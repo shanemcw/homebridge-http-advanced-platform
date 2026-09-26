@@ -1,10 +1,10 @@
 # Modernization details and developer reference
 
-This reference describes the behavior of **2.0.0-alpha.5**. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
+This reference describes the behavior of **2.0.0-alpha.6**. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
 
 ## What non-breaking means here
 
-The existing `accessories[]` configuration model remains supported: the `HttpAdvancedAccessory` alias, device names, service definitions, getter/setter actions, encoded URLs, bodies, mapper chains, optional characteristics and property overrides can stay in place. Plugin Config summarizes these accessories; the plugin menu's JSON Config supports maintaining each definition separately. Runtime startup does not rewrite configuration. The shared cache, recovery and write-confirmation improvements apply without enabling a platform or modifying the web server.
+This platform conversion retains Alpha.5 runtime behavior. The registered package is now `homebridge-http-advanced-platform`; see the [migration guide](migration.md) for replacement requirements and the retained platform UUID namespace. The existing `accessories[]` configuration model remains supported: the `HttpAdvancedAccessory` alias, device names, service definitions, getter/setter actions, encoded URLs, bodies, mapper chains, optional characteristics and property overrides can stay in place. Plugin Config summarizes these accessories; the plugin menu's JSON Config supports maintaining each definition separately. Runtime startup does not rewrite configuration. The shared cache, recovery and write-confirmation improvements apply without enabling a platform or modifying the web server.
 
 Compatibility does not mean every runtime behavior is identical to 1.3.0. In particular:
 
@@ -190,7 +190,7 @@ Local integration tests serialize and deserialize Homebridge platform accessorie
 
 The recorded synthetic fixture compares about 2.15 seconds for a blocking 41-getter read with about 3 ms for a warmed 44-device cached snapshot, issuing no new HTTP getter requests for that snapshot. Refreshing all 44 devices separately took about 2.25 seconds. These measure different stages: the cache speeds up HomeKit reads; it does not make the web server or physical device instantaneous. They are fixture measurements, not a promised speedup on every installation.
 
-Use the [measurement guide](performance.md) to compare read latency, cache freshness and sustained backend load together. The [implementation report](implementation-report.md) records tested versions, package checks and remaining release gates; [Alpha release notes](alpha-release-notes.md) summarize the candidate.
+Use the [measurement guide](performance.md) to compare read latency, cache freshness and sustained backend load together. The [Alpha release notes](alpha-release-notes.md) summarize the candidate and remaining installation and publication gates.
 
 ## Development and release policy
 

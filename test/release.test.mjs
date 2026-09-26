@@ -17,6 +17,7 @@ test('prerelease guard matches alpha and beta versions to their tag, never lates
   }
   for (const version of ['2.0.0', '2.0.0-rc.1', '2.0.0-beta.1extra']) assert.throws(() => validateRelease({...pkg, version}, 'beta'));
   assert.throws(() => validateRelease({...pkg, name: 'another-plugin'}, 'alpha'));
+  assert.throws(() => validateRelease({...pkg, name: 'homebridge-http-advanced-accessory'}, 'alpha'));
   const run = tag => spawnSync(process.execPath, [fileURLToPath(new URL('../scripts/release-guard.mjs', import.meta.url))], {env: {...process.env, npm_config_tag: tag}, encoding: 'utf8'});
   assert.equal(run('alpha').status, 0);
   assert.notEqual(run('latest').status, 0);

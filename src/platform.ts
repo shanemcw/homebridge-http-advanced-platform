@@ -5,7 +5,7 @@ import { sharedRuntime } from './runtime.js';
 import { validateSettings } from './settings.js';
 import type { CoordinatorConfig, DeviceConfig } from './types.js';
 
-import { pluginName, platformName } from './metadata.js';
+import { pluginName, platformName, platformUUIDNamespace } from './metadata.js';
 export { pluginName, platformName } from './metadata.js';
 export interface HTTPPlatformConfig extends PlatformConfig { enabled?: boolean; devices?: DeviceConfig[]; coordinator?: CoordinatorConfig }
 
@@ -46,7 +46,7 @@ export class HTTPPlatform implements DynamicPlatformPlugin {
         validateDevice(device); serviceConstructor(this.api, device.service);
         const id = device.id ?? device.name;
         if (typeof id !== 'string' || !id.trim()) throw new Error();
-        const UUID = this.api.hap.uuid.generate(`${pluginName}:${this.config.name ?? platformName}:${id}`);
+        const UUID = this.api.hap.uuid.generate(`${platformUUIDNamespace}:${this.config.name ?? platformName}:${id}`);
         if (desired.has(UUID)) throw new Error();
         desired.set(UUID, device);
       }

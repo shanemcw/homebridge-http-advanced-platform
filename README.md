@@ -1,16 +1,16 @@
-# HTTP Advanced Accessory
+# Homebridge HTTP Advanced Platform
 
-Connect HTTP-controlled devices and web services to Apple Home through Homebridge.
+A platform conversion of [staromeste's homebridge-http-advanced-accessory](https://github.com/staromeste/homebridge-http-advanced-accessory), connecting HTTP-controlled devices and web services to Apple Home through Homebridge. The project retains the original Apache-2.0 license, Git history and contributor credit, including the earlier [tasict/homebridge-http-accessory](https://github.com/tasict/homebridge-http-accessory) lineage.
 
-**A non-breaking modernization of the existing accessory configuration model, with an optional platform when you choose to migrate.** Keep your `HttpAdvancedAccessory` entries, encoded command URLs, request bodies, hand-written mappings and other settings. The improvements apply to existing accessories without converting them to a platform or upgrading their web server.
+**Use platform devices, retain existing accessory configurations, or migrate manually at your own pace.** Keep your `HttpAdvancedAccessory` entries, encoded command URLs, request bodies, hand-written mappings and other settings. The improvements apply to existing accessories without converting them to a platform or upgrading their web server.
 
 - **Faster HomeKit reads:** shared cached state lets Apple Home read device status promptly while HTTP refreshes run in the background.
 - **More resilient HTTP handling:** bounded requests, background recovery and quieter logs accommodate slow or temporarily unavailable servers, including older systems you cannot change.
 - **Migration at your pace:** maintain existing accessories through JSON Config, and add platform devices alongside them when useful. The plugin also keeps a requested switch state visible while the server catches up, avoiding a brief reversal caused by stale reads.
 
-**Release status: `2.0.0-alpha.5` is a prerelease candidate.** Compatibility applies on the supported runtimes below. Refresh timing changes, and voluntarily converting a device to the platform creates a new HomeKit identity. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain those boundaries.
+**Release status: `2.0.0-alpha.6` is a local, unpublished packaging candidate based on preserved Alpha.5.** It changes public package identity and branding while retaining Alpha.5 device behavior. Installation acceptance and public publication remain pending. Compatibility applies on the supported runtimes below. Refresh timing changes, and voluntarily converting a device to the platform creates a new HomeKit identity. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain those boundaries.
 
-[User guide](#user-guide) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy) · [Beta readiness](docs/beta-readiness.md)
+[User guide](#user-guide) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
 
 ## User guide
 
@@ -25,21 +25,21 @@ Older environments need a runtime upgrade before testing this Alpha. Plugin 1.3.
 
 ### Install or upgrade
 
-Back up Homebridge first, including configuration, cached accessories and pairing data. Install the reviewed Alpha package into the **same plugin location your Homebridge installation already uses**, then restart Homebridge. Keep your existing accessory definitions and Homebridge storage in place.
+Back up Homebridge first, including configuration, cached accessories and pairing data. This is a separate npm package, not an automatic update to the original accessory package. Follow the [replacement and rollback guide](docs/migration.md) before changing an existing installation.
 
-For this unpublished testing candidate, use the supplied `.tgz` archive. npm remains on stable 1.3.0. For example, on a server that keeps plugins in `/var/lib/homebridge`, run as the account that owns that installation:
+For this unpublished candidate, use the locally reviewed `.tgz` in the same plugin location your Homebridge installation already uses. For example, run as the account that owns that installation:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-accessory-2.0.0-alpha.5.tgz
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz
 ```
 
-Use your installation's actual path; installations with globally managed plugins should use their normal plugin-management workflow. If an Alpha is later published to npm, explicitly select that version through Homebridge UI or your usual package manager. Test device control, state updates and existing automations after restarting.
+After publication, opt in explicitly with `homebridge-http-advanced-platform@alpha` or a reviewed exact version through your normal package-management workflow. The new package has no stable release yet. Homebridge UI search and first-publication tag behavior must be checked at launch; the original accessory package's release tags are separate.
 
-After a manual package installation, if the plugin's JSON menu still identifies it only as a platform, restart the complete Homebridge service/UI so its cached plugin metadata reloads.
+Preserve Homebridge storage and bridge identity. Remove the old plugin package as part of the backed-up replacement before starting Homebridge with the new package; loading both would make their shared configuration aliases ambiguous. See the migration guide for package-qualified entries and plugin allowlists. Restart Homebridge and its UI, then verify devices, state updates, controls and existing automations. Installed UI and live HomeKit identity acceptance are still pending for this packaging candidate.
 
 ### Keep using existing accessories
 
-Existing devices stay in `accessories[]`. No configuration rewrite is required to obtain the cache and recovery improvements. A basic definition looks like this:
+Existing devices stay in `accessories[]`. Unqualified aliases remain unchanged; update any explicit old package prefixes as described in the migration guide. A basic definition looks like this:
 
 ```json
 {
@@ -162,4 +162,4 @@ The [modernization and developer reference](docs/modernization.md) contains the 
 - Service support, optional characteristics, configuration editing and platform lifecycle.
 - Benchmark interpretation, development commands, test coverage and release policy.
 
-The [Alpha release notes](docs/alpha-release-notes.md) summarize this candidate; the [implementation report](docs/implementation-report.md) records validation and remaining release gates. The project retains its existing [Apache-2.0 license](LICENSE) and historical authorship.
+The [Alpha release notes](docs/alpha-release-notes.md) summarize this candidate and its remaining release gates. The project retains its existing [Apache-2.0 license](LICENSE) and historical authorship.

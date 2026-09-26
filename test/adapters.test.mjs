@@ -8,14 +8,14 @@ import {LegacyAccessory,DeviceAdapter,serviceConstructor,convertValue} from '../
 import {HTTPPlatform} from '../dist/platform.js';
 import {Runtime,sharedRuntime} from '../dist/runtime.js';
 import {loadLegacy} from './legacy-loader.mjs';
-import {fakeServer,makeAPI,silentLog} from './helpers.mjs';
+import {fakeServer,makeAPI,silentLog,identifierCache} from './helpers.mjs';
 const require=createRequire(import.meta.url);
 const shape=services=>JSON.parse(JSON.stringify(services.map(s=>({UUID:s.UUID,name:s.displayName,chars:s.characteristics.map(c=>({UUID:c.UUID,props:c.props}))}))));
 
 test('registers unchanged legacy alias alongside dynamic platform',async t=>{
   const api=await makeAPI(t);const registrations=[];
   api.registerAccessory=(...args)=>registrations.push(args.slice(0,2));api.registerPlatform=(...args)=>registrations.push(args.slice(0,2));initialize(api);
-  assert.deepEqual(registrations,[['homebridge-http-advanced-accessory','HttpAdvancedAccessory'],['homebridge-http-advanced-accessory','HttpAdvanced']]);
+  assert.deepEqual(registrations,[['homebridge-http-advanced-platform','HttpAdvancedAccessory'],['homebridge-http-advanced-platform','HttpAdvanced']]);
 });
 test('legacy service shape matches published plugin across service types, optional characteristics and props',async t=>{
   const api=await makeAPI(t);const Old=loadLegacy(api.hap);
@@ -80,13 +80,42 @@ test('ordinary legacy upgrade preserves Homebridge UUID input and serialized AID
   const Old=loadLegacy(api.hap), config={name:'Identity',service:'Lightbulb',optionCharacteristic:['Brightness']};
   const old=new Old(silentLog,config), modern=new LegacyAccessory(silentLog,config,api);
   const identity=api.hap.uuid.generate('HttpAdvancedAccessory:Identity');
-  const build=instance=>BridgeService.prototype.createHAPAccessory.call({}, {getPluginIdentifier:()=> 'homebridge-http-advanced-accessory'}, instance, config.name, 'HttpAdvancedAccessory');
-  const before=build(old),after=build(modern);
+  const build=(instance,plugin)=>BridgeService.prototype.createHAPAccessory.call({}, {getPluginIdentifier:()=>plugin}, instance, config.name, 'HttpAdvancedAccessory');
+  const before=build(old,'homebridge-http-advanced-accessory'),after=build(modern,'homebridge-http-advanced-platform');
   assert.equal(before.UUID,after.UUID);
   assert.equal(after.UUID,identity);
   // persisted identifier lookup keys are the accessory UUID, service UUID/subtype and characteristic UUID
   const keys=a=>a.services.flatMap(s=>s.characteristics.map(c=>[a.UUID,s.UUID,s.subtype,c.UUID]));
   assert.deepEqual(keys(before),keys(after));
+});
+test('Homebridge reassigns the Alpha.5 cached platform to the renamed package without changing UUID or AIDs/IIDs',async t=>{
+  const api=await makeAPI(t);
+  const modulePath=require.resolve(process.env.HB_TEST_VERSION==='1'?'homebridge-v1':'homebridge').replace(/index\.js$/,'bridgeService.js');
+  const {BridgeService}=await import(pathToFileURL(modulePath).href);
+  const config={platform:'HttpAdvanced',name:'Identity Platform',devices:[{id:'fixed-id',name:'Renamed Switch',service:'Switch'}]};
+  const UUID=api.hap.uuid.generate('homebridge-http-advanced-accessory:Identity Platform:fixed-id');
+  const original=new api.platformAccessory('Original Switch',UUID);
+  original.addService(new api.hap.Service.Switch('Original Switch'));
+  original._associatedPlugin='homebridge-http-advanced-accessory';original._associatedPlatform='HttpAdvanced';
+  const cache=identifierCache(),bridgeUUID=api.hap.uuid.generate('Packaging Identity Bridge');
+  const oldBridge=new api.hap.Bridge('Packaging Identity Bridge',bridgeUUID);
+  oldBridge.addBridgedAccessory(original._associatedHAPAccessory);oldBridge._assignIDs(cache);
+  const ids=accessory=>({aid:accessory.aid,services:accessory.services.map(s=>({iid:s.iid,characteristics:s.characteristics.map(c=>c.iid)}))});
+  const before=ids(original._associatedHAPAccessory);
+  const restored=api.platformAccessory.deserialize(JSON.parse(JSON.stringify(api.platformAccessory.serialize(original))));
+  const platform=new HTTPPlatform(silentLog,config,api);
+  const plugin={getPluginIdentifier:()=> 'homebridge-http-advanced-platform',getActiveDynamicPlatform:name=>name==='HttpAdvanced'?platform:undefined};
+  const context={cachedPlatformAccessories:[restored],bridgeOptions:{keepOrphanedCachedAccessories:false},
+    bridge:new api.hap.Bridge('Packaging Identity Bridge',bridgeUUID),pluginManager:{
+      getPlugin:name=>name==='homebridge-http-advanced-platform'?plugin:undefined,
+      getPluginByActiveDynamicPlatform:name=>{assert.equal(name,'HttpAdvanced');return plugin;},
+    }};
+  BridgeService.prototype.restoreCachedPlatformAccessories.call(context);
+  platform.discover();context.bridge._assignIDs(cache);
+  assert.equal(restored._associatedPlugin,'homebridge-http-advanced-platform');
+  assert.equal(restored.UUID,UUID);assert.equal(context.cachedPlatformAccessories.length,1);
+  assert.equal(api.registrations.length,0);assert.equal(api.removals.length,0);
+  assert.equal(api.updates[0],restored);assert.deepEqual(ids(restored._associatedHAPAccessory),before);
 });
 test('sanitized 44-device fixture preserves all delay and mapper variants without config rewriting',async t=>{
   const api=await makeAPI(t);const runtime=new Runtime(silentLog);t.after(()=>runtime.shutdown());

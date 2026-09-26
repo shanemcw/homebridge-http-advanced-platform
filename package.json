@@ -1,24 +1,29 @@
 {
-  "displayName": "HTTP Advanced Accessory",
-  "name": "homebridge-http-advanced-accessory",
-  "version": "2.0.0-alpha.5",
-  "description": "HTTP-backed HomeKit accessories with a shared background state cache and legacy configuration support",
+  "displayName": "Homebridge HTTP Advanced Platform",
+  "name": "homebridge-http-advanced-platform",
+  "version": "2.0.0-alpha.6",
+  "description": "A platform conversion of staromeste's homebridge-http-advanced-accessory, with shared cached HTTP reads and support for existing accessory configurations.",
   "license": "Apache-2.0",
   "keywords": [
     "homebridge-plugin",
     "supports-hap",
     "http",
+    "https",
+    "advanced",
+    "platform",
+    "accessory",
     "homekit",
-    "cache"
+    "cache",
+    "homebridge-http-advanced-accessory"
   ],
   "engines": {
     "node": "^22.13.0 || ^24.0.0",
     "homebridge": "^1.11.4 || ^2.4.0"
   },
-  "author": "tasict",
+  "author": "Shane McWhorter",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shanemcw/homebridge-http-advanced-accessory.git"
+    "url": "git+https://github.com/shanemcw/homebridge-http-advanced-platform.git"
   },
   "dependencies": {
     "@homebridge/plugin-ui-utils": "^2.2.6",
@@ -26,7 +31,7 @@
     "jsonpath-plus": "^10.4.0",
     "xpath": "0.0.34"
   },
-  "homepage": "https://github.com/shanemcw/homebridge-http-advanced-accessory#readme",
+  "homepage": "https://github.com/shanemcw/homebridge-http-advanced-platform#readme",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^22.0.0",
@@ -55,14 +60,21 @@
     "config.schema.json",
     "README.md",
     "LICENSE",
-    "docs",
+    "docs/migration.md",
+    "docs/performance.md",
+    "docs/service-support.md",
+    "docs/modernization.md",
+    "docs/legacy-reference.md",
+    "docs/alpha-release-notes.md",
     "sample-config.json",
     "homebridge-ui"
   ],
   "bugs": {
-    "url": "https://github.com/shanemcw/homebridge-http-advanced-accessory/issues"
+    "url": "https://github.com/shanemcw/homebridge-http-advanced-platform/issues"
   },
   "contributors": [
+    "tasict",
+    "staromeste",
     "Shane McWhorter"
   ],
   "publishConfig": {

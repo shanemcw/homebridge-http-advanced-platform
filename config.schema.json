@@ -444,5 +444,6 @@
       }
     }
   },
-  "customUi": true
+  "customUi": true,
+  "headerDisplay": "Homebridge HTTP Advanced Platform supports existing accessories and optional platform devices. Use Plugin Config for platforms and shared settings."
 }

@@ -16,7 +16,7 @@ const setup = t => {
   config.accessories[1].urls.setOn={url:'http://example.invalid',httpMethod:'PUSH',body:'${value}%2B{value}',mappers:[{type:'eval',parameters:{expression:'value ? "x%20y" : "x+y"'}}]};
   config.accessories[1].custom={nested:['unknown',1,false]};
   config.accessories[1]._bridge={username:'00:00:00:00:00:02',port:43210};
-  config.accessories[2].accessory='homebridge-http-advanced-accessory.HttpAdvancedAccessory';
+  config.accessories[2].accessory='homebridge-http-advanced-platform.HttpAdvancedAccessory';
   writeFileSync(path,JSON.stringify(config,null,4)+'\n',{mode:0o600});
   return {root,path,config,editor:new ConfigEditor(path)};
 };
