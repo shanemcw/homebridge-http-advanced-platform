@@ -1,6 +1,6 @@
 # Homebridge HTTP Advanced Platform release checkpoint
 
-Recorded: 2026-09-26. Milestone 2: validated local packaging candidate.
+Recorded: 2026-09-26. Milestone 3a: isolated installation and runtime matrix passed; milestone 3b pending.
 
 ## Agreed scope
 
@@ -35,9 +35,10 @@ after publication; do not claim verification or display its badge beforehand.
   Recheck remote state and name availability before publication.
 - Milestone 1 changes only this checkpoint document. No package/source edits,
   push, repository rename, npm publication, deployment or restart were performed.
-- Candidate build output has been regenerated. Typecheck/lint and both
-  Homebridge regression suites passed on Node 24. A production-only clean
-  installation and Node 22 matrix remain milestone 3 acceptance work.
+- Candidate build output has been regenerated. Source checks passed across
+  Node 22/24 and Homebridge 1/2. A production-only clean installation, audit and
+  installed loader/adapters/UI IPC checks passed at milestone 3a. Browser UI,
+  managed child bridges and replacement/rollback remain milestone 3b work.
 
 ## Intended public metadata
 
@@ -95,8 +96,9 @@ Retain the historical npm regression fixture as a fixture, not a renamed depende
 | Milestone | Deliverable and completion check | Status |
 | --- | --- | --- |
 | 1. Baseline and checkpoint | Separate local branch from preserved Alpha.5; committed plan | Complete at `546aa3c` |
-| 2. Local packaging candidate | Package identity, docs, search metadata and retained UUID namespace; existing checks and tarball review passed; remaining gates recorded below | Complete with this milestone commit |
-| 3. Installation acceptance | Install candidate in isolation; verify UI, both adapters, restart/cache identity behavior and supported runtime matrix; exercise documented replacement and rollback | Next |
+| 2. Local packaging candidate | Package identity, docs, search metadata and retained UUID namespace; existing checks and tarball review passed | Complete at `fe5adb0` |
+| 3a. Clean install and matrix | Production-only clean install, advisory audit, full runtime matrix and installed loader/adapters/custom UI IPC checks | Complete with this checkpoint commit |
+| 3b. Installed lifecycle acceptance | Actual browser/native UI, managed-child-bridge restart, complete replacement/rollback and cache identity acceptance | Next |
 | 4. Public launch | Review accepted candidate; rename repo and update remote/support links, expose the Alpha branch as default, enable issues, publish new npm identity with tested tag/install policy and matching GitHub prerelease; verify searches and install flow | Pending |
 | 5. Live soak | Back up first; deploy as a deliberate production milestone; check actual HomeKit devices, controls, freshness, recovery, child bridges and rollback; record duration and results | Pending |
 | 6. Verification | After public launch, audit then-current Homebridge requirements and request verification when evidence supports it | Pending |
@@ -140,19 +142,37 @@ Do not publish a partially checked candidate because an allowance window is endi
 - Weekly usage was 97% used at the validation milestone; stop here at the local
   commit as requested, with installation acceptance and public launch separate.
 
-## Resume at milestone 3
+## Milestone 3a results
 
-1. Read this checkpoint and applicable instructions; inspect usage and Git state.
+See [INSTALLATION-ACCEPTANCE.md](INSTALLATION-ACCEPTANCE.md) for the artifact,
+checks, runtime matrix, isolated paths and exact evidence limits. The preserved
+candidate tarball is unchanged; the acceptance report/harness are not packaged.
+
+- Production-only clean installation and dependency audit passed; zero known
+  vulnerabilities were reported at this checkpoint.
+- Node 22.23.3 typecheck/lint and 98/98 source tests passed on each Homebridge
+  version, completing the local Node 22/24 x Homebridge 1/2 matrix.
+- Three installed-package acceptance tests passed in each of the four runtime
+  combinations, exercising actual installed loader, adapter HTTP I/O and UI IPC.
+- An official checksum-verified Node 22 binary was used only under a temporary
+  directory; the system Node installation was not changed.
+- Weekly usage was 98% used at the start. This checkpoint completes milestone 3a;
+  it does not mark the broader installation milestone or public readiness complete.
+- No production access, push, publication, remote rename or restart was performed.
+
+## Resume at milestone 3b
+
+1. Read this checkpoint and the acceptance report; inspect usage and Git state.
 2. Continue on `package-http-advanced-platform`. Preserve other work if the
-   checkout has changed. Verify the tarball checksum before using this artifact.
-3. Run an isolated production-only clean installation and remaining Node 22/24
-   compatibility checks without touching production. Check dependencies/audit at
-   that installation milestone; existing source-check results do not prove a
-   clean installed runtime.
-4. Verify both adapters, legacy and cached-platform identity, explicit package
-   prefixes, plugin lists, native JSON Config, Plugin Config and managed-child-
-   bridge restart behavior. Preserve the accessory-type native schema needed for
-   per-accessory JSON editing; the custom UI handles platform configuration.
-5. Rehearse documented replacement and rollback in isolation. Record acceptance
-   limits and stop at a clean checkpoint before public launch. Keep first-publication
-   `alpha` search/tag behavior as a separate registry/Homebridge UI launch gate.
+   checkout has changed. Verify the candidate checksum before using it. Temporary
+   acceptance directories may expire; recreate them safely if necessary.
+3. Use an isolated Homebridge UI/managed-child-bridge fixture, with synthetic
+   devices and separate storage/bridge identity. Do not use production pairing
+   storage, configuration or real device endpoints.
+4. Verify native JSON Config and rendered Plugin Config, explicit package prefixes,
+   plugin allowlists/disabled lists, child-bridge restart and identity restoration.
+   Retain the accessory-type native schema needed for per-accessory JSON editing;
+   the custom UI handles platform configuration.
+5. Rehearse backed-up package replacement and rollback. Record acceptance limits
+   and stop at a clean checkpoint before public launch. Public registry indexing
+   and `alpha` tag installation/search remain a separate launch gate.
