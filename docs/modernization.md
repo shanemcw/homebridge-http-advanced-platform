@@ -1,6 +1,6 @@
 # Modernization details and developer reference
 
-This reference describes the behavior of **2.0.0-alpha.6**. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
+This reference describes the behavior of **2.0.0-alpha.7**, unchanged from Alpha.6. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
 
 ## What non-breaking means here
 
@@ -206,6 +206,6 @@ npm pack --dry-run
 
 CI exercises Node 22/24 and real Homebridge v1/v2 HAP implementations. Unit/integration tests use only loopback fake servers. `legacy-plugin` is a test-only alias of published 1.3.0; its obsolete dependencies are excluded from production installation and the tarball. `npm audit --omit=dev` audits the maintained runtime separately.
 
-Any future public prerelease must use an explicit tag matching its version channel (`alpha` or `beta`) and be marked as a GitHub prerelease. The guard rejects stable versions, channel mismatches and `latest`. `publishConfig.tag` remains `alpha` for this Alpha candidate; update it deliberately when preparing Beta. No automatic publishing workflow is enabled. Stable requires broader device, restart and real-installation evidence, not merely one working household fixture.
+Any future public prerelease must use an explicit tag matching its version channel (`alpha` or `beta`) and be marked as a GitHub prerelease. The guard rejects stable versions, channel mismatches and manual publication to `latest`. npm requires a `latest` dist-tag and assigned it to the first public Alpha; retaining that registry-required tag does not make the package stable. The `alpha` and `latest` tags can point to different prerelease versions. `publishConfig.tag` remains `alpha` for this Alpha candidate; update it deliberately when preparing Beta. No automatic publishing workflow is enabled. Stable requires broader device, restart and real-installation evidence, not merely one working household fixture.
 
 The existing Apache-2.0 LICENSE remains unchanged. Package metadata is reconciled to that file, which has existed since the initial commit; historical authorship is retained and the current maintainer is credited.

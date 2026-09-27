@@ -32,10 +32,17 @@ test('invalid shared settings fall back without exposing their content',async t=
 test('global HTTP timeout and spacing apply to unchanged legacy actions; explicit action timeout wins',async t=>{
   const server=await fakeServer(t,async(_req,res)=>{await sleep(60);res.end('1');});
   const runtime=new Runtime(silentLog,{},undefined,{requestTimeout:20,uriCallsDelay:80});t.after(()=>runtime.shutdown());
+  const starts=[],spacing=[],submit=runtime.coordinator.submit.bind(runtime.coordinator);
+  t.mock.method(runtime.coordinator,'submit',(origin,owner,delay,priority,run,deadline)=>{
+    spacing.push(delay);
+    return submit(origin,owner,delay,priority,signal=>{starts.push(Date.now());return run(signal);},deadline);
+  });
   const action={url:server.url};const config={name:'Legacy',service:'Switch'};
   await assert.rejects(runtime.transport.request(action,config,'owner'),{category:'timeout'});
-  await runtime.transport.request({...action,timeout:300},config,'owner');
-  assert.ok(server.requests[1].time-server.requests[0].time>=70);
+  assert.equal((await runtime.transport.request({...action,timeout:300},config,'owner')).body,'1');
+  assert.deepEqual(spacing,[80,80]);assert.equal(starts.length,2);
+  // measure execution spacing; server receive timestamps also include connection delays
+  assert.ok(starts[1]-starts[0]>=70);
   assert.deepEqual(action,{url:server.url});assert.deepEqual(config,{name:'Legacy',service:'Switch'});
 });
 

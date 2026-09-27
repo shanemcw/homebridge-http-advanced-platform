@@ -1,6 +1,8 @@
 # Homebridge HTTP Advanced Platform
 
-A platform conversion of [staromeste's homebridge-http-advanced-accessory](https://github.com/staromeste/homebridge-http-advanced-accessory), connecting HTTP-controlled devices and web services to Apple Home through Homebridge. The project retains the original Apache-2.0 license, Git history and contributor credit, including the earlier [tasict/homebridge-http-accessory](https://github.com/tasict/homebridge-http-accessory) lineage.
+Connect HTTP/HTTPS-controlled devices and REST APIs to Apple Home (HomeKit) through Homebridge. Read sensor values, control switches and other supported HomeKit services, and map JSON or XML responses with JSONPath or XPath. Shared polling and caching keep reads responsive while HTTP refreshes run in the background.
+
+This is a platform conversion of [staromeste's homebridge-http-advanced-accessory](https://github.com/staromeste/homebridge-http-advanced-accessory). The project retains the original Apache-2.0 license, Git history and contributor credit, including the earlier [tasict/homebridge-http-accessory](https://github.com/tasict/homebridge-http-accessory) lineage.
 
 **Use platform devices, retain existing accessory configurations, or migrate manually at your own pace.** Keep your `HttpAdvancedAccessory` entries, encoded command URLs, request bodies, hand-written mappings and other settings. The improvements apply to existing accessories without converting them to a platform or upgrading their web server.
 
@@ -8,7 +10,7 @@ A platform conversion of [staromeste's homebridge-http-advanced-accessory](https
 - **More resilient HTTP handling:** bounded requests, background recovery and quieter logs accommodate slow or temporarily unavailable servers, including older systems you cannot change.
 - **Migration at your pace:** maintain existing accessories through JSON Config, and add platform devices alongside them when useful. The plugin also keeps a requested switch state visible while the server catches up, avoiding a brief reversal caused by stale reads.
 
-**Release channel: `2.0.0-alpha.6` is an opt-in Alpha based on preserved Alpha.5.** It changes public package identity and branding while retaining Alpha.5 device behavior. Source checks, isolated installations and Homebridge UI replacement/rollback acceptance have passed; paired Apple Home and live-device soak remain pending. Compatibility applies on the supported runtimes below. Refresh timing changes, and voluntarily converting a device to the platform creates a new HomeKit identity. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain those boundaries.
+**Release channel: `2.0.0-alpha.7` is an Alpha based on preserved Alpha.5.** Alpha.6 introduced the new public package identity and branding. Alpha.7 updates search metadata and corrects npm installation guidance; device behavior is unchanged. Source checks, isolated installations and Homebridge UI replacement/rollback acceptance have passed; paired Apple Home and live-device soak remain pending. Compatibility applies on the supported runtimes below. Refresh timing changes, and voluntarily converting a device to the platform creates a new HomeKit identity. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain those boundaries.
 
 [User guide](#user-guide) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
 
@@ -27,25 +29,25 @@ Older environments need a runtime upgrade before testing this Alpha. Plugin 1.3.
 
 Back up Homebridge first, including configuration, cached accessories and pairing data. This is a separate npm package, not an automatic update to the original accessory package. Follow the [replacement and rollback guide](docs/migration.md) before changing an existing installation.
 
-Check the [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions) and matching [GitHub prerelease](https://github.com/shanemcw/homebridge-http-advanced-platform/releases) before installing. The registry instructions below apply once the Alpha is published; a local candidate archive alone does not establish public availability.
+Check the [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions) and matching [GitHub prerelease](https://github.com/shanemcw/homebridge-http-advanced-platform/releases) before installing. Choose a published Alpha; a local candidate archive alone does not establish public availability.
 
-In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select **alpha / v2.0.0-alpha.6** in the version chooser. After installation, use **Manage Version** to select a later Alpha deliberately. Descriptive searches such as **HTTP Advanced** or **HTTP accessory** depend on npm indexing; searching the exact original package name still finds the original accessory package.
+In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select the **alpha** row in the version chooser, or the reviewed **v2.0.0-alpha.7** version. After installation, use **Manage Version** to select a later Alpha deliberately. Descriptive searches such as **HTTP Advanced**, **HTTP accessory**, **REST API** or **HTTP JSON** depend on npm indexing and ranking; searching the exact original package name still finds the original accessory package.
 
 For command-line installation, use `homebridge-http-advanced-platform@alpha`, or pin the reviewed version as shown below. Use the same plugin location and account your Homebridge installation already uses; `/var/lib/homebridge` is an example prefix:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.0.0-alpha.6
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.0.0-alpha.7
 ```
 
 To install a reviewed archive directly:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.0.0-alpha.7.tgz
 ```
 
-**This package has no stable release.** npm requires a `latest` tag and assigned it to this first Alpha alongside `alpha`; both currently resolve to `2.0.0-alpha.6`. An unqualified install therefore also installs the Alpha. Choose the explicit Alpha tag or reviewed exact version to make that decision clear. These tags affect only the new platform package; the original accessory package is separate and does not update automatically to it.
+**This package has no stable release.** npm requires a `latest` tag; for this package, it can point to an Alpha and does not indicate stability. An unqualified install can therefore install an Alpha. The `alpha` and `latest` tags can point to different Alpha versions; choose the explicit `@alpha` tag or reviewed exact version to select the intended release. These tags affect only the new platform package; the original accessory package is separate and does not update automatically to it.
 
-The immutable Alpha.6 archive and its npm-page README contain the earlier assumption that `latest` could be absent. This section and the [GitHub prerelease notes](https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.0.0-alpha.6) correct that statement. Updating the npm-page README requires a subsequent package version; this does not change the published Alpha.6 runtime.
+Alpha.7 includes this correction in its packaged README. The earlier published Alpha.6 archive remains unchanged.
 
 Preserve Homebridge storage and bridge identity. Remove the old plugin package as part of the backed-up replacement before starting Homebridge with the new package; loading both would make their shared configuration aliases ambiguous. See the migration guide for package-qualified entries and plugin allowlists. Restart Homebridge and its UI, then verify devices, state updates, controls and existing automations. Installed UI and managed-child-bridge acceptance passed in an isolated Node 24/Homebridge 2 fixture with HAP disabled; paired Apple Home identity and live controls still need acceptance.
 

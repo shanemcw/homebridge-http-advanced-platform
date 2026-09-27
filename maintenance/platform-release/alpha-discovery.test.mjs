@@ -102,8 +102,8 @@ test('exact new-package lookup keeps an Alpha-only plugin discoverable without l
   assert.equal(results[0].verifiedPlugin, false);
 });
 
-test('indexed candidate metadata matches descriptive HTTP and legacy-accessory searches', async () => {
-  for (const query of ['HTTP Advanced', 'HTTP accessory', 'HTTP Advanced Platform']) {
+test('indexed candidate metadata matches descriptive HTTP, mapping and device searches', async () => {
+  for (const query of ['HTTP Advanced', 'HTTP accessory', 'HTTP Advanced Platform', 'REST API', 'HTTP JSON', 'JSONPath', 'XML', 'XPath', 'polling', 'HTTP switch', 'HTTP sensor']) {
     const results = await makeService().searchNpmRegistry(query);
     assert.equal(results.length, 1, query);
     assert.equal(results[0].name, pkg.name);
