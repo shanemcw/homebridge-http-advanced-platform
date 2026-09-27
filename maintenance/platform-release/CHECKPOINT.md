@@ -1,8 +1,9 @@
 # Homebridge HTTP Advanced Platform release checkpoint
 
-Recorded: 2026-09-26. Alpha.6 is public and exact-package installation is accepted.
-Alpha.7 is a validated local search-metadata/documentation candidate; CI,
-publication and public discovery acceptance remain pending.
+Recorded: 2026-09-26 (America/New_York). Alpha.7 is public at reviewed release
+commit `3ff8a7e`. Its CI, corrected npm README, indexed functionality keywords and
+fresh exact-version installation are accepted. Ordinary descriptive search
+inclusion remains open; see [DISCOVERY-FOLLOWUP.md](DISCOVERY-FOLLOWUP.md).
 
 ## Agreed scope
 
@@ -54,6 +55,7 @@ after publication; do not claim verification or display its badge beforehand.
 | Keywords | `homebridge-plugin`, `supports-hap`, `homebridge`, `http`, `https`, `rest`, `api`, `json`, `xml`, `jsonpath`, `xpath`, `polling`, `advanced`, `platform`, `accessory`, `homekit`, `cache`, `switch`, `sensor`, `homebridge-http-advanced-accessory` |
 | Support links | Our repository, README and issue tracker |
 | First public release | `2.0.0-alpha.6`; retain Alpha status |
+| Current public release | `2.0.0-alpha.7`; both `alpha` and required `latest` point here; still an Alpha |
 
 Keep `HttpAdvancedAccessory` and `HttpAdvanced` configuration aliases. The public
 README must explain retained accessory configuration support, optional manual
@@ -71,18 +73,24 @@ licensing and original authorship credit while identifying our release ownership
    Installed UI and managed child-bridge lifecycle acceptance passed in the
    isolated milestone 3b fixture. Actual HomeKit acceptance remains pending.
 2. Homebridge UI searches npm using `homebridge-plugin`, then matches names,
-   keywords and descriptions. Test descriptive searches for "HTTP Advanced",
-   "HTTP accessory" and "HTTP Advanced Platform" after indexing. An exact lookup
-   of the original npm package name still resolves the original package.
+   keywords and descriptions. Alpha.7 is indexed with the expanded functional
+   and lineage keywords: targeted keyword queries return it at rank 1. Ordinary
+   descriptive queries, including "HTTP Advanced", "HTTP accessory" and
+   "HTTP Advanced Platform", still omit it from the observed results. Index
+   inclusion is confirmed; broad discovery acceptance remains open. An exact
+   lookup of the original npm package name still resolves the original package.
 3. Actual public exact-package lookup, Alpha selection and installation passed in
    Homebridge UI 5.29.0. npm created required `latest` alongside `alpha`, both at
    Alpha.6, and rejected authenticated removal with HTTP 400. The user approved
    this exception with clear Alpha labeling; it is not a stable release. Explicit
    Alpha/Beta publication remains required by the guard, which still rejects
    manual `latest`/stable publication. GitHub documentation and release notes are
-   corrected. The immutable Alpha.6 archive/npm README retain the prior wording;
-   a subsequent documentation Alpha is needed to refresh npm's page. Descriptive
-   search indexing remains unconfirmed. See [PUBLIC-LAUNCH.md](PUBLIC-LAUNCH.md).
+   corrected. Alpha.7 is published through explicit `alpha`, with the existing
+   required `latest` pointer aligned to the same version. Its actual default npm
+   page now displays the corrected README and all 20 keywords. The immutable
+   Alpha.6 archive remains unchanged. See historical
+   [PUBLIC-LAUNCH.md](PUBLIC-LAUNCH.md) and current
+   [DISCOVERY-FOLLOWUP.md](DISCOVERY-FOLLOWUP.md).
 4. Public documentation now has a deliberate distributable allowlist. The
    56-file tarball excludes this checkpoint, tests and draft evidence. Its relative
    documentation links and new package/retained namespace metadata were checked.
@@ -107,8 +115,8 @@ Retain the historical npm regression fixture as a fixture, not a renamed depende
 | 3a. Clean install and matrix | Production-only clean install, advisory audit, full runtime matrix and installed loader/adapters/custom UI IPC checks | Complete at `adca0ad` |
 | 3b. Installed lifecycle acceptance | Actual browser/native UI, managed-child-bridge restart, complete replacement/rollback and cache identity acceptance | Complete at `f80296b`; isolated Node 24/Homebridge 2 fixture |
 | 4a. Launch preparation | Refresh public docs, rehearse Alpha-only discovery/selection, freeze a reviewed archive, prepare exact public changes and release draft | Complete at `85d65bc` |
-| 4b. Public launch and installation | CI, renamed fork, public npm Alpha and matching GitHub prerelease; registry archive integrity and fresh npm/native UI installation | Publication and exact installation accepted; descriptive index follow-up remains |
-| 4c. Public documentation/search follow-up | Alpha.7 functionality metadata and corrected npm README; verify actual descriptive search inclusion | Local candidate validated; CI/publication/indexing gates pending |
+| 4b. Public launch and installation | CI, renamed fork, public npm Alpha and matching GitHub prerelease; registry archive integrity and fresh npm/native UI installation | Publication and exact installation accepted; subsequent metadata/README work in 4c |
+| 4c. Public documentation/search follow-up | Alpha.7 functionality metadata and corrected npm README; verify actual descriptive search inclusion | Publication, README, indexed keywords and exact installation accepted; ordinary search inclusion still open |
 | 5. Live soak | Back up first; deploy as a deliberate production milestone; check actual HomeKit devices, controls, freshness, recovery, child bridges and rollback; record duration and results | Pending |
 | 6. Verification | After public launch, audit then-current Homebridge requirements and request verification when evidence supports it | Pending |
 
@@ -263,7 +271,7 @@ documentation release to refresh its earlier wording. Broad public descriptive
 search inclusion was not observed. Production and the original npm package are
 untouched; paired Apple Home acceptance and verification remain pending.
 
-## Milestone 4c local preparation
+## Milestone 4c public results
 
 See [DISCOVERY-FOLLOWUP.md](DISCOVERY-FOLLOWUP.md) for the reviewed Alpha.7 artifact,
 expanded metadata, local checks and the linked intermittent CI failure/rerun.
@@ -272,22 +280,35 @@ UI, schema, dependencies, samples and licensing match. Local source tests passed
 98/98, discovery/chooser acceptance 3/3 and installed acceptance 3/3. Node 22/HB1
 settings checks passed three times after correcting a server-arrival timing
 assertion to measure execution spacing, preserving its delay and timeout checks.
-Publication and public search inclusion are not yet established for Alpha.7.
+Both release-commit four-job CI matrices passed. The user's earlier failed CI
+run also passed on unchanged rerun; no production bug was established.
 
-## Resume milestone 4c publication and discovery
+The reviewed archive was published through `alpha`; both npm tags now point to
+Alpha.7. Its registry download and GitHub prerelease archive match SHA-256
+`7cc5ae503b7ca68739113b92d2bf2dd0d478b5c72003eb6e6b4fc5db267a42fc`.
+The prerelease tag resolves to `3ff8a7e`; later report commits do not change it.
+A fresh public installation passed all 56 file comparisons and installed
+acceptance 3/3. The actual default npm page shows the corrected Alpha.7 README
+and 20 keywords. GitHub's description and 19 functionality/lineage topics are
+applied; its fork parent is retained.
+
+Targeted functional/lineage keyword searches and maintainer search return the
+indexed Alpha.7 metadata. Ordinary npm/Homebridge UI queries still omit it in
+the observed results. Broad discovery remains open, with no proven ranking
+cause or eventual appearance date. No pending npm process or authentication
+remains; no production access, deployment or restart occurred.
+
+## Resume ordinary descriptive discovery acceptance
 
 1. Read this checkpoint and discovery follow-up report; inspect usage and Git state.
 2. Continue on `package-http-advanced-platform`, preserving unrelated work,
-   Alpha.5/upstream-preparation refs and both reviewed archives. Do not retag or
-   overwrite Alpha.6 at `85d65bc` with later documentation commits.
-3. Recheck descriptive index inclusion. Exact public installation is already
-   accepted; do not recreate the repository or Alpha.6 publication/release.
-4. Publish the reviewed Alpha.7 archive only after candidate CI passes. Preserve
-   explicit Alpha publication and the guard's stable rejection. Align npm's
-   already-approved required `latest` pointer with this reviewed Alpha, so default
-   metadata/README reflect the corrected version; do not claim stable status.
-5. Verify registry artifact/README, fresh published installation and actual search
-   inclusion, and create the matching GitHub prerelease at the candidate commit.
-   New npm authentication may require the user's accessible terminal.
-6. Keep production backup/deployment, live HomeKit soak, verification and parent
-   fixes as later milestones. Record any pending public indexing explicitly.
+   Alpha.5/upstream-preparation refs and all preserved archives. Do not retag or
+   overwrite Alpha.6 at `85d65bc` or Alpha.7 at `3ff8a7e` with report commits.
+3. Manually recheck the recorded ordinary descriptive queries after allowing
+   external search time. Record actual inclusion/rank and decide any additional
+   action from the evidence; do not assume indexing delay is the cause.
+4. Exact public installation, Alpha.7 publication and default README are already
+   accepted. Do not recreate the repository, republish or request authentication
+   to repeat those completed operations. Retain the stable-publication guard.
+5. Keep production backup/deployment, live HomeKit soak, verification and parent
+   fixes as later milestones. Record the outstanding ordinary search gate explicitly.

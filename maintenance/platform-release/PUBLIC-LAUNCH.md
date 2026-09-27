@@ -1,5 +1,10 @@
 # Alpha.6 public launch and installation acceptance
 
+Historical Alpha.6 record. Alpha.7 now supplies the corrected default npm README
+and expanded indexed metadata; ordinary descriptive search inclusion remains
+open. See [DISCOVERY-FOLLOWUP.md](DISCOVERY-FOLLOWUP.md) for the current release
+and acceptance results. The Alpha.6 observations below remain unchanged.
+
 Recorded 2026-09-26. Publication and exact-package installation are accepted.
 Descriptive search indexing and the npm-page README correction remain follow-ups.
 
