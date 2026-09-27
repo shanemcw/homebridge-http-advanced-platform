@@ -1,6 +1,7 @@
 # Homebridge HTTP Advanced Platform release checkpoint
 
-Recorded: 2026-09-26. Milestone 4a complete; public launch 4b is in progress, awaiting npm one-time authentication.
+Recorded: 2026-09-26. Alpha.6 is public and exact-package installation is accepted.
+Descriptive indexing and the npm README correction remain follow-ups.
 
 ## Agreed scope
 
@@ -32,7 +33,7 @@ after publication; do not claim verification or display its badge beforehand.
   `staromeste/homebridge-http-advanced-accessory`. The fork relationship is retained.
 - Earlier read-only checks found both public default branches on the old 2022
   source, upstream PR #59 open, and the proposed npm name returning HTTP 404.
-  Recheck remote state and name availability before publication.
+  These were historical prelaunch observations; Alpha.6 is now published.
 - Milestone 1 changes only this checkpoint document. No package/source edits,
   push, repository rename, npm publication, deployment or restart were performed.
 - Candidate build output has been regenerated. Source checks passed across
@@ -51,7 +52,7 @@ after publication; do not claim verification or display its badge beforehand.
 | Description | A platform conversion of staromeste's homebridge-http-advanced-accessory, with shared cached HTTP reads and support for existing accessory configurations. |
 | Keywords | `homebridge-plugin`, `supports-hap`, `http`, `https`, `advanced`, `platform`, `accessory`, `homekit`, `cache`, `homebridge-http-advanced-accessory` |
 | Support links | Our repository, README and issue tracker |
-| First candidate | Local `2.0.0-alpha.6`; retain Alpha status |
+| First public release | `2.0.0-alpha.6`; retain Alpha status |
 
 Keep `HttpAdvancedAccessory` and `HttpAdvanced` configuration aliases. The public
 README must explain retained accessory configuration support, optional manual
@@ -72,14 +73,15 @@ licensing and original authorship credit while identifying our release ownership
    keywords and descriptions. Test descriptive searches for "HTTP Advanced",
    "HTTP accessory" and "HTTP Advanced Platform" after indexing. An exact lookup
    of the original npm package name still resolves the original package.
-3. Homebridge UI's exact-package lookup reads the `latest` dist-tag, but UI 5.29.0
-   opens a first-install version chooser that enumerates `alpha` independently.
-   Actual service/version-chooser logic passed isolated Alpha-only registry
-   acceptance: discovery, metadata matching and exact-version npm dispatch.
-   The policy remains explicit `alpha` opt-in; `latest` remains rejected by the
-   guard. The README records the supported chooser and CLI paths. Actual public
-   registry/UI installation and indexing remain 4b gates; do not silently promote
-   the candidate to stable to solve discovery.
+3. Actual public exact-package lookup, Alpha selection and installation passed in
+   Homebridge UI 5.29.0. npm created required `latest` alongside `alpha`, both at
+   Alpha.6, and rejected authenticated removal with HTTP 400. The user approved
+   this exception with clear Alpha labeling; it is not a stable release. Explicit
+   Alpha/Beta publication remains required by the guard, which still rejects
+   manual `latest`/stable publication. GitHub documentation and release notes are
+   corrected. The immutable Alpha.6 archive/npm README retain the prior wording;
+   a subsequent documentation Alpha is needed to refresh npm's page. Descriptive
+   search indexing remains unconfirmed. See [PUBLIC-LAUNCH.md](PUBLIC-LAUNCH.md).
 4. Public documentation now has a deliberate distributable allowlist. The
    56-file tarball excludes this checkpoint, tests and draft evidence. Its relative
    documentation links and new package/retained namespace metadata were checked.
@@ -104,7 +106,8 @@ Retain the historical npm regression fixture as a fixture, not a renamed depende
 | 3a. Clean install and matrix | Production-only clean install, advisory audit, full runtime matrix and installed loader/adapters/custom UI IPC checks | Complete at `adca0ad` |
 | 3b. Installed lifecycle acceptance | Actual browser/native UI, managed-child-bridge restart, complete replacement/rollback and cache identity acceptance | Complete at `f80296b`; isolated Node 24/Homebridge 2 fixture |
 | 4a. Launch preparation | Refresh public docs, rehearse Alpha-only discovery/selection, freeze a reviewed archive, prepare exact public changes and release draft | Complete at `85d65bc` |
-| 4b. Public launch | Push reviewed commit and pass CI; rename existing fork, make new `main` default, enable issues/topics, publish explicit npm Alpha and matching GitHub prerelease; verify registry/UI installation and searches | In progress: CI/repository changes complete; npm awaits user authentication |
+| 4b. Public launch and installation | CI, renamed fork, public npm Alpha and matching GitHub prerelease; registry archive integrity and fresh npm/native UI installation | Publication and exact installation accepted; descriptive index follow-up remains |
+| 4c. Public documentation/search follow-up | Subsequent documentation Alpha with corrected npm README; verify actual descriptive search inclusion | Next; not completed by 4b |
 | 5. Live soak | Back up first; deploy as a deliberate production milestone; check actual HomeKit devices, controls, freshness, recovery, child bridges and rollback; record duration and results | Pending |
 | 6. Verification | After public launch, audit then-current Homebridge requirements and request verification when evidence supports it | Pending |
 
@@ -231,7 +234,7 @@ release copy is [GITHUB-PRERELEASE.md](GITHUB-PRERELEASE.md); it is not publishe
   historical `master`, fork lineage and upstream PR work. No pushes, tag creation,
   repository rename, npm publication, production access or restarts were performed.
 
-## Milestone 4b progress and authentication handoff
+## Milestone 4b public launch results
 
 See [PUBLIC-LAUNCH.md](PUBLIC-LAUNCH.md). Reviewed release commit `85d65bc` was
 pushed to both public packaging and new `main` branches. Both four-job
@@ -239,25 +242,38 @@ compatibility CI runs passed before repository changes. The existing public fork
 was renamed, `main` made default, issues enabled and description/topics applied.
 History, parent lineage, historical refs and production are preserved.
 
-npm required one-time authentication and did not publish during the agent's
-attempts. The interactive retry was cancelled before handing the exact command
-to the user's accessible terminal. Latest registry check returned 404. No Alpha.6
-tag or GitHub prerelease has been created yet; public installation/search checks
-remain pending. The release target is still `85d65bc`, even if later maintenance
-checkpoint commits advance the local branch.
+npm required one-time authentication; the user completed publication from their
+terminal after the agent's retry was cancelled. The published registry archive
+and GitHub prerelease asset match the frozen launch SHA-256. Annotated
+`v2.0.0-alpha.6` resolves to `85d65bc`; later maintenance/documentation commits
+do not change that release target.
 
-## Resume milestone 4b after npm authentication
+Fresh registry installation passed all 56 file comparisons and installed
+acceptance 3/3. The actual native Homebridge UI found the exact package, installed
+Alpha.6 from the `alpha` row, and opened Plugin Config with correct branding.
+Its separately installed 56 files also match the published archive. The isolated
+fixture and browser tab were stopped, and the listener/process cleanup verified.
 
-1. Read this checkpoint and launch review; inspect usage and Git state.
-2. Continue on `package-http-advanced-platform`, preserving unrelated work and
-   the Alpha.5/upstream-preparation refs. Verify the new launch archive checksum;
-   do not substitute the earlier documentation archive or unreviewed later HEAD.
-3. Recheck registry state first: the user's terminal may have completed publication.
-   Avoid duplicate publishing. CI and repository changes are already complete;
-   verify them as needed rather than recreating branches or renaming again.
-4. Finish guarded exact-tarball npm publication if needed, verify the public
-   package/tags/archive, then create the matching GitHub prerelease at `85d65bc`.
-5. Verify public dist-tags, metadata, archive contents, fresh registry install,
-   native UI Alpha install and descriptive searches after indexing.
+npm required `latest` alongside `alpha`, both pointing at Alpha.6; authenticated
+removal returned HTTP 400. The user approved this exception and clear Alpha
+labeling. GitHub documentation/prerelease notes were corrected in `306841e`, and
+both four-job CI matrices passed. npm's immutable Alpha.6 README requires a new
+documentation release to refresh its earlier wording. Broad public descriptive
+search inclusion was not observed. Production and the original npm package are
+untouched; paired Apple Home acceptance and verification remain pending.
+
+## Resume at milestone 4c: documentation/search follow-up
+
+1. Read this checkpoint and public launch report; inspect usage and Git state.
+2. Continue on `package-http-advanced-platform`, preserving unrelated work,
+   Alpha.5/upstream-preparation refs and both reviewed archives. Do not retag or
+   overwrite Alpha.6 at `85d65bc` with later documentation commits.
+3. Recheck descriptive index inclusion. Exact public installation is already
+   accepted; do not recreate the repository or Alpha.6 publication/release.
+4. Prepare a subsequent documentation Alpha with only necessary version metadata
+   and corrected public documentation. Describe npm's required tag accurately
+   while retaining explicit Alpha publication and the guard's stable rejection.
+5. Freeze a new checksum-reviewed archive and run appropriate checks/CI before
+   publication. New npm authentication may require the user's accessible terminal.
 6. Keep production backup/deployment, live HomeKit soak, verification and parent
    fixes as later milestones. Record any pending public indexing explicitly.

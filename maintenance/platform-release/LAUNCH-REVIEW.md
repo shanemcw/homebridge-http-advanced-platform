@@ -1,5 +1,10 @@
 # Alpha.6 public launch review
 
+Historical milestone 4a planning snapshot. See [PUBLIC-LAUNCH.md](PUBLIC-LAUNCH.md)
+for the executed launch, the user-approved npm-required `latest` exception and
+remaining README/indexing follow-ups. The planned absence-of-`latest` gate below
+was disproved by the registry and is superseded by that acceptance record.
+
 Recorded 2026-09-26. Milestone 4a is local preparation; publication is milestone
 4b. Nothing in this checklist has been pushed, renamed or published. Production
 Homebridge and Apple Home were not accessed.
