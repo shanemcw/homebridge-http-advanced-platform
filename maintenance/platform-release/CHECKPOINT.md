@@ -1,6 +1,6 @@
 # Homebridge HTTP Advanced Platform release checkpoint
 
-Recorded: 2026-09-26. Milestone 4a launch preparation complete; public launch 4b remains pending.
+Recorded: 2026-09-26. Milestone 4a complete; public launch 4b is in progress, awaiting npm one-time authentication.
 
 ## Agreed scope
 
@@ -28,8 +28,8 @@ after publication; do not claim verification or display its badge beforehand.
   `b010d32225669fefc09b83cc563c51f247e66b77`.
 - That upstream-preparation branch contains later changes. It is not the release
   baseline and must not be merged wholesale into this packaging work.
-- Origin remains `shanemcw/homebridge-http-advanced-accessory`; upstream remains
-  `staromeste/homebridge-http-advanced-accessory`.
+- Origin is now `shanemcw/homebridge-http-advanced-platform`; upstream remains
+  `staromeste/homebridge-http-advanced-accessory`. The fork relationship is retained.
 - Earlier read-only checks found both public default branches on the old 2022
   source, upstream PR #59 open, and the proposed npm name returning HTTP 404.
   Recheck remote state and name availability before publication.
@@ -103,8 +103,8 @@ Retain the historical npm regression fixture as a fixture, not a renamed depende
 | 2. Local packaging candidate | Package identity, docs, search metadata and retained UUID namespace; existing checks and tarball review passed | Complete at `fe5adb0` |
 | 3a. Clean install and matrix | Production-only clean install, advisory audit, full runtime matrix and installed loader/adapters/custom UI IPC checks | Complete at `adca0ad` |
 | 3b. Installed lifecycle acceptance | Actual browser/native UI, managed-child-bridge restart, complete replacement/rollback and cache identity acceptance | Complete at `f80296b`; isolated Node 24/Homebridge 2 fixture |
-| 4a. Launch preparation | Refresh public docs, rehearse Alpha-only discovery/selection, freeze a reviewed archive, prepare exact public changes and release draft | Complete with this checkpoint commit |
-| 4b. Public launch | Push reviewed commit and pass CI; rename existing fork, make new `main` default, enable issues/topics, publish explicit npm Alpha and matching GitHub prerelease; verify registry/UI installation and searches | Next; no public changes made |
+| 4a. Launch preparation | Refresh public docs, rehearse Alpha-only discovery/selection, freeze a reviewed archive, prepare exact public changes and release draft | Complete at `85d65bc` |
+| 4b. Public launch | Push reviewed commit and pass CI; rename existing fork, make new `main` default, enable issues/topics, publish explicit npm Alpha and matching GitHub prerelease; verify registry/UI installation and searches | In progress: CI/repository changes complete; npm awaits user authentication |
 | 5. Live soak | Back up first; deploy as a deliberate production milestone; check actual HomeKit devices, controls, freshness, recovery, child bridges and rollback; record duration and results | Pending |
 | 6. Verification | After public launch, audit then-current Homebridge requirements and request verification when evidence supports it | Pending |
 
@@ -231,17 +231,32 @@ release copy is [GITHUB-PRERELEASE.md](GITHUB-PRERELEASE.md); it is not publishe
   historical `master`, fork lineage and upstream PR work. No pushes, tag creation,
   repository rename, npm publication, production access or restarts were performed.
 
-## Resume at milestone 4b public launch
+## Milestone 4b progress and authentication handoff
+
+See [PUBLIC-LAUNCH.md](PUBLIC-LAUNCH.md). Reviewed release commit `85d65bc` was
+pushed to both public packaging and new `main` branches. Both four-job
+compatibility CI runs passed before repository changes. The existing public fork
+was renamed, `main` made default, issues enabled and description/topics applied.
+History, parent lineage, historical refs and production are preserved.
+
+npm required one-time authentication and did not publish during the agent's
+attempts. The interactive retry was cancelled before handing the exact command
+to the user's accessible terminal. Latest registry check returned 404. No Alpha.6
+tag or GitHub prerelease has been created yet; public installation/search checks
+remain pending. The release target is still `85d65bc`, even if later maintenance
+checkpoint commits advance the local branch.
+
+## Resume milestone 4b after npm authentication
 
 1. Read this checkpoint and launch review; inspect usage and Git state.
 2. Continue on `package-http-advanced-platform`, preserving unrelated work and
    the Alpha.5/upstream-preparation refs. Verify the new launch archive checksum;
    do not substitute the earlier documentation archive or unreviewed later HEAD.
-3. Recheck name availability and authenticated public accounts. After the reviewed
-   launch is authorized, push the exact commit/branches and wait for compatibility
-   CI before repository settings or publication.
-4. Follow the launch review's rename/default-branch/issues/topics, guarded exact
-   tarball publication and matching GitHub prerelease sequence.
+3. Recheck registry state first: the user's terminal may have completed publication.
+   Avoid duplicate publishing. CI and repository changes are already complete;
+   verify them as needed rather than recreating branches or renaming again.
+4. Finish guarded exact-tarball npm publication if needed, verify the public
+   package/tags/archive, then create the matching GitHub prerelease at `85d65bc`.
 5. Verify public dist-tags, metadata, archive contents, fresh registry install,
    native UI Alpha install and descriptive searches after indexing.
 6. Keep production backup/deployment, live HomeKit soak, verification and parent
