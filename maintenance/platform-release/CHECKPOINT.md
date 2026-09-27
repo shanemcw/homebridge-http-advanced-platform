@@ -1,6 +1,6 @@
 # Homebridge HTTP Advanced Platform release checkpoint
 
-Recorded: 2026-09-26. Milestones 3a and 3b complete; public launch remains pending.
+Recorded: 2026-09-26. Milestone 4a launch preparation complete; public launch 4b remains pending.
 
 ## Agreed scope
 
@@ -72,12 +72,14 @@ licensing and original authorship credit while identifying our release ownership
    keywords and descriptions. Test descriptive searches for "HTTP Advanced",
    "HTTP accessory" and "HTTP Advanced Platform" after indexing. An exact lookup
    of the original npm package name still resolves the original package.
-3. Homebridge UI's exact-package lookup reads the `latest` dist-tag. Resolve and
-   test first-publication Alpha discovery and installation before release. The
-   candidate policy is explicit `alpha` opt-in, with `latest` still rejected by
-   the guard. The README gives an explicit tag/version installation path. Registry
-   indexing and actual Homebridge UI behavior remain launch gates; do not silently
-   promote the candidate to stable to solve discovery.
+3. Homebridge UI's exact-package lookup reads the `latest` dist-tag, but UI 5.29.0
+   opens a first-install version chooser that enumerates `alpha` independently.
+   Actual service/version-chooser logic passed isolated Alpha-only registry
+   acceptance: discovery, metadata matching and exact-version npm dispatch.
+   The policy remains explicit `alpha` opt-in; `latest` remains rejected by the
+   guard. The README records the supported chooser and CLI paths. Actual public
+   registry/UI installation and indexing remain 4b gates; do not silently promote
+   the candidate to stable to solve discovery.
 4. Public documentation now has a deliberate distributable allowlist. The
    56-file tarball excludes this checkpoint, tests and draft evidence. Its relative
    documentation links and new package/retained namespace metadata were checked.
@@ -100,8 +102,9 @@ Retain the historical npm regression fixture as a fixture, not a renamed depende
 | 1. Baseline and checkpoint | Separate local branch from preserved Alpha.5; committed plan | Complete at `546aa3c` |
 | 2. Local packaging candidate | Package identity, docs, search metadata and retained UUID namespace; existing checks and tarball review passed | Complete at `fe5adb0` |
 | 3a. Clean install and matrix | Production-only clean install, advisory audit, full runtime matrix and installed loader/adapters/custom UI IPC checks | Complete at `adca0ad` |
-| 3b. Installed lifecycle acceptance | Actual browser/native UI, managed-child-bridge restart, complete replacement/rollback and cache identity acceptance | Complete with this checkpoint commit; isolated Node 24/Homebridge 2 fixture |
-| 4. Public launch | Review accepted candidate; rename repo and update remote/support links, expose the Alpha branch as default, enable issues, publish new npm identity with tested tag/install policy and matching GitHub prerelease; verify searches and install flow | Next, beginning with launch review |
+| 3b. Installed lifecycle acceptance | Actual browser/native UI, managed-child-bridge restart, complete replacement/rollback and cache identity acceptance | Complete at `f80296b`; isolated Node 24/Homebridge 2 fixture |
+| 4a. Launch preparation | Refresh public docs, rehearse Alpha-only discovery/selection, freeze a reviewed archive, prepare exact public changes and release draft | Complete with this checkpoint commit |
+| 4b. Public launch | Push reviewed commit and pass CI; rename existing fork, make new `main` default, enable issues/topics, publish explicit npm Alpha and matching GitHub prerelease; verify registry/UI installation and searches | Next; no public changes made |
 | 5. Live soak | Back up first; deploy as a deliberate production milestone; check actual HomeKit devices, controls, freshness, recovery, child bridges and rollback; record duration and results | Pending |
 | 6. Verification | After public launch, audit then-current Homebridge requirements and request verification when evidence supports it | Pending |
 
@@ -192,18 +195,54 @@ stage results for the complete record and evidence limits.
 - Weekly usage reached 99% during the first attempt. Work resumed after the
   account counters reset, without redeeming reset credits or changing models.
 
-## Resume at milestone 4 launch review
+## Milestone 4a results
 
-1. Read this checkpoint and both acceptance reports; inspect usage and Git state.
+See [LAUNCH-REVIEW.md](LAUNCH-REVIEW.md) for exact repository settings, publication
+sequence, artifact details and Alpha discovery evidence. The prepared public
+release copy is [GITHUB-PRERELEASE.md](GITHUB-PRERELEASE.md); it is not published.
+
+- README and public documentation now record completed isolated acceptance and
+  explicit installation through UI 5.29.0's Alpha chooser or `@alpha`/exact version.
+  Public availability must be confirmed from npm and the matching prerelease.
+- New archive, 56 files / 69253 bytes:
+  `/Users/shanemcw/Downloads/http-advanced-platform-alpha6-launch-20260926/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz`.
+- SHA-256: `3c62cfc01ba7b9f2cbb737fc6fdfa0de4b82ea592ffda935757b0db7823af247`.
+  Its sibling `.tgz.sha256` is prepared for the eventual prerelease attachment.
+- Only four distributed documentation files differ from the preserved milestone
+  2/3 archive. Runtime, custom UI, schema, manifest, sample and license bytes match.
+  The earlier archive/checksum, Alpha.5 tag and upstream-preparation ref are intact.
+- Typecheck, lint and 98/98 source tests passed on Node 24/Homebridge 2. The first
+  restricted run failed on loopback socket permissions; the permitted rerun passed.
+  The prior full matrix remains applicable to unchanged runtime bytes.
+- A new production-only installation added eight packages. Installed loader,
+  adapters with loopback I/O and official custom UI IPC passed 3/3.
+- `alpha-discovery.test.mjs` passed 3/3 using actual UI 5.29.0 service and pinned,
+  transpiled chooser methods with synthetic registry data. Angular rendering and
+  npm execution were stubbed. Public indexing and complete registry/UI installation
+  are not established by this rehearsal and remain launch checks.
+- npm publish dry-run passed for the reviewed archive with `--tag alpha` and
+  `--access public`; no public package or tag was created. Source checks and the
+  explicit guard are separate gates because tarball publishing skips the
+  checkout's `prepublishOnly` hook.
+- Both proposed public names returned 404. npm identified account `shanemcw`;
+  GitHub confirmed admin permission on the existing public fork. These observations
+  do not reserve a name or prove final npm publication/2FA will succeed.
+- New public `main` is proposed at the reviewed packaging commit, preserving
+  historical `master`, fork lineage and upstream PR work. No pushes, tag creation,
+  repository rename, npm publication, production access or restarts were performed.
+
+## Resume at milestone 4b public launch
+
+1. Read this checkpoint and launch review; inspect usage and Git state.
 2. Continue on `package-http-advanced-platform`, preserving unrelated work and
-   the Alpha.5/upstream-preparation refs. Verify the frozen candidate checksum.
-3. Refresh public README/docs wording that still says installed UI acceptance is
-   pending. Repack and record a new checksum if distributable documentation changes.
-4. Recheck npm name availability, repository/remote state and search metadata.
-   Resolve first-publication discovery and installation of an explicit Alpha tag
-   without silently promoting the candidate to stable or permitting `latest`.
-5. Prepare the exact repository rename/default-branch/issues changes, npm
-   publication and matching GitHub prerelease for concrete review. Public launch
-   is a separate milestone; no public changes were made during installation checks.
-6. After launch, verify indexing/search and installation. Keep production backup,
-   deployment, live HomeKit soak, verification and parent fixes as later milestones.
+   the Alpha.5/upstream-preparation refs. Verify the new launch archive checksum;
+   do not substitute the earlier documentation archive or unreviewed later HEAD.
+3. Recheck name availability and authenticated public accounts. After the reviewed
+   launch is authorized, push the exact commit/branches and wait for compatibility
+   CI before repository settings or publication.
+4. Follow the launch review's rename/default-branch/issues/topics, guarded exact
+   tarball publication and matching GitHub prerelease sequence.
+5. Verify public dist-tags, metadata, archive contents, fresh registry install,
+   native UI Alpha install and descriptive searches after indexing.
+6. Keep production backup/deployment, live HomeKit soak, verification and parent
+   fixes as later milestones. Record any pending public indexing explicitly.

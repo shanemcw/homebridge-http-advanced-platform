@@ -190,7 +190,7 @@ Local integration tests serialize and deserialize Homebridge platform accessorie
 
 The recorded synthetic fixture compares about 2.15 seconds for a blocking 41-getter read with about 3 ms for a warmed 44-device cached snapshot, issuing no new HTTP getter requests for that snapshot. Refreshing all 44 devices separately took about 2.25 seconds. These measure different stages: the cache speeds up HomeKit reads; it does not make the web server or physical device instantaneous. They are fixture measurements, not a promised speedup on every installation.
 
-Use the [measurement guide](performance.md) to compare read latency, cache freshness and sustained backend load together. The [Alpha release notes](alpha-release-notes.md) summarize the candidate and remaining installation and publication gates.
+Use the [measurement guide](performance.md) to compare read latency, cache freshness and sustained backend load together. The [Alpha release notes](alpha-release-notes.md) summarize the Alpha, completed isolated acceptance and remaining public-installation and live-soak checks.
 
 ## Development and release policy
 

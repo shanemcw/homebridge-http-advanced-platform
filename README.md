@@ -8,7 +8,7 @@ A platform conversion of [staromeste's homebridge-http-advanced-accessory](https
 - **More resilient HTTP handling:** bounded requests, background recovery and quieter logs accommodate slow or temporarily unavailable servers, including older systems you cannot change.
 - **Migration at your pace:** maintain existing accessories through JSON Config, and add platform devices alongside them when useful. The plugin also keeps a requested switch state visible while the server catches up, avoiding a brief reversal caused by stale reads.
 
-**Release status: `2.0.0-alpha.6` is a local, unpublished packaging candidate based on preserved Alpha.5.** It changes public package identity and branding while retaining Alpha.5 device behavior. Installation acceptance and public publication remain pending. Compatibility applies on the supported runtimes below. Refresh timing changes, and voluntarily converting a device to the platform creates a new HomeKit identity. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain those boundaries.
+**Release channel: `2.0.0-alpha.6` is an opt-in Alpha based on preserved Alpha.5.** It changes public package identity and branding while retaining Alpha.5 device behavior. Source checks, isolated installations and Homebridge UI replacement/rollback acceptance have passed; paired Apple Home and live-device soak remain pending. Compatibility applies on the supported runtimes below. Refresh timing changes, and voluntarily converting a device to the platform creates a new HomeKit identity. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain those boundaries.
 
 [User guide](#user-guide) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
 
@@ -27,15 +27,25 @@ Older environments need a runtime upgrade before testing this Alpha. Plugin 1.3.
 
 Back up Homebridge first, including configuration, cached accessories and pairing data. This is a separate npm package, not an automatic update to the original accessory package. Follow the [replacement and rollback guide](docs/migration.md) before changing an existing installation.
 
-For this unpublished candidate, use the locally reviewed `.tgz` in the same plugin location your Homebridge installation already uses. For example, run as the account that owns that installation:
+Check the [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions) and matching [GitHub prerelease](https://github.com/shanemcw/homebridge-http-advanced-platform/releases) before installing. The registry instructions below apply once the Alpha is published; a local candidate archive alone does not establish public availability.
+
+In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select **alpha / v2.0.0-alpha.6** in the version chooser. After installation, use **Manage Version** to select a later Alpha deliberately. Descriptive searches such as **HTTP Advanced** or **HTTP accessory** depend on npm indexing; searching the exact original package name still finds the original accessory package. The exact new-package card may show an empty default-version label while this package has only an `alpha` tag; select the tagged version in the chooser.
+
+For command-line installation, use `homebridge-http-advanced-platform@alpha`, or pin the reviewed version as shown below. Use the same plugin location and account your Homebridge installation already uses; `/var/lib/homebridge` is an example prefix:
+
+```sh
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.0.0-alpha.6
+```
+
+Before publication, install the locally reviewed archive instead:
 
 ```sh
 npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz
 ```
 
-After publication, opt in explicitly with `homebridge-http-advanced-platform@alpha` or a reviewed exact version through your normal package-management workflow. The new package has no stable release yet. Homebridge UI search and first-publication tag behavior must be checked at launch; the original accessory package's release tags are separate.
+This package has no stable release or `latest` tag yet. An install without an explicit tag/version is not the Alpha installation path. Its release tags are separate from the original accessory package's tags. Public registry indexing and the complete UI-to-registry install flow will be checked at launch; the Alpha-only version selection was rehearsed with isolated registry data and Homebridge UI 5.29.0's actual service and version-chooser logic.
 
-Preserve Homebridge storage and bridge identity. Remove the old plugin package as part of the backed-up replacement before starting Homebridge with the new package; loading both would make their shared configuration aliases ambiguous. See the migration guide for package-qualified entries and plugin allowlists. Restart Homebridge and its UI, then verify devices, state updates, controls and existing automations. Installed UI and live HomeKit identity acceptance are still pending for this packaging candidate.
+Preserve Homebridge storage and bridge identity. Remove the old plugin package as part of the backed-up replacement before starting Homebridge with the new package; loading both would make their shared configuration aliases ambiguous. See the migration guide for package-qualified entries and plugin allowlists. Restart Homebridge and its UI, then verify devices, state updates, controls and existing automations. Installed UI and managed-child-bridge acceptance passed in an isolated Node 24/Homebridge 2 fixture with HAP disabled; paired Apple Home identity and live controls still need acceptance.
 
 ### Keep using existing accessories
 
