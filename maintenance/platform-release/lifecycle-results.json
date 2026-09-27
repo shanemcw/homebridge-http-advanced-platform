@@ -1,0 +1,67 @@
+{
+  "node": "v24.21.0",
+  "homebridge": "2.4.0",
+  "oldArchiveSHA256": "94926bae6088a1c7ebe930ee081a6af7e031adb7071f0a17905091a819b827e9",
+  "results": [
+    {
+      "stage": "baseline-alpha5",
+      "package": "homebridge-http-advanced-accessory@2.0.0-alpha.5",
+      "managedChildren": 2,
+      "cachedPlatformAccessories": 1,
+      "platformUUID": "e8d6f025-6706-4e40-ac87-b154d91f7f6b",
+      "childPIDs": [
+        35588,
+        35589
+      ],
+      "identityPreserved": true
+    },
+    {
+      "stage": "forward-alpha6",
+      "package": "homebridge-http-advanced-platform@2.0.0-alpha.6",
+      "managedChildren": 2,
+      "cachedPlatformAccessories": 1,
+      "platformUUID": "e8d6f025-6706-4e40-ac87-b154d91f7f6b",
+      "childPIDs": [
+        35597,
+        35598
+      ],
+      "identityPreserved": true
+    },
+    {
+      "stage": "restart-alpha6",
+      "package": "homebridge-http-advanced-platform@2.0.0-alpha.6",
+      "managedChildren": 2,
+      "cachedPlatformAccessories": 1,
+      "platformUUID": "e8d6f025-6706-4e40-ac87-b154d91f7f6b",
+      "childPIDs": [
+        35603,
+        35604
+      ],
+      "identityPreserved": true
+    },
+    {
+      "stage": "rollback-alpha5",
+      "package": "homebridge-http-advanced-accessory@2.0.0-alpha.5",
+      "managedChildren": 2,
+      "cachedPlatformAccessories": 1,
+      "platformUUID": "e8d6f025-6706-4e40-ac87-b154d91f7f6b",
+      "childPIDs": [
+        35613,
+        35612
+      ],
+      "identityPreserved": true
+    },
+    {
+      "stage": "final-alpha6",
+      "package": "homebridge-http-advanced-platform@2.0.0-alpha.6",
+      "managedChildren": 2,
+      "cachedPlatformAccessories": 1,
+      "platformUUID": "e8d6f025-6706-4e40-ac87-b154d91f7f6b",
+      "childPIDs": [
+        35633,
+        35632
+      ],
+      "identityPreserved": true
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Homebridge HTTP Advanced Platform release checkpoint
 
-Recorded: 2026-09-26. Milestone 3a: isolated installation and runtime matrix passed; milestone 3b pending.
+Recorded: 2026-09-26. Milestones 3a and 3b complete; public launch remains pending.
 
 ## Agreed scope
 
@@ -37,8 +37,9 @@ after publication; do not claim verification or display its badge beforehand.
   push, repository rename, npm publication, deployment or restart were performed.
 - Candidate build output has been regenerated. Source checks passed across
   Node 22/24 and Homebridge 1/2. A production-only clean installation, audit and
-  installed loader/adapters/UI IPC checks passed at milestone 3a. Browser UI,
-  managed child bridges and replacement/rollback remain milestone 3b work.
+  installed loader/adapters/UI IPC checks passed at milestone 3a. Rendered UI,
+  managed child bridges and backed-up replacement/rollback passed at milestone 3b
+  in an isolated Homebridge 2 fixture. Live Apple Home acceptance remains pending.
 
 ## Intended public metadata
 
@@ -65,7 +66,8 @@ licensing and original authorship credit while identifying our release ownership
    Both Homebridge 1 and 2 regressions passed real cached-plugin reassociation
    and AID/IID continuity checks. Explicit old package prefixes and plugin lists
    require documented manual updates; no runtime configuration rewrite was added.
-   Installed UI, managed child bridges and actual HomeKit acceptance remain pending.
+   Installed UI and managed child-bridge lifecycle acceptance passed in the
+   isolated milestone 3b fixture. Actual HomeKit acceptance remains pending.
 2. Homebridge UI searches npm using `homebridge-plugin`, then matches names,
    keywords and descriptions. Test descriptive searches for "HTTP Advanced",
    "HTTP accessory" and "HTTP Advanced Platform" after indexing. An exact lookup
@@ -97,9 +99,9 @@ Retain the historical npm regression fixture as a fixture, not a renamed depende
 | --- | --- | --- |
 | 1. Baseline and checkpoint | Separate local branch from preserved Alpha.5; committed plan | Complete at `546aa3c` |
 | 2. Local packaging candidate | Package identity, docs, search metadata and retained UUID namespace; existing checks and tarball review passed | Complete at `fe5adb0` |
-| 3a. Clean install and matrix | Production-only clean install, advisory audit, full runtime matrix and installed loader/adapters/custom UI IPC checks | Complete with this checkpoint commit |
-| 3b. Installed lifecycle acceptance | Actual browser/native UI, managed-child-bridge restart, complete replacement/rollback and cache identity acceptance | Next |
-| 4. Public launch | Review accepted candidate; rename repo and update remote/support links, expose the Alpha branch as default, enable issues, publish new npm identity with tested tag/install policy and matching GitHub prerelease; verify searches and install flow | Pending |
+| 3a. Clean install and matrix | Production-only clean install, advisory audit, full runtime matrix and installed loader/adapters/custom UI IPC checks | Complete at `adca0ad` |
+| 3b. Installed lifecycle acceptance | Actual browser/native UI, managed-child-bridge restart, complete replacement/rollback and cache identity acceptance | Complete with this checkpoint commit; isolated Node 24/Homebridge 2 fixture |
+| 4. Public launch | Review accepted candidate; rename repo and update remote/support links, expose the Alpha branch as default, enable issues, publish new npm identity with tested tag/install policy and matching GitHub prerelease; verify searches and install flow | Next, beginning with launch review |
 | 5. Live soak | Back up first; deploy as a deliberate production milestone; check actual HomeKit devices, controls, freshness, recovery, child bridges and rollback; record duration and results | Pending |
 | 6. Verification | After public launch, audit then-current Homebridge requirements and request verification when evidence supports it | Pending |
 
@@ -160,19 +162,48 @@ candidate tarball is unchanged; the acceptance report/harness are not packaged.
   it does not mark the broader installation milestone or public readiness complete.
 - No production access, push, publication, remote rename or restart was performed.
 
-## Resume at milestone 3b
+## Milestone 3b results
 
-1. Read this checkpoint and the acceptance report; inspect usage and Git state.
-2. Continue on `package-http-advanced-platform`. Preserve other work if the
-   checkout has changed. Verify the candidate checksum before using it. Temporary
-   acceptance directories may expire; recreate them safely if necessary.
-3. Use an isolated Homebridge UI/managed-child-bridge fixture, with synthetic
-   devices and separate storage/bridge identity. Do not use production pairing
-   storage, configuration or real device endpoints.
-4. Verify native JSON Config and rendered Plugin Config, explicit package prefixes,
-   plugin allowlists/disabled lists, child-bridge restart and identity restoration.
-   Retain the accessory-type native schema needed for per-accessory JSON editing;
-   the custom UI handles platform configuration.
-5. Rehearse backed-up package replacement and rollback. Record acceptance limits
-   and stop at a clean checkpoint before public launch. Public registry indexing
-   and `alpha` tag installation/search remain a separate launch gate.
+See [LIFECYCLE-ACCEPTANCE.md](LIFECYCLE-ACCEPTANCE.md) and its retained synthetic
+stage results for the complete record and evidence limits.
+
+- Homebridge UI 5.29.0 rendered the new package card and Plugin Config on
+  Node 24.21.0 / Homebridge 2.4.0. Shared timeout saved and reopened correctly.
+- Native per-accessory JSON editing saved a synthetic manufacturer field.
+  Homebridge UI normalized the accessory's qualified registration to the valid
+  unchanged alias; other configuration matched the expected preserved data.
+- Both actual managed child bridges restarted through the native UI flow and
+  restored their cache. Disable/enable configuration and runtime behavior passed.
+- A source-built preserved Alpha.5 archive established the old package baseline.
+  Replacement, another full restart, restored-backup rollback and final candidate
+  restoration all passed with one unchanged platform UUID and matching serialized
+  service/characteristic identities. Both plugin identities and qualified
+  registrations/allowlists loaded at the appropriate stages.
+- The initial UI host setup needed its native dependency rebuilt. Its automatic
+  LAN discovery briefly probed an existing bridge and was refused; no control
+  occurred. Later fixture runs disabled insecure accessory control. The fixture
+  was stopped, including its backend and child processes, after acceptance.
+- HAP remained disabled; this does not establish paired Apple Home behavior or
+  published AID/IID persistence. Those limits are distinct from the earlier
+  Homebridge/HAP source regressions and the future live soak.
+- Only maintenance evidence changed. The candidate archive/checksum, preserved
+  Alpha.5 tag, upstream-preparation branch and distributable source are unchanged.
+  No publication, push, repository rename, production deployment or restart.
+- Weekly usage reached 99% during the first attempt. Work resumed after the
+  account counters reset, without redeeming reset credits or changing models.
+
+## Resume at milestone 4 launch review
+
+1. Read this checkpoint and both acceptance reports; inspect usage and Git state.
+2. Continue on `package-http-advanced-platform`, preserving unrelated work and
+   the Alpha.5/upstream-preparation refs. Verify the frozen candidate checksum.
+3. Refresh public README/docs wording that still says installed UI acceptance is
+   pending. Repack and record a new checksum if distributable documentation changes.
+4. Recheck npm name availability, repository/remote state and search metadata.
+   Resolve first-publication discovery and installation of an explicit Alpha tag
+   without silently promoting the candidate to stable or permitting `latest`.
+5. Prepare the exact repository rename/default-branch/issues changes, npm
+   publication and matching GitHub prerelease for concrete review. Public launch
+   is a separate milestone; no public changes were made during installation checks.
+6. After launch, verify indexing/search and installation. Keep production backup,
+   deployment, live HomeKit soak, verification and parent fixes as later milestones.

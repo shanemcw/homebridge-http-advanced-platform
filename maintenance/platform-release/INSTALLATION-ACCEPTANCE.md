@@ -1,6 +1,7 @@
 # Alpha.6 isolated installation acceptance
 
-Checkpoint: 2026-09-26. Milestone 3a complete; milestone 3b remains pending.
+Checkpoint: 2026-09-26. Milestone 3a complete. Milestone 3b subsequently passed;
+see [LIFECYCLE-ACCEPTANCE.md](LIFECYCLE-ACCEPTANCE.md) for its separate evidence.
 Candidate source: `fe5adb0`, based on preserved Alpha.5. This acceptance work
 changes no distributable files and does not require rebuilding the candidate.
 
@@ -63,7 +64,7 @@ under `/private/tmp/http-advanced-platform-acceptance-20260926/`; temporary file
 may expire, so this report and harness retain the reproducible acceptance record.
 The harness/report are outside the package allowlist and are not distributed.
 
-## Milestone 3b remaining gates
+## Subsequent milestone 3b acceptance
 
 - Actual Homebridge UI rendering and native per-accessory JSON editing. Schema
   checks and custom UI IPC round-trips do not establish browser acceptance.
@@ -73,7 +74,9 @@ The harness/report are outside the package allowlist and are not distributed.
 - Installed restart/cache restoration and identity verification across that
   complete lifecycle. Source API/HAP regression coverage remains distinct.
 
-Do not mark milestone 3 complete or start public launch solely from these results.
+These gates subsequently passed in the isolated Node 24/Homebridge 2 fixture,
+recorded in the lifecycle report. Do not infer those outcomes from the milestone
+3a checks alone. Public launch remains a separate milestone.
 Actual Apple Home pairing, scenes, physical devices and live soak remain separate
 production acceptance. Public registry indexing and Alpha-tag install/search
 behavior remain launch gates. No production access, restart, publication, push,
