@@ -29,7 +29,7 @@ Back up Homebridge first, including configuration, cached accessories and pairin
 
 Check the [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions) and matching [GitHub prerelease](https://github.com/shanemcw/homebridge-http-advanced-platform/releases) before installing. The registry instructions below apply once the Alpha is published; a local candidate archive alone does not establish public availability.
 
-In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select **alpha / v2.0.0-alpha.6** in the version chooser. After installation, use **Manage Version** to select a later Alpha deliberately. Descriptive searches such as **HTTP Advanced** or **HTTP accessory** depend on npm indexing; searching the exact original package name still finds the original accessory package. The exact new-package card may show an empty default-version label while this package has only an `alpha` tag; select the tagged version in the chooser.
+In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select **alpha / v2.0.0-alpha.6** in the version chooser. After installation, use **Manage Version** to select a later Alpha deliberately. Descriptive searches such as **HTTP Advanced** or **HTTP accessory** depend on npm indexing; searching the exact original package name still finds the original accessory package.
 
 For command-line installation, use `homebridge-http-advanced-platform@alpha`, or pin the reviewed version as shown below. Use the same plugin location and account your Homebridge installation already uses; `/var/lib/homebridge` is an example prefix:
 
@@ -37,13 +37,15 @@ For command-line installation, use `homebridge-http-advanced-platform@alpha`, or
 npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.0.0-alpha.6
 ```
 
-Before publication, install the locally reviewed archive instead:
+To install a reviewed archive directly:
 
 ```sh
 npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz
 ```
 
-This package has no stable release or `latest` tag yet. An install without an explicit tag/version is not the Alpha installation path. Its release tags are separate from the original accessory package's tags. Public registry indexing and the complete UI-to-registry install flow will be checked at launch; the Alpha-only version selection was rehearsed with isolated registry data and Homebridge UI 5.29.0's actual service and version-chooser logic.
+**This package has no stable release.** npm requires a `latest` tag and assigned it to this first Alpha alongside `alpha`; both currently resolve to `2.0.0-alpha.6`. An unqualified install therefore also installs the Alpha. Choose the explicit Alpha tag or reviewed exact version to make that decision clear. These tags affect only the new platform package; the original accessory package is separate and does not update automatically to it.
+
+The immutable Alpha.6 archive and its npm-page README contain the earlier assumption that `latest` could be absent. This section and the [GitHub prerelease notes](https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.0.0-alpha.6) correct that statement. Updating the npm-page README requires a subsequent package version; this does not change the published Alpha.6 runtime.
 
 Preserve Homebridge storage and bridge identity. Remove the old plugin package as part of the backed-up replacement before starting Homebridge with the new package; loading both would make their shared configuration aliases ambiguous. See the migration guide for package-qualified entries and plugin allowlists. Restart Homebridge and its UI, then verify devices, state updates, controls and existing automations. Installed UI and managed-child-bridge acceptance passed in an isolated Node 24/Homebridge 2 fixture with HAP disabled; paired Apple Home identity and live controls still need acceptance.
 

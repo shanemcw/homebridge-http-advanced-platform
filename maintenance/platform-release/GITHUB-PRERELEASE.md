@@ -10,7 +10,15 @@ accessory to a platform device is optional, manual and creates a new HomeKit ide
 
 Install **`homebridge-http-advanced-platform@2.0.0-alpha.6`**, or select
 **alpha / v2.0.0-alpha.6** in Homebridge UI 5.29.0's install version chooser.
-This package uses the `alpha` tag and has no stable release or `latest` tag.
+**This is an Alpha, with no stable release.** npm requires a `latest` tag and
+assigned it to this first Alpha alongside `alpha`; both resolve to
+`2.0.0-alpha.6`. An unqualified install also installs this Alpha. The original
+accessory package's tags are separate, so its users receive no automatic update.
+
+The immutable Alpha.6 archive and npm-page README retain a prepublication
+"no latest" assumption. These release notes and the current GitHub README
+correct that statement. npm requires a new package version to update its page's
+README; the reviewed Alpha.6 runtime and archive remain unchanged.
 
 Back up Homebridge before replacing the original package. Preserve storage and
 bridge identity, remove the old package before starting with the new one, and
