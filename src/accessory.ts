@@ -120,9 +120,9 @@ export class LegacyAccessory {
     const config = rawConfig as unknown as DeviceConfig;
     this.name = config.name;
     const information = new api.hap.Service.AccessoryInformation()
-      .setCharacteristic(api.hap.Characteristic.Manufacturer, 'Custom Manufacturer')
-      .setCharacteristic(api.hap.Characteristic.Model, 'HTTP Accessory Model')
-      .setCharacteristic(api.hap.Characteristic.SerialNumber, 'HTTP Accessory Serial Number');
+      .setCharacteristic(api.hap.Characteristic.Manufacturer, config.manufacturer || 'Custom Manufacturer')
+      .setCharacteristic(api.hap.Characteristic.Model, config.model || 'HTTP Accessory Model')
+      .setCharacteristic(api.hap.Characteristic.SerialNumber, config.serialNumber || 'HTTP Accessory Serial Number');
     this.services = [information];
     try {
       const adapter = new DeviceAdapter(api, sharedRuntime(api, log), config, `legacy:${config.name}`);

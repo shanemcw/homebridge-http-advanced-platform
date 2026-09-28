@@ -10,7 +10,7 @@ This is a platform conversion of [staromeste's homebridge-http-advanced-accessor
 - **More resilient HTTP handling:** bounded requests, background recovery and quieter logs accommodate slow or temporarily unavailable servers, including older systems you cannot change.
 - **Migration at your pace:** maintain existing accessories through JSON Config, and add platform devices alongside them when useful. The plugin also keeps a requested switch state visible while the server catches up, avoiding a brief reversal caused by stale reads.
 
-**Release channel: `2.0.0-alpha.7` is an Alpha based on preserved Alpha.5.** Alpha.6 introduced the new public package identity and branding. Alpha.7 updates search metadata and corrects npm installation guidance; device behavior is unchanged. Source checks, isolated installations and Homebridge UI replacement/rollback acceptance have passed; paired Apple Home and live-device soak remain pending. Compatibility applies on the supported runtimes below. Refresh timing changes, and voluntarily converting a device to the platform creates a new HomeKit identity. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain those boundaries.
+**Release channel: `2.0.0-alpha.8` is an Alpha based on preserved Alpha.5.** Alpha.6 introduced the public package and Alpha.7 updated its search metadata and npm guidance. Alpha.8 adds optional accessory information fields from upstream PR #46. Existing defaults, device identities and HTTP behavior remain unchanged when those fields are omitted. Source checks and isolated Homebridge UI acceptance have passed for earlier Alphas; paired Apple Home and live-device soak remain incomplete. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain the boundaries.
 
 [User guide](#user-guide) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
 
@@ -31,18 +31,18 @@ Back up Homebridge first, including configuration, cached accessories and pairin
 
 Check the [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions) and matching [GitHub prerelease](https://github.com/shanemcw/homebridge-http-advanced-platform/releases) before installing. Choose a published Alpha; a local candidate archive alone does not establish public availability.
 
-In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select the **alpha** row in the version chooser, or the reviewed **v2.0.0-alpha.7** version. After installation, use **Manage Version** to select a later Alpha deliberately. Descriptive searches such as **HTTP Advanced**, **HTTP accessory**, **REST API** or **HTTP JSON** depend on npm indexing and ranking; searching the exact original package name still finds the original accessory package.
+In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select the **alpha** row in the version chooser, or the reviewed **v2.0.0-alpha.8** version. After installation, use **Manage Version** to select a later Alpha deliberately. Descriptive searches such as **HTTP Advanced**, **HTTP accessory**, **REST API** or **HTTP JSON** depend on npm indexing and ranking; searching the exact original package name still finds the original accessory package.
 
 For command-line installation, use `homebridge-http-advanced-platform@alpha`, or pin the reviewed version as shown below. Use the same plugin location and account your Homebridge installation already uses; `/var/lib/homebridge` is an example prefix:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.0.0-alpha.7
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.0.0-alpha.8
 ```
 
 To install a reviewed archive directly:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.0.0-alpha.7.tgz
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.0.0-alpha.8.tgz
 ```
 
 **This package has no stable release.** npm requires a `latest` tag; for this package, it can point to an Alpha and does not indicate stability. An unqualified install can therefore install an Alpha. The `alpha` and `latest` tags can point to different Alpha versions; choose the explicit `@alpha` tag or reviewed exact version to select the intended release. These tags affect only the new platform package; the original accessory package is separate and does not update automatically to it.
@@ -68,6 +68,8 @@ Existing devices stay in `accessories[]`. Unqualified aliases remain unchanged; 
 ```
 
 Keep each existing accessory's name, alias and service definition unchanged when upgrading to preserve its identity. Your existing GET/POST methods, bodies, encoded strings, mapper chains, optional characteristics and property settings remain supported. See the [action and HTTP reference](docs/modernization.md#actions-and-http), [mapper reference](docs/modernization.md#mappers) and [legacy examples](docs/legacy-reference.md) for more elaborate configurations.
+
+To customize HomeKit's Accessory Information, optionally add `manufacturer`, `model` and `serialNumber` to an accessory or platform device. Omitted fields keep their previous values. A platform device's `id` still controls its HomeKit identity; `serialNumber` does not replace `id` or change the generated UUID.
 
 ### Maintain configuration in the UI or JSON
 

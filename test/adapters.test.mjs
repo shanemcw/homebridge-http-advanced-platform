@@ -31,6 +31,31 @@ test('legacy service shape matches published plugin across service types, option
     assert.deepEqual(shape(modern.getServices()),shape(old.getServices()));
   }
 });
+test('accessory information accepts metadata overrides without changing legacy or platform identity',async t=>{
+  const api=await makeAPI(t);
+  const info=accessory=>accessory.getService(api.hap.Service.AccessoryInformation);
+  const value=(service,characteristic)=>service.getCharacteristic(characteristic).value;
+  const config={name:'Identity',service:'Switch',manufacturer:'Acme',model:'Relay',serialNumber:'serial-123'};
+  const legacy=new LegacyAccessory(silentLog,config,api);
+  const legacyInfo=legacy.getServices()[0];
+  assert.equal(value(legacyInfo,api.hap.Characteristic.Manufacturer),'Acme');
+  assert.equal(value(legacyInfo,api.hap.Characteristic.Model),'Relay');
+  assert.equal(value(legacyInfo,api.hap.Characteristic.SerialNumber),'serial-123');
+  const platform=new HTTPPlatform(silentLog,{platform:'HttpAdvanced',name:'Metadata',devices:[{...config,id:'stable-id'}]},api);
+  platform.discover();
+  const device=api.registrations[0];
+  assert.equal(device.UUID,api.hap.uuid.generate('homebridge-http-advanced-accessory:Metadata:stable-id'));
+  assert.equal(value(info(device),api.hap.Characteristic.Manufacturer),'Acme');
+  assert.equal(value(info(device),api.hap.Characteristic.Model),'Relay');
+  assert.equal(value(info(device),api.hap.Characteristic.SerialNumber),'serial-123');
+  const defaults=new LegacyAccessory(silentLog,{name:'Defaults',service:'Switch'},api).getServices()[0];
+  assert.equal(value(defaults,api.hap.Characteristic.Manufacturer),'Custom Manufacturer');
+  assert.equal(value(defaults,api.hap.Characteristic.Model),'HTTP Accessory Model');
+  assert.equal(value(defaults,api.hap.Characteristic.SerialNumber),'HTTP Accessory Serial Number');
+  const platformDefault=new HTTPPlatform(silentLog,{platform:'HttpAdvanced',name:'Default Metadata',devices:[{id:'stable-id',name:'Default',service:'Switch'}]},api);
+  platformDefault.discover();
+  assert.equal(value(info(api.registrations[1]),api.hap.Characteristic.SerialNumber),'stable-id');
+});
 test('inventory every historically documented service against actual HAP; BatteryService alias works',async t=>{
   const api=await makeAPI(t);
   const doc=readFileSync(new URL('../docs/legacy-reference.md',import.meta.url),'utf8');
@@ -77,13 +102,15 @@ test('ordinary legacy upgrade preserves Homebridge UUID input and serialized AID
   const api=await makeAPI(t);
   const modulePath=require.resolve(process.env.HB_TEST_VERSION==='1'?'homebridge-v1':'homebridge').replace(/index\.js$/,'bridgeService.js');
   const {BridgeService}=await import(pathToFileURL(modulePath).href);
-  const Old=loadLegacy(api.hap), config={name:'Identity',service:'Lightbulb',optionCharacteristic:['Brightness']};
+  const Old=loadLegacy(api.hap), config={name:'Identity',service:'Lightbulb',optionCharacteristic:['Brightness'],manufacturer:'Acme',model:'Relay',serialNumber:'serial-123'};
   const old=new Old(silentLog,config), modern=new LegacyAccessory(silentLog,config,api);
   const identity=api.hap.uuid.generate('HttpAdvancedAccessory:Identity');
   const build=(instance,plugin)=>BridgeService.prototype.createHAPAccessory.call({}, {getPluginIdentifier:()=>plugin}, instance, config.name, 'HttpAdvancedAccessory');
   const before=build(old,'homebridge-http-advanced-accessory'),after=build(modern,'homebridge-http-advanced-platform');
   assert.equal(before.UUID,after.UUID);
   assert.equal(after.UUID,identity);
+  assert.equal(before.getService(api.hap.Service.AccessoryInformation).getCharacteristic(api.hap.Characteristic.Manufacturer).value,'Custom Manufacturer');
+  assert.equal(after.getService(api.hap.Service.AccessoryInformation).getCharacteristic(api.hap.Characteristic.Manufacturer).value,'Acme');
   // persisted identifier lookup keys are the accessory UUID, service UUID/subtype and characteristic UUID
   const keys=a=>a.services.flatMap(s=>s.characteristics.map(c=>[a.UUID,s.UUID,s.subtype,c.UUID]));
   assert.deepEqual(keys(before),keys(after));

@@ -1,6 +1,6 @@
 # Modernization details and developer reference
 
-This reference describes the behavior of **2.0.0-alpha.7**, unchanged from Alpha.6. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
+This reference describes **2.0.0-alpha.8**. HTTP and caching behavior remains as in Alpha.6 and Alpha.7; Alpha.8 adds optional accessory information fields. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
 
 ## What non-breaking means here
 
@@ -178,7 +178,7 @@ Malformed XML, invalid values, expression failures and exhausted numeric/boolean
 }
 ```
 
-The legacy adapter retains the fixed Manufacturer, Model and SerialNumber values exposed by 1.3.0; its previously ignored `manufacturer`/`model` keys remain accepted. The platform honors these metadata settings. All historical extended examples (security system, contact sensor, Daikin, Yamaha and lightbulb) remain in [the legacy reference](legacy-reference.md).
+Both adapters accept optional `manufacturer`, `model` and `serialNumber` strings for the HomeKit Accessory Information service. When omitted, legacy accessories retain the 1.3.0 Manufacturer, Model and SerialNumber defaults. Platform devices retain their existing Manufacturer and Model defaults and use `id` as their default serial number when present. A configured `serialNumber` overrides that display value without changing the platform device's UUID. All historical extended examples (security system, contact sensor, Daikin, Yamaha and lightbulb) remain in [the legacy reference](legacy-reference.md).
 
 ## Platform lifecycle
 

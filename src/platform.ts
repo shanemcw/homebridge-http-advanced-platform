@@ -80,7 +80,7 @@ export class HTTPPlatform implements DynamicPlatformPlugin {
           .setCharacteristic(this.api.hap.Characteristic.Name, device.name)
           .setCharacteristic(this.api.hap.Characteristic.Manufacturer, device.manufacturer ?? 'Custom Manufacturer')
           .setCharacteristic(this.api.hap.Characteristic.Model, device.model ?? 'HTTP Accessory Model')
-          .setCharacteristic(this.api.hap.Characteristic.SerialNumber, device.id ?? 'HTTP Accessory Serial Number');
+          .setCharacteristic(this.api.hap.Characteristic.SerialNumber, device.serialNumber || device.id || 'HTTP Accessory Serial Number');
         // context stores no configuration, URLs, bodies, usernames or passwords
         accessory.context = { schemaVersion: 1 };
         if (cached) this.api.updatePlatformAccessories([accessory]);

@@ -33,6 +33,7 @@ export interface DeviceConfig {
   service: string;
   manufacturer?: string;
   model?: string;
+  serialNumber?: string;
   username?: string;
   password?: string;
   immediately?: boolean;

@@ -1,25 +1,40 @@
-# Homebridge HTTP Advanced Platform 2.0.0-alpha.7
+# Homebridge HTTP Advanced Platform 2.0.0-alpha.8
 
-Opt-in Alpha based on preserved `2.0.0-alpha.5`. Confirm availability in the
-matching [GitHub prerelease](https://github.com/shanemcw/homebridge-http-advanced-platform/releases)
-and [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions).
+Alpha.8 adds optional HomeKit Accessory Information metadata from
+[upstream PR #46](https://github.com/staromeste/homebridge-http-advanced-accessory/pull/46).
+Legacy accessories can now set `manufacturer`, `model` and `serialNumber`.
+Platform devices already honored manufacturer and model; they now accept a
+separate `serialNumber`. The displayed serial number does not replace a platform
+device's stable `id` or alter its HomeKit UUID.
 
-This is a platform conversion of [staromeste/homebridge-http-advanced-accessory](https://github.com/staromeste/homebridge-http-advanced-accessory). It retains the original Apache-2.0 license, contributor credit and Git history.
+Omitting these fields preserves the previous values. HTTP actions, caching,
+configuration aliases, service definitions, package dependencies and runtime
+requirements are unchanged. This release does not include other upstream PRs or
+issues.
 
-Alpha.6 introduced the public `homebridge-http-advanced-platform` package. Alpha.7 updates its description, keywords and README to explain HTTP/HTTPS devices, REST APIs, JSON/XML response mapping, JSONPath, XPath, polling, shared caching, switches and sensors. It also packages the corrected explanation of npm's required `latest` tag. Search metadata helps matching but does not guarantee public indexing or ranking.
+Alpha.6 introduced the public `homebridge-http-advanced-platform` package and
+Alpha.7 updated its description, keywords and npm README. The project is a
+platform conversion of
+[staromeste/homebridge-http-advanced-accessory](https://github.com/staromeste/homebridge-http-advanced-accessory),
+retaining the Apache-2.0 license, contributor credit and Git history.
 
-Distributable runtime, custom UI, schema, configuration aliases, UUID namespace and dependency declarations are unchanged from Alpha.6. This retains Alpha.5 device behavior: shared cached reads, bounded background HTTP requests, recovery, write confirmation, legacy accessories and optional platform devices. No parent issue/PR fixes or dependency updates are included.
+Configuration aliases remain `HttpAdvancedAccessory` and `HttpAdvanced`. The
+platform UUID namespace remains the Alpha.5 namespace. Package-qualified
+configuration and plugin lists must use the new package name; do not load both
+old and new packages. Follow the [replacement and rollback guide](migration.md)
+and preserve Homebridge configuration, cached accessories and pairing data.
+Moving a legacy accessory into platform mode remains an explicit manual
+conversion that creates a new HomeKit identity.
 
-A repository-only timing assertion now checks scheduled execution spacing rather than server receive timestamps, which include connection delays. Its configured delay and timeout checks are retained. Tests and maintenance reports are not shipped in the npm archive.
+Requires Node `^22.13.0 || ^24.0.0` and Homebridge `^1.11.4 || ^2.4.0`.
+This is an Alpha, not a stable or Homebridge-verified release. npm requires a
+`latest` tag, which can also point to an Alpha. Choose the **alpha** row or
+**v2.0.0-alpha.8** in Homebridge UI's version chooser, or install
+`homebridge-http-advanced-platform@2.0.0-alpha.8` explicitly. Confirm public
+availability in the matching [GitHub prerelease](https://github.com/shanemcw/homebridge-http-advanced-platform/releases)
+and [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions)
+before installing.
 
-Configuration aliases remain `HttpAdvancedAccessory` and `HttpAdvanced`. The platform UUID namespace remains the Alpha.5 namespace. Package-qualified configuration and plugin lists must use the new package name; do not load both old and new packages. Follow the [replacement and rollback guide](migration.md), preserving configuration, storage and bridge identity.
-
-Moving a legacy accessory into a platform remains an explicit manual conversion with a new HomeKit identity. No automatic conversion tool is included.
-
-Requirements remain Node `^22.13.0 || ^24.0.0` and Homebridge `^1.11.4 || ^2.4.0`. Source checks and installed loader/adapters/custom UI IPC passed across Node 22/24 and Homebridge 1/2. Rendered Homebridge UI 5.29.0, native editing, managed child bridges and backed-up replacement/rollback passed in an isolated Node 24/Homebridge 2 fixture. HAP was disabled in that fixture; paired Apple Home, physical controls, rooms/scenes/automations and live soak remain separate acceptance.
-
-The publication channel is the explicit `alpha` npm tag with a matching GitHub prerelease; this package has no stable release. npm also requires a `latest` tag, which can point to an Alpha and does not indicate stability. The `alpha` and `latest` tags can point to different Alpha versions, so choose the **alpha** row or reviewed **v2.0.0-alpha.7** in Homebridge UI 5.29.0's install version chooser, or install `homebridge-http-advanced-platform@alpha` (exact version: `@2.0.0-alpha.7`). Its tags do not modify the original accessory package's tags. Homebridge verification will be pursued separately after publication; this Alpha is not verified.
-
-Alpha.7 includes the npm tag correction in its packaged README. The published Alpha.6 archive and its release tag remain unchanged.
-
-Report versions and sanitized diagnostics. Do not include credentials, pairing PINs or unredacted configuration.
+The publication and exact-package checks are separate from paired Apple Home,
+physical device control and unattended live soak. Report versions and sanitized
+diagnostics without credentials or unredacted configuration.

@@ -4,6 +4,9 @@
       "accessory": "HttpAdvancedAccessory",
       "name": "Example Legacy Switch",
       "service": "Switch",
+      "manufacturer": "Example Manufacturer",
+      "model": "Example Relay",
+      "serialNumber": "example-legacy-001",
       "urls": {
         "getOn": {
           "url": "http://legacy-device.example/state"
@@ -24,6 +27,9 @@
           "id": "example-platform-switch",
           "name": "Example Platform Switch",
           "service": "Switch",
+          "manufacturer": "Example Manufacturer",
+          "model": "Example Relay",
+          "serialNumber": "example-platform-001",
           "urls": {
             "getOn": {
               "url": "http://platform-device.example/state"

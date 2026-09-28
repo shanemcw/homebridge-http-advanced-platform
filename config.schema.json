@@ -28,6 +28,9 @@
       "model": {
         "type": "string"
       },
+      "serialNumber": {
+        "type": "string"
+      },
       "username": {
         "type": "string"
       },
@@ -254,6 +257,9 @@
                   "type": "string"
                 },
                 "model": {
+                  "type": "string"
+                },
+                "serialNumber": {
                   "type": "string"
                 },
                 "username": {
