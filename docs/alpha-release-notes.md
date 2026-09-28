@@ -1,4 +1,12 @@
-# Homebridge HTTP Advanced Platform 2.0.0-alpha.8
+# Homebridge HTTP Advanced Platform 2.0.0-alpha.9 development notes
+
+**Alpha.9 is an unpublished work in progress.** It is not available through npm, Homebridge UI or a GitHub release. The installable Alpha remains `2.0.0-alpha.8`.
+
+The current Alpha.9 source adds `additionalServices` to legacy accessories and platform devices, addressing the multi-service/Battery use case in [upstream issue #12](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/12). Each additional service has a stable `id` used as its HomeKit subtype and its own actions and optional characteristics. Authentication and timing can inherit from the containing device. Existing single-service configurations keep their primary service identity. The [Front Door example](../README.md#add-battery-information-to-a-device-unpublished-alpha9) shows a Contact Sensor with Battery status and level on one accessory.
+
+Local source tests exercise both adapters, cached platform restoration, duplicate-ID rejection and removal of an added service. Paired Apple Home presentation, automations, live endpoint behavior and the final package/CI review remain to be checked before publication. These notes will be finalized when Alpha.9 is ready.
+
+## Published Alpha.8
 
 Alpha.8 adds optional HomeKit Accessory Information metadata from
 [upstream PR #46](https://github.com/staromeste/homebridge-http-advanced-accessory/pull/46).

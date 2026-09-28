@@ -1,5 +1,7 @@
 # Beta.1 readiness
 
+> Historical Alpha.5 checkpoint. For the current unpublished Alpha.9 work and published Alpha.8, see the [release notes](alpha-release-notes.md) and [README](../README.md). The test counts and deployment status below describe 2026-09-13 only.
+
 Local checkpoint: 2026-09-13, `2.0.0-alpha.5`. Alpha.4 is the last verified household deployment. These changes are uncommitted and have not been deployed or published.
 
 | Area | Local evidence | Remaining acceptance |

@@ -46,6 +46,12 @@
         "type": "boolean",
         "default": false
       },
+      "additionalServices": {
+        "type": "array",
+        "maxItems": 32,
+        "items": { "$ref": "#/definitions/additionalService" },
+        "description": "Additional HomeKit services on this accessory; each id is a stable service subtype"
+      },
       "optionCharacteristic": {
         "type": "array",
         "items": {
@@ -113,6 +119,37 @@
       }
     },
     "definitions": {
+      "refresh": {
+        "type": "object",
+        "properties": {
+          "activeInterval": { "type": "number", "exclusiveMinimum": 0 },
+          "idleInterval": { "type": "number", "exclusiveMinimum": 0 },
+          "idleAfter": { "type": "number", "exclusiveMinimum": 0 }
+        }
+      },
+      "additionalService": {
+        "type": "object",
+        "required": ["id", "service"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string", "minLength": 1, "description": "Stable service subtype; keep it unchanged after pairing" },
+          "service": { "type": "string", "minLength": 1, "not": { "enum": ["AccessoryInformation"] } },
+          "name": { "type": "string", "description": "Defaults to the accessory name" },
+          "username": { "type": "string", "description": "Overrides inherited HTTP basic auth username" },
+          "password": { "type": "string", "format": "password", "description": "Overrides inherited HTTP basic auth password" },
+          "immediately": { "type": "boolean" },
+          "debug": { "type": "boolean" },
+          "optionCharacteristic": { "type": "array", "items": { "type": "string" } },
+          "props": { "type": "object", "additionalProperties": { "type": "object", "additionalProperties": true } },
+          "forceRefreshDelay": { "type": "number", "minimum": 0 },
+          "setterDelay": { "type": "number", "minimum": 0 },
+          "uriCallsDelay": { "type": "number", "minimum": 0 },
+          "writeConfirmationTimeout": { "type": "number", "minimum": 0 },
+          "refresh": { "$ref": "#/definitions/refresh" },
+          "urls": { "type": "object", "additionalProperties": { "$ref": "#/definitions/action" } },
+          "additionalServices": false
+        }
+      },
       "action": {
         "type": "object",
         "required": [
@@ -276,6 +313,12 @@
                 "debug": {
                   "type": "boolean",
                   "default": false
+                },
+                "additionalServices": {
+                  "type": "array",
+                  "maxItems": 32,
+                  "items": { "$ref": "#/definitions/additionalService" },
+                  "description": "Additional HomeKit services on this device; each id is a stable service subtype"
                 },
                 "optionCharacteristic": {
                   "type": "array",

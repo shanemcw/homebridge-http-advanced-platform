@@ -46,6 +46,11 @@ export interface DeviceConfig {
   uriCallsDelay?: number;
   refresh?: RefreshConfig;
   urls?: Record<string, ActionConfig>;
+  additionalServices?: AdditionalServiceConfig[];
+}
+export interface AdditionalServiceConfig extends Partial<Omit<DeviceConfig, 'additionalServices' | 'id' | 'service' | 'accessory' | 'manufacturer' | 'model' | 'serialNumber'>> {
+  id: string;
+  service: string;
 }
 export interface CoordinatorConfig {
   concurrency?: number;
@@ -60,6 +65,7 @@ export class ActionError extends Error {
 }
 export interface CacheEntry {
   key: string;
+  requestOwner?: string;
   actionName: string;
   config: DeviceConfig;
   state: State;

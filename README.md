@@ -10,7 +10,7 @@ This is a platform conversion of [staromeste's homebridge-http-advanced-accessor
 - **More resilient HTTP handling:** bounded requests, background recovery and quieter logs accommodate slow or temporarily unavailable servers, including older systems you cannot change.
 - **Migration at your pace:** maintain existing accessories through JSON Config, and add platform devices alongside them when useful. The plugin also keeps a requested switch state visible while the server catches up, avoiding a brief reversal caused by stale reads.
 
-**Release channel: `2.0.0-alpha.8` is an Alpha based on preserved Alpha.5.** Alpha.6 introduced the public package and Alpha.7 updated its search metadata and npm guidance. Alpha.8 adds optional accessory information fields from upstream PR #46. Existing defaults, device identities and HTTP behavior remain unchanged when those fields are omitted. Source checks and isolated Homebridge UI acceptance have passed for earlier Alphas; paired Apple Home and live-device soak remain incomplete. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain the boundaries.
+**Published release: `2.0.0-alpha.8`. Unpublished development version: `2.0.0-alpha.9`.** Alpha.9 adds optional additional services on one accessory, starting with the Battery use case in [upstream issue #12](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/12). The Alpha.9 source is still under development and cannot yet be selected from npm or Homebridge UI. Alpha.8 added optional accessory information fields from upstream PR #46. Source checks and isolated Homebridge UI acceptance have passed for earlier Alphas; paired Apple Home and live-device soak remain incomplete. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain the boundaries.
 
 [User guide](#user-guide) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
 
@@ -112,6 +112,36 @@ Use **Also use as a platform** in the settings screen, or add an `HttpAdvanced` 
 
 Choose a permanent device `id` before pairing, and keep the platform name stable. The device's display name can then change without changing its platform identity. Disabling a platform keeps its definitions and cached identities but stops device updates.
 
+### Add battery information to a device (unpublished Alpha.9)
+
+Add `additionalServices` to a legacy accessory or a platform device. This example is one **platform device** with a Contact Sensor and a Battery service; the endpoint examples return `0` or `1` for contact/low-battery status and `0` through `100` for battery level:
+
+```json
+{
+  "platform": "HttpAdvanced",
+  "name": "HTTP Advanced",
+  "devices": [{
+    "id": "front-door",
+    "name": "Front Door",
+    "service": "ContactSensor",
+    "urls": {
+      "getContactSensorState": { "url": "http://device.example/contact" }
+    },
+    "additionalServices": [{
+      "id": "battery",
+      "service": "BatteryService",
+      "optionCharacteristic": ["BatteryLevel"],
+      "urls": {
+        "getStatusLowBattery": { "url": "http://device.example/battery/low" },
+        "getBatteryLevel": { "url": "http://device.example/battery/level" }
+      }
+    }]
+  }]
+}
+```
+
+The Battery service is attached to **Front Door**, not exposed as another accessory. `StatusLowBattery` is the required Battery characteristic; `BatteryLevel` is optional and must be listed in `optionCharacteristic`. Map endpoint output to each characteristic's HomeKit values as needed. Each additional service needs a permanent `id`: Homebridge uses it as that service's subtype, including when two services have the same type. Changing or removing it can change HomeKit service identity and affect automations. The primary device `id`, service type and HomeKit identity remain as before. Additional services have their own `urls`, `optionCharacteristic` and `props`; they inherit device authentication and timing unless overridden. See the [service reference](docs/modernization.md#services-optional-characteristics-and-props).
+
 **Accessories and platforms can coexist for different devices.** Do not define the same physical device in both places. Moving an existing accessory into a platform is an optional, deliberate conversion: it creates a different HomeKit identity and may require reassigning rooms, scenes and automations. There is no automatic identity-preserving migration tool in this Alpha. Follow the [migration guide](docs/migration.md) if you choose to convert devices.
 
 ### Tune shared settings
@@ -178,4 +208,4 @@ The [modernization and developer reference](docs/modernization.md) contains the 
 - Service support, optional characteristics, configuration editing and platform lifecycle.
 - Benchmark interpretation, development commands, test coverage and release policy.
 
-The [Alpha release notes](docs/alpha-release-notes.md) summarize this candidate and its remaining release gates. The project retains its existing [Apache-2.0 license](LICENSE) and historical authorship.
+The [Alpha release notes](docs/alpha-release-notes.md) distinguish the unpublished Alpha.9 work from the published Alpha.8 and list remaining release gates. The project retains its existing [Apache-2.0 license](LICENSE) and historical authorship.

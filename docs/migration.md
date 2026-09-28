@@ -1,5 +1,7 @@
 # Upgrade and migration
 
+The installation steps below refer to the published **2.0.0-alpha.8**. Alpha.9 additional-service support is still local, unpublished source work and has no npm or Homebridge UI installation path yet.
+
 ## Replace the accessory package with the platform package
 
 This is a separate package with the existing Alpha behavior. It does not automatically convert accessory definitions into platform devices. Back up configuration, cached accessories, pairing data, identifier storage and the exact old plugin version/package before replacement.

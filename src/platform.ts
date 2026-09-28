@@ -1,7 +1,7 @@
 import type { API, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig } from 'homebridge';
 import { DeviceAdapter, serviceConstructor } from './accessory.js';
-import { validateDevice } from './config.js';
-import { sharedRuntime } from './runtime.js';
+import { serviceConfigs, validateDevice } from './config.js';
+import { fingerprint, sharedRuntime } from './runtime.js';
 import { validateSettings } from './settings.js';
 import type { CoordinatorConfig, DeviceConfig } from './types.js';
 
@@ -43,7 +43,8 @@ export class HTTPPlatform implements DynamicPlatformPlugin {
     const desired = new Map<string, DeviceConfig>();
     try {
       for (const device of devices) {
-        validateDevice(device); serviceConstructor(this.api, device.service);
+        validateDevice(device);
+        for (const definition of serviceConfigs(device)) serviceConstructor(this.api, definition.config.service);
         const id = device.id ?? device.name;
         if (typeof id !== 'string' || !id.trim()) throw new Error();
         const UUID = this.api.hap.uuid.generate(`${platformUUIDNamespace}:${this.config.name ?? platformName}:${id}`);
@@ -67,13 +68,18 @@ export class HTTPPlatform implements DynamicPlatformPlugin {
       try {
         const cached = this.cached.get(UUID);
         const accessory = cached ?? new this.api.platformAccessory(device.name, UUID);
-        const Constructor = serviceConstructor(this.api, device.service);
-        const existing = accessory.services.find(service => service.UUID === Constructor.UUID);
-        const adapter = new DeviceAdapter(this.api, runtime, device, `platform:${UUID}`, existing);
-        if (!existing) accessory.addService(adapter.service);
-        // remove obsolete primary services only after the new definition was successfully attached
+        const definitions = serviceConfigs(device);
+        const requestOwner = fingerprint(definitions[0].config);
+        const adapters = definitions.map(({ config: serviceConfig, subtype }) => {
+          const Constructor = serviceConstructor(this.api, serviceConfig.service);
+          const existing = accessory.services.find(service => service.UUID === Constructor.UUID && service.subtype === subtype);
+          return new DeviceAdapter(this.api, runtime, serviceConfig,
+            subtype === undefined ? `platform:${UUID}` : `platform:${UUID}:service:${subtype}`, existing, subtype, requestOwner);
+        });
+        for (const adapter of adapters) if (!accessory.services.includes(adapter.service)) accessory.addService(adapter.service);
+        // remove obsolete services only after all desired definitions were attached
         for (const service of accessory.services.slice()) {
-          if (service.UUID !== this.api.hap.Service.AccessoryInformation.UUID && service !== adapter.service) accessory.removeService(service);
+          if (service.UUID !== this.api.hap.Service.AccessoryInformation.UUID && !adapters.some(adapter => adapter.service === service)) accessory.removeService(service);
         }
         accessory.displayName = device.name;
         accessory.getService(this.api.hap.Service.AccessoryInformation)!

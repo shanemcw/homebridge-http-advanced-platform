@@ -39,12 +39,12 @@ export class Runtime {
     }
   }
 
-  register(owner: string, actionName: string, config: DeviceConfig, state: State, convert: CacheEntry['convert'], update: CacheEntry['update']): CacheEntry {
+  register(owner: string, actionName: string, config: DeviceConfig, state: State, convert: CacheEntry['convert'], update: CacheEntry['update'], requestOwner?: string): CacheEntry {
     const key = fingerprint([owner, config, actionName]);
     if (this.entries.has(key)) throw new ActionError('config');
     this.owners.add(owner);
     const now = Date.now();
-    const entry: CacheEntry = { key, actionName, config, state, known: false, lastSuccess: 0, lastAttempt: 0, lastChange: 0, lastDemand: now, inFlight: false, failures: 0, nextEligible: now + Math.random() * 1000, generation: 0, convert, update };
+    const entry: CacheEntry = { key, requestOwner, actionName, config, state, known: false, lastSuccess: 0, lastAttempt: 0, lastChange: 0, lastDemand: now, inFlight: false, failures: 0, nextEligible: now + Math.random() * 1000, generation: 0, convert, update };
     if (this.savePath) {
       try {
         const saved = JSON.parse(readFileSync(join(this.savePath, key + '.json'), 'utf8')) as Persisted;
@@ -170,7 +170,7 @@ export class Runtime {
     }
   }
 
-  private ownerFor(entry: CacheEntry): string { return fingerprint(entry.config); }
+  private ownerFor(entry: CacheEntry): string { return entry.requestOwner ?? fingerprint(entry.config); }
 
   private originFor(entry: CacheEntry): string | undefined {
     try { return new URL(entry.config.urls![entry.actionName].url).origin; }
@@ -241,13 +241,13 @@ export class Runtime {
     entry.update(entry.pendingWrite?.value ?? (entry.known ? entry.value : undefined) ?? new ActionError('inconclusive'));
   }
 
-  async set(config: DeviceConfig, state: State, actionName: string, value: CharacteristicValue, entry?: CacheEntry, intent?: PendingWrite): Promise<void> {
+  async set(config: DeviceConfig, state: State, actionName: string, value: CharacteristicValue, entry?: CacheEntry, intent?: PendingWrite, requestOwner?: string): Promise<void> {
     if (this.stopped) throw new ActionError('aborted');
     const action = config.urls?.[actionName];
     if (!action) return;
     intent ??= entry ? this.beginWrite(entry, value) : undefined;
     try {
-      await this.actions.set(action, config, fingerprint(config), state, value);
+      await this.actions.set(action, config, requestOwner ?? fingerprint(config), state, value);
       if (entry && entry.pendingWrite === intent) intent!.expires = Date.now() + (config.writeConfirmationTimeout ?? this.settings.writeConfirmationTimeout ?? 10000);
     } catch (error) {
       if (entry && entry.pendingWrite === intent) {

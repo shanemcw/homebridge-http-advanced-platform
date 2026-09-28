@@ -30,6 +30,13 @@ test('platform JSON schema accepts every sanitized legacy device and recursive a
   for (const device of devices) assert.equal(legacyValidator(device),true,JSON.stringify(legacyValidator.errors));
   const validator=ajv.compile({definitions:schema.schema.definitions,$ref:'#/definitions/platform'});
   assert.equal(validator({name:'Fixture',platform:'HttpAdvanced',devices}),true,JSON.stringify(validator.errors));
+  const multiService={name:'Door',service:'ContactSensor',additionalServices:[{
+    id:'battery',service:'BatteryService',optionCharacteristic:['BatteryLevel'],
+    urls:{getStatusLowBattery:{url:'http://example.invalid/low'},getBatteryLevel:{url:'http://example.invalid/level'}},
+  }]};
+  assert.equal(legacyValidator(multiService),true,JSON.stringify(legacyValidator.errors));
+  assert.equal(validator({name:'Fixture',platform:'HttpAdvanced',devices:[multiService]}),true,JSON.stringify(validator.errors));
+  validateDevice(multiService);
   devices[0].urls.getOn.inconclusive={url:'http://example.invalid',mappers:[{type:'eval',parameters:{expression:'value'}}]};
   devices[0].urls.getOn.responsePattern='^(?:ON|OFF)$';
   devices[0].urls.getOn.requireResponseMatch=true;
