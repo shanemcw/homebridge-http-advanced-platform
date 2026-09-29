@@ -418,4 +418,3 @@ Choose the `id` before pairing and keep it stable. Moving an existing legacy acc
 - The root [README](../README.md) covers installation, platform coexistence, Alpha.9 `lookup`/`scale`, additional services, shared settings, and troubleshooting.
 - The [modernization reference](modernization.md) documents action semantics, caching, scheduling, response guards, mapper behavior, and release policy.
 - The [service support table](service-support.md) lists services available for the supported Homebridge/HAP versions.
-- The [legacy reference](legacy-reference.md) retains historical 1.3.0 behavior and real-device examples such as Bticino, Daikin, Yamaha MusicCast, and a generic multi-characteristic light.
