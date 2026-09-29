@@ -1,6 +1,6 @@
 # Modernization details and developer reference
 
-This reference describes **2.0.0-alpha.8**. HTTP and caching behavior remains as in Alpha.6 and Alpha.7; Alpha.8 adds optional accessory information fields. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
+This reference describes **2.0.0-alpha.9**. HTTP and caching behavior remains as in Alpha.8; Alpha.9 adds optional additional services and `scale`/`lookup` mappers. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
 
 ## What non-breaking means here
 
@@ -10,8 +10,9 @@ Compatibility does not mean every runtime behavior is identical to 1.3.0. In par
 
 | Area | Compatibility and limits |
 |---|---|
-| HomeKit identity | The legacy adapter retains its registration, service ordering and characteristic identities. Preserve accessory names and Homebridge pairing/identifier storage. Regression tests check identity continuity; physical-device and automation verification remains part of Alpha testing. |
+| HomeKit identity | The legacy adapter retains its registration, service ordering and characteristic identities. Preserve unqualified accessory identifiers, names, optional `uuid_base` values, bridge assignments and Homebridge pairing/identifier storage. Changing a package-qualified legacy accessory identifier changes Homebridge's UUID seed. Regression tests check identity continuity; physical-device and automation verification remains part of Alpha testing. |
 | Optional platform | Legacy and platform devices can coexist. Moving an existing device to the platform creates a different identity; plan room, scene and automation assignments. There is no automatic identity-preserving migration tool. |
+| Additional services | Opting into `additionalServices` retains the primary accessory UUID and primary service identity. Each added service uses its stable `id` as a HAP subtype. Removing or changing an added service may affect HomeKit automations that refer to it. |
 | Runtime support | Node 22.13+ in the 22.x line or Node 24.x; Homebridge 1.11.4+ in the 1.x line or 2.4+ in the 2.x line. Historical HAP services removed by a newer Homebridge version cannot be restored by this plugin. |
 | Read timing | Default on-demand acquisition becomes background refresh. HomeKit reads return memory state promptly, with finite staleness and bounded background traffic. Positive polling intervals remain, with a brief confirmation phase after writes. |
 | Writes | HTTP acknowledgement is followed by a bounded requested-state window while the getter catches up. Failed writes are not replayed. A matching response, expiry or command failure ends that command's pending state. |
@@ -147,10 +148,12 @@ A chain feeds each mapper's output into the next. Getter mappers consume respons
 
 | Type | Parameters | Semantics |
 |---|---|---|
-| `static` | `mapping` object | Lookup by input value; unmatched values pass through. Legacy falsey mapped values (`0`, `false`, `""`) also pass through. Use strings `"0"`/`"1"` for numeric state or an eval expression for an intentional falsey result. |
+| `static` | `mapping` object | Lookup by input value; unmatched values pass through. Legacy falsey mapped values (`0`, `false`, `""`) also pass through. Use strings `"0"`/`"1"` for numeric state, or opt into `lookup` for intentional falsey results. |
+| `lookup` (Alpha.9) | Nonempty `mapping` object with string, finite number or boolean results | Match an own key exactly and return its value, including `0`, `false` or `""`. Unknown getter input is `"inconclusive"`; unknown setter input fails before sending. |
 | `regex` | `regexp`, `capture` (default `"1"`) | Return the selected capture, or original input when unmatched. |
 | `xpath` | `xpath`, `index` (default 0) | XPath text-node selection or string expression. Select `/text()` or `string(...)`, not entire elements. |
 | `jpath` | `jpath`, `index` (default 0) | JSONPath selection, indexed result, objects/arrays serialized as JSON. Malformed or non-object JSON returns `"inconclusive"`. |
+| `scale` (Alpha.9) | `inputMin`, `inputMax`, `outputMin`, `outputMax`; optional `round`, `clamp` | Linearly convert a finite number between ranges. Getter input may be a numeric string. Invalid numeric input yields `"inconclusive"` on a getter and fails a setter before sending. |
 | `eval` | `expression` | Execute the legacy JavaScript expression with `value`, `self.state`, and `this.state`. |
 
 ```json
@@ -159,6 +162,23 @@ A chain feeds each mapper's output into the next. Getter mappers consume respons
   { "type": "static", "parameters": { "mapping": { "0": "0", "1": "1", "unset": "0" } } }
 ]
 ```
+
+`lookup` is an opt-in strict counterpart to `static`. Keys use the string form of a string, finite number or boolean input; matching is case-sensitive and does not trim whitespace. Missing keys and non-scalar inputs do not pass through. Its result must be a string, finite number or boolean; `null`, arrays and objects are rejected at configuration validation. A missing getter key becomes `"inconclusive"`, which can run an `inconclusive` fallback action. A missing setter key fails before its HTTP request. The [relay example](../README.md#look-up-exact-device-states-alpha9) shows both directions; legacy `static` behavior remains unchanged.
+
+For a JSON response such as `{ "level": 128 }`, chain extraction and scaling:
+
+```json
+[
+  { "type": "jpath", "parameters": { "jpath": "$.level" } },
+  { "type": "scale", "parameters": {
+    "inputMin": 0, "inputMax": 255,
+    "outputMin": 0, "outputMax": 100,
+    "round": 0, "clamp": true
+  } }
+]
+```
+
+`inputMin` must be less than `inputMax`; output endpoints may descend to invert a range. All four endpoints must be finite numbers. `round` is an integer from 0 to 12 decimal places. `clamp` defaults to false, which permits extrapolation beyond the input range. `scale` accepts only finite numbers or complete decimal strings, including exponent notation and surrounding whitespace; it rejects blank, partial and nondecimal strings. If a getter cannot scale its value, its result is `"inconclusive"` and a configured `inconclusive` action can run. A setter failure prevents the HTTP request. The [dimmer example](../README.md#scale-a-device-value-alpha9) shows inverse getter and setter ranges.
 
 **Eval and `${...}` templates execute trusted configuration as JavaScript with the privileges of Homebridge. They are not sandboxed.** Do not paste untrusted expressions. Evaluation is isolated in the compatibility module and exceptions are contained; a deliberately nonterminating expression can still block Node. JSONPath uses the maintained library's safe filter evaluator; exotic executable legacy JSONPath scripts need individual compatibility verification.
 
@@ -178,13 +198,17 @@ Malformed XML, invalid values, expression failures and exhausted numeric/boolean
 }
 ```
 
+In Alpha.9, `additionalServices` is an optional array on either a legacy accessory or a platform device. Each entry has a required `id` and `service`, plus its own optional `name`, `urls`, `optionCharacteristic` and `props`. The `id` becomes the HomeKit service subtype, so keep it stable after pairing. IDs must be unique within the accessory and have no surrounding whitespace. A service type may appear more than once when the additional entries have different IDs; `AccessoryInformation` is reserved for the containing accessory. The primary service has no subtype, preserving its existing identity. Additional services do not inherit the primary service's action URLs, optional characteristics or property overrides; they inherit authentication, refresh and timing settings unless explicitly overridden. Request spacing applies across the containing device's services. All services use the same process-wide HTTP coordinator, but each has its own action cache and mapper state. Up to 32 additional services are accepted per accessory.
+
+For Battery, `StatusLowBattery` is required by HAP. `BatteryLevel` and `ChargingState` are optional; list them in `optionCharacteristic` when used. Supply a getter action for each value your endpoint reports. The [Front Door example](../README.md#add-battery-information-to-a-device-alpha9) shows a Battery service attached to a Contact Sensor. Adding or removing services requires restarting Homebridge after saving configuration. A previously standalone Battery accessory is not moved automatically; doing so would change its HomeKit accessory identity.
+
 Both adapters accept optional `manufacturer`, `model` and `serialNumber` strings for the HomeKit Accessory Information service. When omitted, legacy accessories retain the 1.3.0 Manufacturer, Model and SerialNumber defaults. Platform devices retain their existing Manufacturer and Model defaults and use `id` as their default serial number when present. A configured `serialNumber` overrides that display value without changing the platform device's UUID. All historical extended examples (security system, contact sensor, Daikin, Yamaha and lightbulb) remain in [the legacy reference](legacy-reference.md).
 
 ## Platform lifecycle
 
 After saving and restarting, a disabled platform retains cached identities but reports its device reads and commands unavailable. Re-enabling with the same platform name and device IDs restores those identities. Invalid enable flags or inventories retain cached accessories and report them unavailable instead of accepting commands without a working device handler. A valid empty inventory explicitly unregisters its devices.
 
-Local integration tests serialize and deserialize Homebridge platform accessories between fresh API instances, covering disable, rename/re-enable, real getter/setter handlers, invalid inventory retention and explicit removal. This verifies the persistence boundary without pairing a household HomeKit controller.
+Local integration tests serialize and deserialize Homebridge platform accessories between fresh API instances, covering disable, rename/re-enable, real getter/setter handlers, invalid inventory retention, additional service retention/removal and explicit accessory removal. This verifies the persistence boundary without pairing a household HomeKit controller.
 
 ## Measurements and validation
 

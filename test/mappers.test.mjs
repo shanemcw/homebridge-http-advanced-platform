@@ -27,6 +27,19 @@ test('ordered mapper pipeline and valid falsey values', () => {
   assert.equal(mapValue([{type:'jpath',parameters:{jpath:'$.u'}},{type:'static',parameters:{mapping:{false:'0'}}}], '{"u":false}'), '0');
   assert.equal(mapValue([{type:'eval',parameters:{expression:'false'}}], 'anything'), false);
 });
+test('lookup preserves falsey mappings and requires an exact own key', () => {
+  const lookup={type:'lookup',parameters:{mapping:{ON:true,OFF:false,ZERO:0,EMPTY:'',lower:'1'}}};
+  assert.equal(mapResponse([lookup],'OFF'),false);
+  assert.equal(mapResponse([lookup],'ZERO'),0);
+  assert.equal(mapResponse([lookup],'EMPTY'),'');
+  assert.equal(mapValue([lookup],'ON'),true);
+  for (const value of ['off',' OFF','missing','toString',null,{},[],Infinity]) {
+    assert.equal(mapResponse([lookup],value),'inconclusive');
+    assert.throws(() => mapValue([lookup],value),{category:'mapper'});
+  }
+  assert.equal(mapResponse([{type:'jpath',parameters:{jpath:'$.state'}},lookup],'{"state":"OFF"}'),false);
+  assert.equal(mapResponse([lookup,{type:'static',parameters:{mapping:{inconclusive:'0'}}}],'missing'), '0');
+});
 test('legacy URL and body expressions distinguish raw value from mapped value', () => {
   assert.equal(interpolateLegacy('http://example/${value}?t=${state.getTargetTemperature*9/5+32}&v={value}', 1, 'on', {getTargetTemperature:20}), 'http://example/1?t=68&v=on');
   assert.equal(interpolateLegacy('{"v":"{VALUE}","temp":${state.getTargetTemperature}}', 1, 'on', {getTargetTemperature:20}), '{"v":"on","temp":20}');
@@ -64,4 +77,28 @@ test('later explicit mappings may handle failed extraction and valid falsey sele
   for (const value of [false, 0, '']) assert.equal(mapResponse([jpath], JSON.stringify({state:value})), value);
   assert.equal(mapResponse([{type:'static',parameters:{mapping:{offline:'0'}}}], '42'), '42', 'intentional static pass-through remains available');
   assert.throws(() => mapResponse([{type:'xpath',parameters:{xpath:'['}}], '<state>1</state>'), {category:'mapper'});
+});
+
+test('scale maps numeric response and setter values through the ordered pipeline', () => {
+  const scale = {type:'scale',parameters:{inputMin:0,inputMax:255,outputMin:0,outputMax:100}};
+  assert.equal(mapResponse([scale], '0'), 0);
+  assert.equal(mapResponse([scale], '255'), 100);
+  assert.equal(mapResponse([scale], ' 127.5\n'), 50);
+  assert.equal(mapResponse([{type:'jpath',parameters:{jpath:'$.level'}},scale], '{"level":127.5}'), 50);
+  assert.equal(mapValue([scale], 306), 120, 'without clamp, values extrapolate');
+  assert.equal(mapValue([{...scale,parameters:{...scale.parameters,clamp:true}}], 306), 100);
+  assert.equal(mapValue([{...scale,parameters:{...scale.parameters,outputMin:100,outputMax:0}}], 255), 0);
+  assert.equal(mapValue([{...scale,parameters:{...scale.parameters,round:0}}], 128), 50);
+  assert.equal(mapValue([{...scale,parameters:{...scale.parameters,round:1}}], 128), 50.2);
+});
+
+test('scale rejects nonnumeric input and arithmetic overflow without sending a value', () => {
+  const scale = {type:'scale',parameters:{inputMin:0,inputMax:255,outputMin:0,outputMax:100}};
+  for (const value of ['', '  ', '50%', '0x10', '1e309', null, false, [], {}]) {
+    assert.equal(mapResponse([scale], value), 'inconclusive');
+    assert.throws(() => mapValue([scale], value), {category:'mapper'});
+  }
+  const overflowing={type:'scale',parameters:{inputMin:0,inputMax:1,outputMin:0,outputMax:1e308}};
+  assert.equal(mapResponse([overflowing], '100'), 'inconclusive');
+  assert.throws(() => mapValue([overflowing], 100), {category:'mapper'});
 });

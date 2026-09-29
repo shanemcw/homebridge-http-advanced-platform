@@ -4,9 +4,11 @@ export type Value = string | number | boolean;
 export type State = Record<string, unknown>;
 export type MapperConfig =
   | { type: 'static'; parameters: { mapping: Record<string, unknown> } }
+  | { type: 'lookup'; parameters: { mapping: Record<string, Value> } }
   | { type: 'regex'; parameters: { regexp: string; capture?: number | string } }
   | { type: 'xpath'; parameters: { xpath: string; index?: number } }
   | { type: 'jpath'; parameters: { jpath: string; index?: number } }
+  | { type: 'scale'; parameters: { inputMin: number; inputMax: number; outputMin: number; outputMax: number; round?: number; clamp?: boolean } }
   | { type: 'eval'; parameters: { expression: string } };
 export interface ActionConfig {
   url: string;
@@ -46,6 +48,11 @@ export interface DeviceConfig {
   uriCallsDelay?: number;
   refresh?: RefreshConfig;
   urls?: Record<string, ActionConfig>;
+  additionalServices?: AdditionalServiceConfig[];
+}
+export interface AdditionalServiceConfig extends Partial<Omit<DeviceConfig, 'additionalServices' | 'id' | 'service' | 'accessory' | 'manufacturer' | 'model' | 'serialNumber'>> {
+  id: string;
+  service: string;
 }
 export interface CoordinatorConfig {
   concurrency?: number;
@@ -60,6 +67,7 @@ export class ActionError extends Error {
 }
 export interface CacheEntry {
   key: string;
+  requestOwner?: string;
   actionName: string;
   config: DeviceConfig;
   state: State;

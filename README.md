@@ -10,7 +10,7 @@ This is a platform conversion of [staromeste's homebridge-http-advanced-accessor
 - **More resilient HTTP handling:** bounded requests, background recovery and quieter logs accommodate slow or temporarily unavailable servers, including older systems you cannot change.
 - **Migration at your pace:** maintain existing accessories through JSON Config, and add platform devices alongside them when useful. The plugin also keeps a requested switch state visible while the server catches up, avoiding a brief reversal caused by stale reads.
 
-**Release channel: `2.0.0-alpha.8` is an Alpha based on preserved Alpha.5.** Alpha.6 introduced the public package and Alpha.7 updated its search metadata and npm guidance. Alpha.8 adds optional accessory information fields from upstream PR #46. Existing defaults, device identities and HTTP behavior remain unchanged when those fields are omitted. Source checks and isolated Homebridge UI acceptance have passed for earlier Alphas; paired Apple Home and live-device soak remain incomplete. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain the boundaries.
+**Current Alpha: `2.0.0-alpha.9`.** Alpha.9 adds optional additional services on one accessory, starting with the Battery use case in [upstream issue #12](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/12), plus declarative `scale` and strict `lookup` mappers. Alpha.8 added optional accessory information fields from upstream PR #46. Source and package checks do not establish paired Apple Home behavior, physical device control or an unattended live soak; these are the purposes of Alpha testing. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain the boundaries.
 
 [User guide](#user-guide) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
 
@@ -27,33 +27,35 @@ Older environments need a runtime upgrade before testing this Alpha. Plugin 1.3.
 
 ### Install or upgrade
 
-Back up Homebridge first, including configuration, cached accessories and pairing data. This is a separate npm package, not an automatic update to the original accessory package. Follow the [replacement and rollback guide](docs/migration.md) before changing an existing installation.
+**Replacing `homebridge-http-advanced-accessory`? Save your legacy accessory JSON before using the Homebridge UI.** Make a full Homebridge backup, then separately save the exact `accessories[]` entries from the raw `config.json` editor in a private file. They may contain credentials or private URLs. The UI's **Remove plugin config?** option is enabled by default when uninstalling the old package and can delete those entries; its child-bridge removal option can also remove pairings. This is a separate npm package, not an automatic update to the original accessory package. Follow the [replacement and recovery guide](docs/migration.md) before changing an existing installation.
+
+If the legacy accessories disappear from the new setup, [paste only the missing saved entries back into the current `accessories[]` array](docs/migration.md#if-the-accessories-are-missing). Restoring their JSON does **not** guarantee that Apple Home will recover room assignments, scenes or automations after it has seen the accessories removed; those references may need to be rebuilt. A full Homebridge backup restore also reinstalls the npm plugins recorded in that backup, potentially including the old package.
 
 Check the [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions) and matching [GitHub prerelease](https://github.com/shanemcw/homebridge-http-advanced-platform/releases) before installing. Choose a published Alpha; a local candidate archive alone does not establish public availability.
 
-In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select the **alpha** row in the version chooser, or the reviewed **v2.0.0-alpha.8** version. After installation, use **Manage Version** to select a later Alpha deliberately. Descriptive searches such as **HTTP Advanced**, **HTTP accessory**, **REST API** or **HTTP JSON** depend on npm indexing and ranking; searching the exact original package name still finds the original accessory package.
+In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select the **alpha** row in the version chooser, or **v2.0.0-alpha.9** explicitly. After installation, use **Manage Version** to select a later Alpha deliberately. Descriptive searches such as **HTTP Advanced**, **HTTP accessory**, **REST API** or **HTTP JSON** depend on npm indexing and ranking; searching the exact original package name still finds the original accessory package.
 
 For command-line installation, use `homebridge-http-advanced-platform@alpha`, or pin the reviewed version as shown below. Use the same plugin location and account your Homebridge installation already uses; `/var/lib/homebridge` is an example prefix:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.0.0-alpha.8
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.0.0-alpha.9
 ```
 
 To install a reviewed archive directly:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.0.0-alpha.8.tgz
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.0.0-alpha.9.tgz
 ```
 
 **This package has no stable release.** npm requires a `latest` tag; for this package, it can point to an Alpha and does not indicate stability. An unqualified install can therefore install an Alpha. The `alpha` and `latest` tags can point to different Alpha versions; choose the explicit `@alpha` tag or reviewed exact version to select the intended release. These tags affect only the new platform package; the original accessory package is separate and does not update automatically to it.
 
 Alpha.7 includes this correction in its packaged README. The earlier published Alpha.6 archive remains unchanged.
 
-Preserve Homebridge storage and bridge identity. Remove the old plugin package as part of the backed-up replacement before starting Homebridge with the new package; loading both would make their shared configuration aliases ambiguous. See the migration guide for package-qualified entries and plugin allowlists. Restart Homebridge and its UI, then verify devices, state updates, controls and existing automations. Installed UI and managed-child-bridge acceptance passed in an isolated Node 24/Homebridge 2 fixture with HAP disabled; paired Apple Home identity and live controls still need acceptance.
+Preserve Homebridge storage and bridge identity. Remove the old plugin package as part of the backed-up replacement before starting Homebridge with the new package; loading both would make their shared configuration aliases ambiguous. Check the migration guide before changing any package-qualified identifiers: changing a qualified legacy accessory identifier can change its HomeKit identity. Restart Homebridge and its UI, then verify devices, state updates, controls and existing automations. Installed UI and managed-child-bridge acceptance passed in an isolated Node 24/Homebridge 2 fixture with HAP disabled; paired Apple Home identity and live controls still need acceptance.
 
 ### Keep using existing accessories
 
-Existing devices stay in `accessories[]`. Unqualified aliases remain unchanged; update any explicit old package prefixes as described in the migration guide. A basic definition looks like this:
+Existing devices stay in `accessories[]`. Leave unqualified aliases unchanged; see the migration guide before changing an explicitly package-qualified accessory identifier. A basic definition looks like this:
 
 ```json
 {
@@ -67,7 +69,7 @@ Existing devices stay in `accessories[]`. Unqualified aliases remain unchanged; 
 }
 ```
 
-Keep each existing accessory's name, alias and service definition unchanged when upgrading to preserve its identity. Your existing GET/POST methods, bodies, encoded strings, mapper chains, optional characteristics and property settings remain supported. See the [action and HTTP reference](docs/modernization.md#actions-and-http), [mapper reference](docs/modernization.md#mappers) and [legacy examples](docs/legacy-reference.md) for more elaborate configurations.
+Keep each existing accessory's name, unqualified alias, `uuid_base` when present, service definition and bridge assignment unchanged to give HomeKit the best chance of retaining its identity. Your existing GET/POST methods, bodies, encoded strings, mapper chains, optional characteristics and property settings remain supported. See the [action and HTTP reference](docs/modernization.md#actions-and-http), [mapper reference](docs/modernization.md#mappers) and [legacy examples](docs/legacy-reference.md) for more elaborate configurations.
 
 To customize HomeKit's Accessory Information, optionally add `manufacturer`, `model` and `serialNumber` to an accessory or platform device. Omitted fields keep their previous values. A platform device's `id` still controls its HomeKit identity; `serialNumber` does not replace `id` or change the generated UUID.
 
@@ -111,6 +113,99 @@ Use **Also use as a platform** in the settings screen, or add an `HttpAdvanced` 
 ```
 
 Choose a permanent device `id` before pairing, and keep the platform name stable. The device's display name can then change without changing its platform identity. Disabling a platform keeps its definitions and cached identities but stops device updates.
+
+### Look up exact device states (Alpha.9)
+
+Use `lookup` when every accepted state has a defined result. Unlike legacy `static`, it returns mapped `false`, `0` and `""` exactly. This switch accepts only `ON` or `OFF` from its getter and sends numeric `1` or `0` for writes:
+
+```json
+{
+  "accessory": "HttpAdvancedAccessory",
+  "name": "Example Relay",
+  "service": "Switch",
+  "urls": {
+    "getOn": {
+      "url": "http://device.example/power",
+      "mappers": [{ "type": "lookup", "parameters": {
+        "mapping": { "ON": true, "OFF": false }
+      } }]
+    },
+    "setOn": {
+      "url": "http://device.example/power/{value}",
+      "mappers": [{ "type": "lookup", "parameters": {
+        "mapping": { "true": 1, "false": 0 }
+      } }]
+    }
+  }
+}
+```
+
+Keys match exactly, including case and whitespace. An unknown getter response is `inconclusive`, so an optional `inconclusive` action can try another endpoint; an unknown setter value fails before sending. `lookup` supports string, finite number and boolean results. Existing `static` mappings retain their legacy pass-through behavior. See the [mapper reference](docs/modernization.md#mappers).
+
+### Scale a device value (Alpha.9)
+
+Use `scale` when a device and HomeKit use different numeric ranges. For example, a dimmer that reports and accepts `0` to `255` can map to HomeKit Brightness `0` to `100`:
+
+```json
+{
+  "accessory": "HttpAdvancedAccessory",
+  "name": "Example Dimmer",
+  "service": "Lightbulb",
+  "optionCharacteristic": ["Brightness"],
+  "urls": {
+    "getOn": { "url": "http://device.example/power" },
+    "setOn": { "url": "http://device.example/power/{value}" },
+    "getBrightness": {
+      "url": "http://device.example/level",
+      "mappers": [{ "type": "scale", "parameters": {
+        "inputMin": 0, "inputMax": 255,
+        "outputMin": 0, "outputMax": 100,
+        "round": 0, "clamp": true
+      } }]
+    },
+    "setBrightness": {
+      "url": "http://device.example/level/{value}",
+      "mappers": [{ "type": "scale", "parameters": {
+        "inputMin": 0, "inputMax": 100,
+        "outputMin": 0, "outputMax": 255,
+        "round": 0, "clamp": true
+      } }]
+    }
+  }
+}
+```
+
+The same `urls` work inside a platform device; use its `id`, `name` and `service` instead of the accessory alias. `round` chooses decimal places and `clamp` limits values to the input range; both are optional. Without `clamp`, out-of-range numbers extrapolate. Invalid numeric responses become inconclusive, so a configured `inconclusive` getter action can handle them. Invalid setter values fail before an HTTP request. See the [mapper reference](docs/modernization.md#mappers) for chaining and validation details.
+
+### Add battery information to a device (Alpha.9)
+
+Add `additionalServices` to a legacy accessory or a platform device. This example is one **platform device** with a Contact Sensor and a Battery service; the endpoint examples return `0` or `1` for contact/low-battery status and `0` through `100` for battery level:
+
+```json
+{
+  "platform": "HttpAdvanced",
+  "name": "HTTP Advanced",
+  "devices": [{
+    "id": "front-door",
+    "name": "Front Door",
+    "service": "ContactSensor",
+    "urls": {
+      "getContactSensorState": { "url": "http://device.example/contact" }
+    },
+    "additionalServices": [{
+      "id": "battery",
+      "service": "BatteryService",
+      "optionCharacteristic": ["BatteryLevel"],
+      "urls": {
+        "getStatusLowBattery": { "url": "http://device.example/battery/low" },
+        "getBatteryLevel": { "url": "http://device.example/battery/level" }
+      }
+    }]
+  }]
+}
+```
+
+The Battery service is attached to **Front Door**, not exposed as another accessory. `StatusLowBattery` is the required Battery characteristic; `BatteryLevel` is optional and must be listed in `optionCharacteristic`. Map endpoint output to each characteristic's HomeKit values as needed. Each additional service needs a permanent `id`: Homebridge uses it as that service's subtype, including when two services have the same type. Changing or removing it can change HomeKit service identity and affect automations. The primary device `id`, service type and HomeKit identity remain as before. Additional services have their own `urls`, `optionCharacteristic` and `props`; they inherit device authentication and timing unless overridden. See the [service reference](docs/modernization.md#services-optional-characteristics-and-props).
 
 **Accessories and platforms can coexist for different devices.** Do not define the same physical device in both places. Moving an existing accessory into a platform is an optional, deliberate conversion: it creates a different HomeKit identity and may require reassigning rooms, scenes and automations. There is no automatic identity-preserving migration tool in this Alpha. Follow the [migration guide](docs/migration.md) if you choose to convert devices.
 
@@ -161,6 +256,7 @@ During a temporary outage, the plugin retries background reads with backoff and 
 | A toggle returns to its old state | Whether the write failed, the server applied it, or the confirmation window expired. |
 | Busy/error text becomes an unexpected value | The mapper chain and optional `responsePattern`, `requireResponseMatch` or `strictHTTP` settings. See [servers you cannot change](docs/modernization.md#servers-you-cannot-change). |
 | Configuration does not load | Service support, action names, mapper syntax and duplicate platform IDs. |
+| Legacy accessories are missing after replacing the old package | Inspect the raw `accessories[]` array before editing. If entries were deleted, [restore only the missing saved JSON objects](docs/migration.md#if-the-accessories-are-missing); then check Apple Home rooms, scenes and automations. |
 
 Set `debug: true` on one device to enable a shared diagnostic snapshot every 30 seconds. It includes request timing, queue usage, cache ages and recovery status. Shared messages use **HTTP Advanced** as their log prefix; device-specific messages retain their accessory name. Diagnostics omit URLs, credentials, request bodies and device values, and are not sent externally.
 
@@ -174,8 +270,8 @@ The [modernization and developer reference](docs/modernization.md) contains the 
 
 - What compatibility preserves, and which runtime behaviors change.
 - Shared caching, persistence, polling, request scheduling and outage recovery.
-- HTTP actions, older-server response handling, writes, templates and all five mapper types.
+- HTTP actions, older-server response handling, writes, templates, the five legacy mapper types and Alpha.9 `scale`/`lookup`.
 - Service support, optional characteristics, configuration editing and platform lifecycle.
 - Benchmark interpretation, development commands, test coverage and release policy.
 
-The [Alpha release notes](docs/alpha-release-notes.md) summarize this candidate and its remaining release gates. The project retains its existing [Apache-2.0 license](LICENSE) and historical authorship.
+The [Alpha release notes](docs/alpha-release-notes.md) summarize Alpha.9 and its testing boundaries. The project retains its existing [Apache-2.0 license](LICENSE) and historical authorship.

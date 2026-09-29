@@ -1,5 +1,7 @@
 # Homebridge HTTP Advanced Platform release checkpoint
 
+Historical Alpha.6/Alpha.7 packaging checkpoint. For published releases see [ALPHA8-PUBLICATION.md](ALPHA8-PUBLICATION.md) and [ALPHA9-PUBLICATION.md](ALPHA9-PUBLICATION.md). The milestone records and commands below retain their original time-specific meaning.
+
 Recorded: 2026-09-26 (America/New_York). Alpha.7 is public at reviewed release
 commit `3ff8a7e`. Its CI, corrected npm README, indexed functionality keywords and
 fresh exact-version installation are accepted. Ordinary descriptive search

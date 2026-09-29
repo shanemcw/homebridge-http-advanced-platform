@@ -87,6 +87,65 @@ test('dynamic platform restores cached objects, retains IDs on rename with id, r
   const invalid=new HTTPPlatform(silentLog,{...config,devices:[{name:'bad',service:'Missing'}]},api);invalid.configureAccessory(original);invalid.discover();assert.equal(api.removals.length,0);
   const empty=new HTTPPlatform(silentLog,{...config,devices:[]},api);empty.configureAccessory(original);empty.discover();assert.equal(api.removals.length,1);
 });
+test('legacy and platform attach Battery to the primary accessory with separate HTTP actions',async t=>{
+  const api=await makeAPI(t);const server=await fakeServer(t,(req,res)=>res.end(req.url==='/battery/level'?'79':req.url==='/battery/low'?'0':'1'));
+  const config={id:'contact-one',name:'Door',service:'ContactSensor',username:'reader',password:'secret',uriCallsDelay:20,
+    urls:{getContactSensorState:{url:server.url+'/contact'}},additionalServices:[{
+      id:'battery',service:'BatteryService',optionCharacteristic:['BatteryLevel'],
+      urls:{getStatusLowBattery:{url:server.url+'/battery/low'},getBatteryLevel:{url:server.url+'/battery/level'}},
+    }]};
+  const legacy=new LegacyAccessory(silentLog,config,api);
+  assert.equal(legacy.getServices().length,3);
+  const platform=new HTTPPlatform(silentLog,{platform:'HttpAdvanced',name:'Multi',devices:[config]},api);platform.discover();
+  const accessory=api.registrations[0];
+  assert.equal(accessory.services.length,3);
+  assert.equal(accessory.getService(api.hap.Service.ContactSensor).subtype,undefined);
+  const battery=accessory.services.find(service=>service.UUID===api.hap.Service.Battery.UUID);
+  assert.equal(battery.subtype,'battery');
+  assert.ok(battery.testCharacteristic(api.hap.Characteristic.BatteryLevel));
+  const runtime=sharedRuntime(api,silentLog);
+  assert.equal(new Set([...runtime.entries.values()].map(entry=>entry.requestOwner)).size,1);
+  assert.ok([...runtime.entries.values()].every(entry=>entry.config.uriCallsDelay===20));
+  await Promise.all([...runtime.entries.values()].map(entry=>runtime.refresh(entry)));
+  assert.equal(await battery.getCharacteristic(api.hap.Characteristic.StatusLowBattery).handleGetRequest(),0);
+  assert.equal(await battery.getCharacteristic(api.hap.Characteristic.BatteryLevel).handleGetRequest(),79);
+  assert.equal(await accessory.getService(api.hap.Service.ContactSensor).getCharacteristic(api.hap.Characteristic.ContactSensorState).handleGetRequest(),1);
+  assert.ok(server.requests.every(request=>request.headers.authorization==='Basic '+Buffer.from('reader:secret').toString('base64')));
+});
+test('platform restores, changes and removes additional services without replacing the primary identity',async t=>{
+  const api=await makeAPI(t);
+  const base={id:'fixed',name:'Door',service:'ContactSensor'};
+  const first=new HTTPPlatform(silentLog,{platform:'HttpAdvanced',name:'Multi',devices:[base]},api);first.discover();
+  const accessory=api.registrations[0],primary=accessory.getService(api.hap.Service.ContactSensor);
+  const cache=identifierCache(),bridge=new api.hap.Bridge('Multi Test Bridge',api.hap.uuid.generate('Multi Test Bridge'));
+  bridge.addBridgedAccessory(accessory._associatedHAPAccessory);bridge._assignIDs(cache);
+  const originalIDs=[accessory._associatedHAPAccessory.aid,primary.iid,...primary.characteristics.map(characteristic=>characteristic.iid)];
+  const withExtras={...base,additionalServices:[{id:'battery',service:'BatteryService'},{id:'secondary',service:'ContactSensor'}]};
+  const second=new HTTPPlatform(silentLog,{platform:'HttpAdvanced',name:'Multi',devices:[withExtras]},api);
+  second.configureAccessory(accessory);second.discover();
+  assert.equal(api.registrations.length,1);assert.equal(api.updates[0],accessory);
+  assert.equal(accessory.getService(api.hap.Service.ContactSensor),primary);
+  bridge._assignIDs(cache);
+  assert.deepEqual([accessory._associatedHAPAccessory.aid,primary.iid,...primary.characteristics.map(characteristic=>characteristic.iid)],originalIDs);
+  assert.deepEqual(accessory.services.filter(service=>service.UUID===api.hap.Service.ContactSensor.UUID).map(service=>service.subtype),[undefined,'secondary']);
+  assert.equal(accessory.services.find(service=>service.subtype==='battery').UUID,api.hap.Service.Battery.UUID);
+  accessory._associatedPlugin='homebridge-http-advanced-platform';accessory._associatedPlatform='HttpAdvanced';
+  const saved=JSON.parse(JSON.stringify(api.platformAccessory.serialize(accessory)));
+  const restoredAPI=await makeAPI(t),restored=restoredAPI.platformAccessory.deserialize(saved);
+  const third=new HTTPPlatform(silentLog,{platform:'HttpAdvanced',name:'Multi',devices:[withExtras]},restoredAPI);
+  third.configureAccessory(restored);third.discover();
+  assert.equal(restoredAPI.updates[0],restored);
+  assert.deepEqual(restored.services.map(service=>service.subtype),accessory.services.map(service=>service.subtype));
+  const invalid=new HTTPPlatform(silentLog,{platform:'HttpAdvanced',name:'Multi',devices:[{
+    ...withExtras,additionalServices:[{id:'battery',service:'BatteryService'},{id:'battery',service:'Switch'}],
+  }]},restoredAPI);invalid.configureAccessory(restored);invalid.discover();
+  assert.equal(restoredAPI.removals.length,0);assert.equal(restored.services.length,4);
+  const removed=new HTTPPlatform(silentLog,{platform:'HttpAdvanced',name:'Multi',devices:[base]},restoredAPI);
+  removed.configureAccessory(restored);removed.discover();
+  assert.equal(restored.services.length,2);
+  assert.equal(restored.getService(restoredAPI.hap.Service.ContactSensor).subtype,undefined);
+  assert.equal(restored.UUID,accessory.UUID);
+});
 test('legacy and platform configurations expose equivalent services, getters and setters',async t=>{
   const api=await makeAPI(t);const server=await fakeServer(t);
   const config={name:'Equivalent',service:'Switch',urls:{getOn:{url:server.url},setOn:{url:server.url+'/set/{value}'}}};

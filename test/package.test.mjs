@@ -30,10 +30,99 @@ test('platform JSON schema accepts every sanitized legacy device and recursive a
   for (const device of devices) assert.equal(legacyValidator(device),true,JSON.stringify(legacyValidator.errors));
   const validator=ajv.compile({definitions:schema.schema.definitions,$ref:'#/definitions/platform'});
   assert.equal(validator({name:'Fixture',platform:'HttpAdvanced',devices}),true,JSON.stringify(validator.errors));
+  const multiService={name:'Door',service:'ContactSensor',additionalServices:[{
+    id:'battery',service:'BatteryService',optionCharacteristic:['BatteryLevel'],
+    urls:{getStatusLowBattery:{url:'http://example.invalid/low'},getBatteryLevel:{url:'http://example.invalid/level'}},
+  }]};
+  assert.equal(legacyValidator(multiService),true,JSON.stringify(legacyValidator.errors));
+  assert.equal(validator({name:'Fixture',platform:'HttpAdvanced',devices:[multiService]}),true,JSON.stringify(validator.errors));
+  validateDevice(multiService);
+  const scaleDevice={name:'Dimmer',service:'Lightbulb',urls:{getBrightness:{url:'http://example.invalid/level',mappers:[{
+    type:'scale',parameters:{inputMin:0,inputMax:255,outputMin:0,outputMax:100,round:0,clamp:true},
+  }]}}};
+  assert.equal(legacyValidator(scaleDevice),true,JSON.stringify(legacyValidator.errors));
+  assert.equal(validator({name:'Fixture',platform:'HttpAdvanced',devices:[scaleDevice]}),true,JSON.stringify(validator.errors));
+  validateDevice(scaleDevice);
+  const lookupDevice={name:'Relay',service:'Switch',urls:{getOn:{url:'http://example.invalid/state',mappers:[{
+    type:'lookup',parameters:{mapping:{ON:true,OFF:false,UNKNOWN:0,EMPTY:''}},
+  }]}}};
+  assert.equal(legacyValidator(lookupDevice),true,JSON.stringify(legacyValidator.errors));
+  assert.equal(validator({name:'Fixture',platform:'HttpAdvanced',devices:[lookupDevice]}),true,JSON.stringify(validator.errors));
+  validateDevice(lookupDevice);
   devices[0].urls.getOn.inconclusive={url:'http://example.invalid',mappers:[{type:'eval',parameters:{expression:'value'}}]};
   devices[0].urls.getOn.responsePattern='^(?:ON|OFF)$';
   devices[0].urls.getOn.requireResponseMatch=true;
   assert.equal(validator({name:'Fixture',platform:'HttpAdvanced',devices}),true,JSON.stringify(validator.errors));
+});
+
+test('lookup configuration requires a nonempty scalar mapping', () => {
+  const schema=JSON.parse(readFileSync(new URL('../config.schema.json',import.meta.url),'utf8'));
+  const Ajv=require('ajv');
+  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile(schema.schema);
+  const device=parameters=>({name:'Relay',service:'Switch',urls:{getOn:{url:'http://example.invalid',mappers:[{type:'lookup',parameters}]}}});
+  for (const parameters of [
+    {},{mapping:{}},{mapping:[]},{mapping:null},{mapping:{OFF:null}},
+    {mapping:{OFF:[]}},{mapping:{OFF:{}}},{mapping:{OFF:false},extra:1},
+  ]) {
+    assert.equal(schemaValidator(device(parameters)),false,JSON.stringify(parameters));
+    assert.throws(() => validateDevice(device(parameters)),{category:'config'});
+  }
+  for (const mapping of [{OFF:NaN},{OFF:Infinity}]) assert.throws(() => validateDevice(device({mapping})),{category:'config'});
+});
+
+test('scale parameters reject invalid bounds and options during configuration validation', () => {
+  const schema=JSON.parse(readFileSync(new URL('../config.schema.json',import.meta.url),'utf8'));
+  const Ajv=require('ajv');
+  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile(schema.schema);
+  const base={inputMin:0,inputMax:255,outputMin:0,outputMax:100};
+  const device=parameters=>({name:'Dimmer',service:'Lightbulb',urls:{getBrightness:{url:'http://example.invalid',mappers:[{type:'scale',parameters}]}}});
+  for (const parameters of [
+    {inputMin:0,inputMax:255,outputMin:0},
+    {...base,inputMin:'0'},
+    {...base,round:-1},
+    {...base,round:13},
+    {...base,round:1.5},
+    {...base,clamp:'true'},
+    {...base,extra:1},
+  ]) {
+    assert.equal(schemaValidator(device(parameters)),false,JSON.stringify(parameters));
+    assert.throws(() => validateDevice(device(parameters)),{category:'config'});
+  }
+  for (const parameters of [
+    {...base,inputMax:0},
+    {...base,inputMax:-1},
+    {...base,inputMax:Infinity},
+    {...base,inputMax:NaN},
+    {...base,inputMin:-1e308,inputMax:1e308},
+  ]) {
+    assert.throws(() => validateDevice(device(parameters)),{category:'config'});
+  }
+});
+
+test('documented dimmer example is valid accessory configuration', () => {
+  const readme=readFileSync(new URL('../README.md',import.meta.url),'utf8');
+  const section=readme.split('### Scale a device value (Alpha.9)')[1].split('### Add battery information')[0];
+  const example=JSON.parse(section.match(/```json\s*([\s\S]*?)\s*```/)[1]);
+  const schema=JSON.parse(readFileSync(new URL('../config.schema.json',import.meta.url),'utf8'));
+  const Ajv=require('ajv');
+  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile(schema.schema);
+  assert.equal(schemaValidator(example),true,JSON.stringify(schemaValidator.errors));
+  validateDevice(example);
+  assert.equal(example.urls.getBrightness.mappers[0].type,'scale');
+  assert.equal(example.urls.setBrightness.mappers[0].type,'scale');
+});
+
+test('documented strict lookup relay is valid accessory configuration', () => {
+  const readme=readFileSync(new URL('../README.md',import.meta.url),'utf8');
+  const section=readme.split('### Look up exact device states (Alpha.9)')[1].split('### Scale a device value')[0];
+  const example=JSON.parse(section.match(/```json\s*([\s\S]*?)\s*```/)[1]);
+  const schema=JSON.parse(readFileSync(new URL('../config.schema.json',import.meta.url),'utf8'));
+  const Ajv=require('ajv');
+  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile(schema.schema);
+  assert.equal(schemaValidator(example),true,JSON.stringify(schemaValidator.errors));
+  validateDevice(example);
+  assert.equal(example.urls.getOn.mappers[0].parameters.mapping.OFF,false);
+  assert.equal(example.urls.setOn.mappers[0].parameters.mapping.false,0);
 });
 
 test('response patterns validate before startup, including fallback actions', () => {

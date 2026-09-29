@@ -1,9 +1,9 @@
 import type { API, AccessoryConfig, Characteristic, CharacteristicValue, Logging, Service } from 'homebridge';
-import { validateDevice } from './config.js';
+import { serviceConfigs, validateDevice } from './config.js';
 import { ActionError, type CacheEntry, type DeviceConfig, type State } from './types.js';
 import { fingerprint, Runtime, sharedRuntime } from './runtime.js';
 
-type ServiceConstructor = { new(name?: string): Service; UUID: string };
+type ServiceConstructor = { new(name?: string, subtype?: string): Service; UUID: string };
 type CharacteristicConstructor = { new(): Characteristic; UUID: string };
 
 export function serviceConstructor(api: API, name: string): ServiceConstructor {
@@ -45,10 +45,10 @@ export class DeviceAdapter {
   readonly state: State = {};
   readonly entries = new Map<string, CacheEntry>();
   readonly service: Service;
-  constructor(readonly api: API, readonly runtime: Runtime, readonly config: DeviceConfig, readonly identity: string, existing?: Service) {
+  constructor(readonly api: API, readonly runtime: Runtime, readonly config: DeviceConfig, readonly identity: string, existing?: Service, subtype?: string, requestOwner?: string) {
     validateDevice(config);
     const Constructor = serviceConstructor(api, config.service);
-    this.service = existing ?? new Constructor(config.name);
+    this.service = existing ?? new Constructor(config.name, subtype);
     this.service.displayName = config.name;
     const registry = api.hap.Characteristic as unknown as Record<string, CharacteristicConstructor>;
     const names = new Map<string, string>();
@@ -85,7 +85,7 @@ export class DeviceAdapter {
       }
       let entry: CacheEntry | undefined;
       if (config.urls?.[getName]) {
-        entry = runtime.register(identity, getName, config, this.state, value => convertValue(characteristic, value), value => characteristic.updateValue(value));
+        entry = runtime.register(identity, getName, config, this.state, value => convertValue(characteristic, value), value => characteristic.updateValue(value), requestOwner);
         this.entries.set(getName, entry);
         const cached = entry;
         characteristic.onGet(() => {
@@ -97,7 +97,7 @@ export class DeviceAdapter {
         characteristic.onSet(async value => {
           const intent = entry ? runtime.beginWrite(entry, value) : undefined;
           const work = async () => {
-            try { await runtime.set(config, this.state, setName, value, entry, intent); }
+            try { await runtime.set(config, this.state, setName, value, entry, intent, requestOwner); }
             catch { throw new api.hap.HapStatusError(api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE); }
             finally {
               // HAP stores each completed write's value; a later intent must win
@@ -125,8 +125,14 @@ export class LegacyAccessory {
       .setCharacteristic(api.hap.Characteristic.SerialNumber, config.serialNumber || 'HTTP Accessory Serial Number');
     this.services = [information];
     try {
-      const adapter = new DeviceAdapter(api, sharedRuntime(api, log), config, `legacy:${config.name}`);
-      this.services.push(adapter.service);
+      validateDevice(config);
+      const definitions = serviceConfigs(config);
+      for (const definition of definitions) serviceConstructor(api, definition.config.service);
+      const runtime = sharedRuntime(api, log);
+      const requestOwner = fingerprint(definitions[0].config);
+      const services = definitions.map(({ config: serviceConfig, subtype }) => new DeviceAdapter(api, runtime, serviceConfig,
+        subtype === undefined ? `legacy:${config.name}` : `legacy:${config.name}:service:${subtype}`, undefined, subtype, requestOwner).service);
+      this.services.push(...services);
     } catch (error) {
       const unsupported = error instanceof Error && error.message.startsWith('HTTP Advanced unsupported HomeKit service:');
       log.error(unsupported ? error.message : 'HTTP Advanced accessory configuration failed; check action and characteristic definitions');
