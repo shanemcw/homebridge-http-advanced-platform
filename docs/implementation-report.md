@@ -1,6 +1,6 @@
 # Alpha implementation and release checkpoint
 
-> Historical Alpha.5 implementation record. For current release status and the unpublished Alpha.9 changes, see the [release notes](alpha-release-notes.md) and [README](../README.md). Statements below are scoped to their dated checkpoints.
+> Historical Alpha.5 implementation record. For current release status and Alpha.9 changes, see the [release notes](alpha-release-notes.md) and [README](../README.md). Statements below are scoped to their dated checkpoints.
 
 Status as of 2026-09-13: Alpha.5 is a local, uncommitted candidate. The four-combination test matrix passes; the current review and remaining field gates are tracked in [Beta readiness](beta-readiness.md). Alpha.4 is the last verified household deployment. No publication or upstream announcement is part of this checkpoint.
 

@@ -1,0 +1,11 @@
+# Homebridge HTTP Advanced Platform 2.0.0-alpha.9
+
+This prerelease is for testing through npm and Homebridge UI. It is not a stable or Homebridge-verified release. The package is a platform conversion of [staromeste/homebridge-http-advanced-accessory](https://github.com/staromeste/homebridge-http-advanced-accessory), retaining the Apache-2.0 license, Git history and contributor credit.
+
+- Add optional `additionalServices` to legacy accessories and platform devices, including a Battery service on the same HomeKit accessory. Each added service has a stable `id` used as its subtype. This addresses the use case in [upstream issue #12](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/12).
+- Add an opt-in `scale` mapper for numeric range conversion and an opt-in exact `lookup` mapper that preserves `false`, `0` and empty-string results. Existing `static` mappings retain their behavior.
+- Expand the README and migration guide with examples and a warning that uninstalling the original plugin through Homebridge UI can remove its `accessories[]` configuration. Save those exact JSON entries separately before replacement; restoring JSON after Apple Home has seen accessories disappear may not restore scenes or automations.
+
+Install `homebridge-http-advanced-platform@2.0.0-alpha.9`, or select the **alpha** row or exact **v2.0.0-alpha.9** version in Homebridge UI. Confirm that the version appears in the [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions). The original accessory package is separate and is not upgraded automatically. Do not load both packages in one Homebridge process because their configuration aliases overlap. Follow the [replacement guide](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/main/docs/migration.md) before changing an existing installation.
+
+Requires Node `^22.13.0 || ^24.0.0` and Homebridge `^1.11.4 || ^2.4.0`. Isolated source, package and compatibility checks support this prerelease. Paired Apple Home presentation, rooms, automations, physical endpoint behavior and unattended soak are the intended Alpha acceptance work; they have not been established by package checks. Report versions and sanitized diagnostics without credentials or unredacted configuration.

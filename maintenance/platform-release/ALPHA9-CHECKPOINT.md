@@ -69,7 +69,10 @@ reference describe exact matching and the scalar value constraint.
 - `npm pack --dry-run --json` completed with an isolated npm cache: 56 files,
   including the schema, README, mapper reference, release notes and built mapper.
 
-## Before publication
+## Original unpublished-development checklist
+
+The publication decision below changes the timing of the live acceptance items
+in this original checklist.
 
 Review the final Alpha.9 diff and archive, then run the Node 22/24 by Homebridge
 1/2 CI matrix on the intended release commit. Exercise a fresh installed Alpha.9
@@ -80,3 +83,14 @@ Test physical endpoint mapping and an outage with the intended device. Complete
 the existing live-soak and rollback gates before calling this release ready.
 Update public installation wording and release notes only after publication is
 approved and the exact version is available.
+
+## Publication decision, 2026-09-29
+
+Shane approved publishing Alpha.9 as an npm Alpha and matching GitHub prerelease
+so he can install it through Homebridge UI and test paired Apple Home behavior.
+The paired Apple Home, physical endpoint and soak checks above are now
+post-publication Alpha acceptance work, not publication prerequisites. Before
+publication, retain the final diff/archive review, release-commit compatibility
+CI, package guard and public migration warning. The release notes describe the
+live behavior as unverified, and no production Homebridge changes are part of
+the publication task.
