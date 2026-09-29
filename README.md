@@ -69,7 +69,7 @@ Existing devices stay in `accessories[]`. Leave unqualified aliases unchanged; s
 }
 ```
 
-Keep each existing accessory's name, unqualified alias, `uuid_base` when present, service definition and bridge assignment unchanged to give HomeKit the best chance of retaining its identity. Your existing GET/POST methods, bodies, encoded strings, mapper chains, optional characteristics and property settings remain supported. See the [configuration examples](docs/configuration-examples.md) for progressive generic setups, the [action and HTTP reference](docs/modernization.md#actions-and-http) and [mapper reference](docs/modernization.md#mappers) for exact behavior, and the [legacy examples](docs/legacy-reference.md) for historical real-device configurations.
+Keep each existing accessory's name, unqualified alias, `uuid_base` when present, service definition and bridge assignment unchanged to give HomeKit the best chance of retaining its identity. Your existing GET/POST methods, bodies, encoded strings, mapper chains, optional characteristics and property settings remain supported. See the [configuration examples](docs/configuration-examples.md) for progressive generic setups and the [action and HTTP reference](docs/modernization.md#actions-and-http) and [mapper reference](docs/modernization.md#mappers) for exact behavior.
 
 To customize HomeKit's Accessory Information, optionally add `manufacturer`, `model` and `serialNumber` to an accessory or platform device. Omitted fields keep their previous values. A platform device's `id` still controls its HomeKit identity; `serialNumber` does not replace `id` or change the generated UUID.
 
