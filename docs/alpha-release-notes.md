@@ -6,6 +6,8 @@ The current Alpha.9 source adds `additionalServices` to legacy accessories and p
 
 The source also adds a declarative `scale` mapper for linear conversion between numeric ranges, including an optional decimal `round` and input `clamp`. It works in getter and setter pipelines without writing an `eval` expression. Invalid getter input is inconclusive; an invalid setter value fails before sending. The [dimmer example](../README.md#scale-a-device-value-unpublished-alpha9) shows the inverse ranges needed to read and write a `0` to `255` device through HomeKit Brightness.
 
+An opt-in `lookup` mapper returns exact scalar mappings, including `false`, `0` and empty string. Unknown getter responses are inconclusive, while unknown setter values fail before sending. Legacy `static` mappings keep their existing pass-through semantics. The [relay example](../README.md#look-up-exact-device-states-unpublished-alpha9) maps `ON`/`OFF` reads and `true`/`false` writes without JavaScript.
+
 Local source tests exercise both adapters, cached platform restoration, duplicate-ID rejection and removal of an added service. Paired Apple Home presentation, automations, live endpoint behavior and the final package/CI review remain to be checked before publication. These notes will be finalized when Alpha.9 is ready.
 
 ## Published Alpha.8

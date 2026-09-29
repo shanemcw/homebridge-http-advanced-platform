@@ -64,6 +64,18 @@ test('scale maps an HTTP brightness read and outgoing write, and rejects bad val
   await assert.rejects(actions.set(setter,{},'dimmer',{},'busy'),{category:'mapper'});
   assert.equal(server.requests.length,count);
 });
+test('lookup returns falsey HTTP state, uses an inconclusive fallback and sends mapped zero', async t => {
+  const server=await fakeServer(t,(req,res)=>res.end(req.url==='/unknown'?'busy':req.url==='/fallback'?'OFF':'ON'));
+  const {actions}=harness(t);
+  const getter={url:server.url+'/state',mappers:[{type:'lookup',parameters:{mapping:{ON:true,OFF:false}}}]};
+  assert.equal(await actions.get({...getter,url:server.url+'/unknown',inconclusive:{...getter,url:server.url+'/fallback'}},{},'relay',{}),false);
+  const setter={url:server.url+'/set/{value}',mappers:[{type:'lookup',parameters:{mapping:{true:1,false:0}}}]};
+  await actions.set(setter,{},'relay',{},false);
+  assert.equal(server.requests.at(-1).url,'/set/0');
+  const count=server.requests.length;
+  await assert.rejects(actions.set(setter,{},'relay',{},'unknown'),{category:'mapper'});
+  assert.equal(server.requests.length,count);
+});
 test('queue bounds, per-origin concurrency and fairness', async t => {
   let release;
   const gate=new Promise(resolve=>{release=resolve;});

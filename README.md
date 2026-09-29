@@ -10,7 +10,7 @@ This is a platform conversion of [staromeste's homebridge-http-advanced-accessor
 - **More resilient HTTP handling:** bounded requests, background recovery and quieter logs accommodate slow or temporarily unavailable servers, including older systems you cannot change.
 - **Migration at your pace:** maintain existing accessories through JSON Config, and add platform devices alongside them when useful. The plugin also keeps a requested switch state visible while the server catches up, avoiding a brief reversal caused by stale reads.
 
-**Published release: `2.0.0-alpha.8`. Unpublished development version: `2.0.0-alpha.9`.** Alpha.9 adds optional additional services on one accessory, starting with the Battery use case in [upstream issue #12](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/12), and a declarative `scale` mapper for numeric values. The Alpha.9 source is still under development and cannot yet be selected from npm or Homebridge UI. Alpha.8 added optional accessory information fields from upstream PR #46. Source checks and isolated Homebridge UI acceptance have passed for earlier Alphas; paired Apple Home and live-device soak remain incomplete. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain the boundaries.
+**Published release: `2.0.0-alpha.8`. Unpublished development version: `2.0.0-alpha.9`.** Alpha.9 adds optional additional services on one accessory, starting with the Battery use case in [upstream issue #12](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/12), plus declarative `scale` and strict `lookup` mappers. The Alpha.9 source is still under development and cannot yet be selected from npm or Homebridge UI. Alpha.8 added optional accessory information fields from upstream PR #46. Source checks and isolated Homebridge UI acceptance have passed for earlier Alphas; paired Apple Home and live-device soak remain incomplete. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain the boundaries.
 
 [User guide](#user-guide) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
 
@@ -111,6 +111,34 @@ Use **Also use as a platform** in the settings screen, or add an `HttpAdvanced` 
 ```
 
 Choose a permanent device `id` before pairing, and keep the platform name stable. The device's display name can then change without changing its platform identity. Disabling a platform keeps its definitions and cached identities but stops device updates.
+
+### Look up exact device states (unpublished Alpha.9)
+
+Use `lookup` when every accepted state has a defined result. Unlike legacy `static`, it returns mapped `false`, `0` and `""` exactly. This switch accepts only `ON` or `OFF` from its getter and sends numeric `1` or `0` for writes:
+
+```json
+{
+  "accessory": "HttpAdvancedAccessory",
+  "name": "Example Relay",
+  "service": "Switch",
+  "urls": {
+    "getOn": {
+      "url": "http://device.example/power",
+      "mappers": [{ "type": "lookup", "parameters": {
+        "mapping": { "ON": true, "OFF": false }
+      } }]
+    },
+    "setOn": {
+      "url": "http://device.example/power/{value}",
+      "mappers": [{ "type": "lookup", "parameters": {
+        "mapping": { "true": 1, "false": 0 }
+      } }]
+    }
+  }
+}
+```
+
+Keys match exactly, including case and whitespace. An unknown getter response is `inconclusive`, so an optional `inconclusive` action can try another endpoint; an unknown setter value fails before sending. `lookup` supports string, finite number and boolean results. Existing `static` mappings retain their legacy pass-through behavior. See the [mapper reference](docs/modernization.md#mappers).
 
 ### Scale a device value (unpublished Alpha.9)
 
@@ -239,7 +267,7 @@ The [modernization and developer reference](docs/modernization.md) contains the 
 
 - What compatibility preserves, and which runtime behaviors change.
 - Shared caching, persistence, polling, request scheduling and outage recovery.
-- HTTP actions, older-server response handling, writes, templates, the five legacy mapper types and Alpha.9 `scale`.
+- HTTP actions, older-server response handling, writes, templates, the five legacy mapper types and Alpha.9 `scale`/`lookup`.
 - Service support, optional characteristics, configuration editing and platform lifecycle.
 - Benchmark interpretation, development commands, test coverage and release policy.
 

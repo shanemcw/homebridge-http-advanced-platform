@@ -27,6 +27,19 @@ test('ordered mapper pipeline and valid falsey values', () => {
   assert.equal(mapValue([{type:'jpath',parameters:{jpath:'$.u'}},{type:'static',parameters:{mapping:{false:'0'}}}], '{"u":false}'), '0');
   assert.equal(mapValue([{type:'eval',parameters:{expression:'false'}}], 'anything'), false);
 });
+test('lookup preserves falsey mappings and requires an exact own key', () => {
+  const lookup={type:'lookup',parameters:{mapping:{ON:true,OFF:false,ZERO:0,EMPTY:'',lower:'1'}}};
+  assert.equal(mapResponse([lookup],'OFF'),false);
+  assert.equal(mapResponse([lookup],'ZERO'),0);
+  assert.equal(mapResponse([lookup],'EMPTY'),'');
+  assert.equal(mapValue([lookup],'ON'),true);
+  for (const value of ['off',' OFF','missing','toString',null,{},[],Infinity]) {
+    assert.equal(mapResponse([lookup],value),'inconclusive');
+    assert.throws(() => mapValue([lookup],value),{category:'mapper'});
+  }
+  assert.equal(mapResponse([{type:'jpath',parameters:{jpath:'$.state'}},lookup],'{"state":"OFF"}'),false);
+  assert.equal(mapResponse([lookup,{type:'static',parameters:{mapping:{inconclusive:'0'}}}],'missing'), '0');
+});
 test('legacy URL and body expressions distinguish raw value from mapped value', () => {
   assert.equal(interpolateLegacy('http://example/${value}?t=${state.getTargetTemperature*9/5+32}&v={value}', 1, 'on', {getTargetTemperature:20}), 'http://example/1?t=68&v=on');
   assert.equal(interpolateLegacy('{"v":"{VALUE}","temp":${state.getTargetTemperature}}', 1, 'on', {getTargetTemperature:20}), '{"v":"on","temp":20}');

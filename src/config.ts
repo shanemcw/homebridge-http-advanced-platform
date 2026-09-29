@@ -68,6 +68,15 @@ function validateAction(action: ActionConfig, seen: Set<ActionConfig>): void {
     switch (mapper.type) {
       case 'regex': try { new RegExp(mapper.parameters.regexp); } catch { throw new ActionError('config'); } break;
       case 'static': if (!mapper.parameters.mapping || typeof mapper.parameters.mapping !== 'object') throw new ActionError('config'); break;
+      case 'lookup': {
+        const p = mapper.parameters;
+        const mapping = p.mapping;
+        if (!mapping || typeof mapping !== 'object' || Array.isArray(mapping) || !Object.keys(mapping).length
+          || Object.keys(p).some(key => key !== 'mapping')
+          || Object.values(mapping).some(value => !['string', 'boolean', 'number'].includes(typeof value)
+            || typeof value === 'number' && !Number.isFinite(value))) throw new ActionError('config');
+        break;
+      }
       case 'eval': if (typeof mapper.parameters.expression !== 'string') throw new ActionError('config'); break;
       case 'xpath': if (typeof mapper.parameters.xpath !== 'string') throw new ActionError('config'); break;
       case 'jpath': if (typeof mapper.parameters.jpath !== 'string') throw new ActionError('config'); break;

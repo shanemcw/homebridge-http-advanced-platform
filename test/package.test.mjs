@@ -43,10 +43,31 @@ test('platform JSON schema accepts every sanitized legacy device and recursive a
   assert.equal(legacyValidator(scaleDevice),true,JSON.stringify(legacyValidator.errors));
   assert.equal(validator({name:'Fixture',platform:'HttpAdvanced',devices:[scaleDevice]}),true,JSON.stringify(validator.errors));
   validateDevice(scaleDevice);
+  const lookupDevice={name:'Relay',service:'Switch',urls:{getOn:{url:'http://example.invalid/state',mappers:[{
+    type:'lookup',parameters:{mapping:{ON:true,OFF:false,UNKNOWN:0,EMPTY:''}},
+  }]}}};
+  assert.equal(legacyValidator(lookupDevice),true,JSON.stringify(legacyValidator.errors));
+  assert.equal(validator({name:'Fixture',platform:'HttpAdvanced',devices:[lookupDevice]}),true,JSON.stringify(validator.errors));
+  validateDevice(lookupDevice);
   devices[0].urls.getOn.inconclusive={url:'http://example.invalid',mappers:[{type:'eval',parameters:{expression:'value'}}]};
   devices[0].urls.getOn.responsePattern='^(?:ON|OFF)$';
   devices[0].urls.getOn.requireResponseMatch=true;
   assert.equal(validator({name:'Fixture',platform:'HttpAdvanced',devices}),true,JSON.stringify(validator.errors));
+});
+
+test('lookup configuration requires a nonempty scalar mapping', () => {
+  const schema=JSON.parse(readFileSync(new URL('../config.schema.json',import.meta.url),'utf8'));
+  const Ajv=require('ajv');
+  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile(schema.schema);
+  const device=parameters=>({name:'Relay',service:'Switch',urls:{getOn:{url:'http://example.invalid',mappers:[{type:'lookup',parameters}]}}});
+  for (const parameters of [
+    {},{mapping:{}},{mapping:[]},{mapping:null},{mapping:{OFF:null}},
+    {mapping:{OFF:[]}},{mapping:{OFF:{}}},{mapping:{OFF:false},extra:1},
+  ]) {
+    assert.equal(schemaValidator(device(parameters)),false,JSON.stringify(parameters));
+    assert.throws(() => validateDevice(device(parameters)),{category:'config'});
+  }
+  for (const mapping of [{OFF:NaN},{OFF:Infinity}]) assert.throws(() => validateDevice(device({mapping})),{category:'config'});
 });
 
 test('scale parameters reject invalid bounds and options during configuration validation', () => {
@@ -89,6 +110,19 @@ test('documented dimmer example is valid accessory configuration', () => {
   validateDevice(example);
   assert.equal(example.urls.getBrightness.mappers[0].type,'scale');
   assert.equal(example.urls.setBrightness.mappers[0].type,'scale');
+});
+
+test('documented strict lookup relay is valid accessory configuration', () => {
+  const readme=readFileSync(new URL('../README.md',import.meta.url),'utf8');
+  const section=readme.split('### Look up exact device states (unpublished Alpha.9)')[1].split('### Scale a device value')[0];
+  const example=JSON.parse(section.match(/```json\s*([\s\S]*?)\s*```/)[1]);
+  const schema=JSON.parse(readFileSync(new URL('../config.schema.json',import.meta.url),'utf8'));
+  const Ajv=require('ajv');
+  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile(schema.schema);
+  assert.equal(schemaValidator(example),true,JSON.stringify(schemaValidator.errors));
+  validateDevice(example);
+  assert.equal(example.urls.getOn.mappers[0].parameters.mapping.OFF,false);
+  assert.equal(example.urls.setOn.mappers[0].parameters.mapping.false,0);
 });
 
 test('response patterns validate before startup, including fallback actions', () => {

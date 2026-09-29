@@ -51,6 +51,24 @@ and draft release notes describe this unpublished feature.
 - `npm pack --dry-run --json` completed with an isolated npm cache: 56 files,
   including the schema, README, mapper reference, release notes and built mapper.
 
+## Strict lookup milestone
+
+Recorded: 2026-09-29 (America/New_York). The local Alpha.9 source now adds an
+opt-in `lookup` mapper that returns mapped false, zero and empty string exactly.
+An unknown getter key is inconclusive; an unknown setter key fails before the
+HTTP request. Legacy `static` behavior is unchanged. The README contains a
+relay example with both getter and setter mappings; the schema and mapper
+reference describe exact matching and the scalar value constraint.
+
+- `npm run check`: typecheck, lint and 110/110 tests passed on Node 24 with
+  Homebridge 2.4.0.
+- `HB_TEST_VERSION=1 npm test`: 110/110 tests passed on Node 24 with
+  Homebridge 1.11.4.
+- Focused tests cover falsey values, unknown/prototype keys, fallback reads,
+  zero-valued writes, configuration validation and the README example.
+- `npm pack --dry-run --json` completed with an isolated npm cache: 56 files,
+  including the schema, README, mapper reference, release notes and built mapper.
+
 ## Before publication
 
 Review the final Alpha.9 diff and archive, then run the Node 22/24 by Homebridge

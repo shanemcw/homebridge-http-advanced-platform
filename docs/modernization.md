@@ -1,6 +1,6 @@
 # Modernization details and developer reference
 
-This reference describes the **unpublished 2.0.0-alpha.9 source**. Alpha.8 is the current published release. HTTP and caching behavior remains as in Alpha.8; Alpha.9 adds optional additional services and a numeric `scale` mapper. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
+This reference describes the **unpublished 2.0.0-alpha.9 source**. Alpha.8 is the current published release. HTTP and caching behavior remains as in Alpha.8; Alpha.9 adds optional additional services and `scale`/`lookup` mappers. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
 
 ## What non-breaking means here
 
@@ -148,7 +148,8 @@ A chain feeds each mapper's output into the next. Getter mappers consume respons
 
 | Type | Parameters | Semantics |
 |---|---|---|
-| `static` | `mapping` object | Lookup by input value; unmatched values pass through. Legacy falsey mapped values (`0`, `false`, `""`) also pass through. Use strings `"0"`/`"1"` for numeric state or an eval expression for an intentional falsey result. |
+| `static` | `mapping` object | Lookup by input value; unmatched values pass through. Legacy falsey mapped values (`0`, `false`, `""`) also pass through. Use strings `"0"`/`"1"` for numeric state, or opt into `lookup` for intentional falsey results. |
+| `lookup` (Alpha.9) | Nonempty `mapping` object with string, finite number or boolean results | Match an own key exactly and return its value, including `0`, `false` or `""`. Unknown getter input is `"inconclusive"`; unknown setter input fails before sending. |
 | `regex` | `regexp`, `capture` (default `"1"`) | Return the selected capture, or original input when unmatched. |
 | `xpath` | `xpath`, `index` (default 0) | XPath text-node selection or string expression. Select `/text()` or `string(...)`, not entire elements. |
 | `jpath` | `jpath`, `index` (default 0) | JSONPath selection, indexed result, objects/arrays serialized as JSON. Malformed or non-object JSON returns `"inconclusive"`. |
@@ -161,6 +162,8 @@ A chain feeds each mapper's output into the next. Getter mappers consume respons
   { "type": "static", "parameters": { "mapping": { "0": "0", "1": "1", "unset": "0" } } }
 ]
 ```
+
+`lookup` is an opt-in strict counterpart to `static`. Keys use the string form of a string, finite number or boolean input; matching is case-sensitive and does not trim whitespace. Missing keys and non-scalar inputs do not pass through. Its result must be a string, finite number or boolean; `null`, arrays and objects are rejected at configuration validation. A missing getter key becomes `"inconclusive"`, which can run an `inconclusive` fallback action. A missing setter key fails before its HTTP request. The [relay example](../README.md#look-up-exact-device-states-unpublished-alpha9) shows both directions; legacy `static` behavior remains unchanged.
 
 For a JSON response such as `{ "level": 128 }`, chain extraction and scaling:
 

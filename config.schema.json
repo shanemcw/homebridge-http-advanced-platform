@@ -197,6 +197,7 @@
                   "type": "string",
                   "enum": [
                     "static",
+                    "lookup",
                     "regex",
                     "xpath",
                     "jpath",
@@ -207,10 +208,21 @@
                 "parameters": {
                   "type": "object",
                   "additionalProperties": true,
-                  "description": "Mapper-specific mapping, regexp/capture, xpath/index, jpath/index, scale range/round/clamp, or expression. See README."
+                  "description": "Mapper-specific static/lookup mapping, regexp/capture, xpath/index, jpath/index, scale range/round/clamp, or expression. See README."
                 }
               },
               "allOf": [{
+                "if": { "properties": { "type": { "const": "lookup" } }, "required": ["type"] },
+                "then": { "properties": { "parameters": {
+                  "required": ["mapping"],
+                  "additionalProperties": false,
+                  "properties": { "mapping": {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": { "type": ["string", "number", "boolean"] }
+                  } }
+                } } }
+              }, {
                 "if": { "properties": { "type": { "const": "scale" } }, "required": ["type"] },
                 "then": { "properties": { "parameters": {
                   "required": ["inputMin", "inputMax", "outputMin", "outputMax"],

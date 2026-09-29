@@ -37,6 +37,18 @@ function mapPipeline(mappers: MapperConfig[], input: unknown, state: State, resp
           }
           return value;
         }
+        case 'lookup': {
+          const key = typeof value === 'string' || typeof value === 'boolean'
+            || (typeof value === 'number' && Number.isFinite(value)) ? String(value) : undefined;
+          const mapping = mapper.parameters.mapping;
+          if (key !== undefined && Object.hasOwn(mapping, key)) {
+            unmatched = false; invalidDocument = false;
+            return mapping[key];
+          }
+          if (!response) throw new ActionError('mapper');
+          unmatched = true;
+          return 'inconclusive';
+        }
         case 'regex': {
           const { regexp, capture } = mapper.parameters;
           const matches = new RegExp(regexp).exec(String(value));

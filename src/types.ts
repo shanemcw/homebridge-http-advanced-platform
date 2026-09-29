@@ -4,6 +4,7 @@ export type Value = string | number | boolean;
 export type State = Record<string, unknown>;
 export type MapperConfig =
   | { type: 'static'; parameters: { mapping: Record<string, unknown> } }
+  | { type: 'lookup'; parameters: { mapping: Record<string, Value> } }
   | { type: 'regex'; parameters: { regexp: string; capture?: number | string } }
   | { type: 'xpath'; parameters: { xpath: string; index?: number } }
   | { type: 'jpath'; parameters: { jpath: string; index?: number } }
