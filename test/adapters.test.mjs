@@ -59,7 +59,7 @@ test('accessory information accepts metadata overrides without changing legacy o
 test('inventory every maintained historical service against actual HAP; BatteryService alias works',async t=>{
   const api=await makeAPI(t);
   const doc=readFileSync(new URL('../docs/service-support.md',import.meta.url),'utf8');
-  const names=[...doc.matchAll(/^\\| ([A-Za-z][A-Za-z0-9]+) \\|/gm)].map(match=>match[1]);
+  const names=[...doc.matchAll(/^\| ([A-Za-z][A-Za-z0-9]+) \|/gm)].map(match=>match[1]);
   assert.ok(names.length>0);
   for(const name of names){
     if(name==='BatteryService'||typeof api.hap.Service[name]==='function')assert.equal(typeof serviceConstructor(api,name),'function');
