@@ -56,10 +56,11 @@ test('accessory information accepts metadata overrides without changing legacy o
   platformDefault.discover();
   assert.equal(value(info(api.registrations[1]),api.hap.Characteristic.SerialNumber),'stable-id');
 });
-test('inventory every historically documented service against actual HAP; BatteryService alias works',async t=>{
+test('inventory every maintained historical service against actual HAP; BatteryService alias works',async t=>{
   const api=await makeAPI(t);
-  const doc=readFileSync(new URL('../docs/legacy-reference.md',import.meta.url),'utf8');
-  const names=doc.split('## Supported services')[1].split('## Configuration Examples')[0].trim().split(/\s+/);
+  const doc=readFileSync(new URL('../docs/service-support.md',import.meta.url),'utf8');
+  const names=[...doc.matchAll(/^\\| ([A-Za-z][A-Za-z0-9]+) \\|/gm)].map(match=>match[1]);
+  assert.ok(names.length>0);
   for(const name of names){
     if(name==='BatteryService'||typeof api.hap.Service[name]==='function')assert.equal(typeof serviceConstructor(api,name),'function');
     else assert.throws(()=>serviceConstructor(api,name),new RegExp('unsupported HomeKit service: '+name));
