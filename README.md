@@ -12,7 +12,7 @@ This is a platform conversion of [staromeste's homebridge-http-advanced-accessor
 
 **Current Alpha: `2.0.0-alpha.9`.** Alpha.9 adds optional additional services on one accessory, starting with the Battery use case in [upstream issue #12](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/12), plus declarative `scale` and strict `lookup` mappers. Alpha.8 added optional accessory information fields from upstream PR #46. Source and package checks do not establish paired Apple Home behavior, physical device control or an unattended live soak; these are the purposes of Alpha testing. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain the boundaries.
 
-[User guide](#user-guide) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
+[User guide](#user-guide) · [Configuration examples](docs/configuration-examples.md) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
 
 ## User guide
 
@@ -69,7 +69,7 @@ Existing devices stay in `accessories[]`. Leave unqualified aliases unchanged; s
 }
 ```
 
-Keep each existing accessory's name, unqualified alias, `uuid_base` when present, service definition and bridge assignment unchanged to give HomeKit the best chance of retaining its identity. Your existing GET/POST methods, bodies, encoded strings, mapper chains, optional characteristics and property settings remain supported. See the [action and HTTP reference](docs/modernization.md#actions-and-http), [mapper reference](docs/modernization.md#mappers) and [legacy examples](docs/legacy-reference.md) for more elaborate configurations.
+Keep each existing accessory's name, unqualified alias, `uuid_base` when present, service definition and bridge assignment unchanged to give HomeKit the best chance of retaining its identity. Your existing GET/POST methods, bodies, encoded strings, mapper chains, optional characteristics and property settings remain supported. See the [configuration examples](docs/configuration-examples.md) for progressive generic setups, the [action and HTTP reference](docs/modernization.md#actions-and-http) and [mapper reference](docs/modernization.md#mappers) for exact behavior, and the [legacy examples](docs/legacy-reference.md) for historical real-device configurations.
 
 To customize HomeKit's Accessory Information, optionally add `manufacturer`, `model` and `serialNumber` to an accessory or platform device. Omitted fields keep their previous values. A platform device's `id` still controls its HomeKit identity; `serialNumber` does not replace `id` or change the generated UUID.
 
@@ -112,7 +112,7 @@ Use **Also use as a platform** in the settings screen, or add an `HttpAdvanced` 
 }
 ```
 
-Choose a permanent device `id` before pairing, and keep the platform name stable. The device's display name can then change without changing its platform identity. Disabling a platform keeps its definitions and cached identities but stops device updates.
+Choose a permanent device `id` before pairing, and keep the platform name stable. The device's display name can then change without changing its platform identity. Disabling a platform keeps its definitions and cached identities but stops device updates. The [configuration examples](docs/configuration-examples.md#use-the-same-device-as-a-platform-entry) show how the same device fields translate between accessory and platform forms.
 
 ### Look up exact device states (Alpha.9)
 
