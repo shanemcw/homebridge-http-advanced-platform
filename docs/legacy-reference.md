@@ -1,4 +1,4 @@
-> Historical 1.3.0 feature reference and examples. For Alpha installation, runtime requirements, cache behavior and corrected documentation, use the root README. Examples are retained as compatibility reference; this document does not override Alpha guidance.
+> Historical 1.3.0 feature reference and real-device examples. For current Alpha configuration patterns, use the [configuration examples](configuration-examples.md); for installation, runtime requirements, cache behavior and corrected documentation, use the root README. This document is retained as compatibility reference and does not override current Alpha guidance.
 
 # homebridge http advanced accessory
 
