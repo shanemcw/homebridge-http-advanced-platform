@@ -71,6 +71,18 @@ function validateAction(action: ActionConfig, seen: Set<ActionConfig>): void {
       case 'eval': if (typeof mapper.parameters.expression !== 'string') throw new ActionError('config'); break;
       case 'xpath': if (typeof mapper.parameters.xpath !== 'string') throw new ActionError('config'); break;
       case 'jpath': if (typeof mapper.parameters.jpath !== 'string') throw new ActionError('config'); break;
+      case 'scale': {
+        const p = mapper.parameters;
+        if ([p.inputMin, p.inputMax, p.outputMin, p.outputMax].some(value => typeof value !== 'number' || !Number.isFinite(value))
+          || p.inputMax <= p.inputMin || !Number.isFinite(p.inputMax - p.inputMin)
+          || !Number.isFinite(p.outputMax - p.outputMin)
+          || p.round !== undefined && (!Number.isInteger(p.round) || p.round < 0 || p.round > 12)
+          || p.clamp !== undefined && typeof p.clamp !== 'boolean'
+          || Object.keys(p).some(key => !['inputMin', 'inputMax', 'outputMin', 'outputMax', 'round', 'clamp'].includes(key))) {
+          throw new ActionError('config');
+        }
+        break;
+      }
       default: throw new ActionError('config');
     }
   }

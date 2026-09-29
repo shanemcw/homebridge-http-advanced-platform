@@ -200,15 +200,31 @@
                     "regex",
                     "xpath",
                     "jpath",
+                    "scale",
                     "eval"
                   ]
                 },
                 "parameters": {
                   "type": "object",
                   "additionalProperties": true,
-                  "description": "Mapper-specific mapping, regexp/capture, xpath/index, jpath/index, or expression. See README."
+                  "description": "Mapper-specific mapping, regexp/capture, xpath/index, jpath/index, scale range/round/clamp, or expression. See README."
                 }
-              }
+              },
+              "allOf": [{
+                "if": { "properties": { "type": { "const": "scale" } }, "required": ["type"] },
+                "then": { "properties": { "parameters": {
+                  "required": ["inputMin", "inputMax", "outputMin", "outputMax"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "inputMin": { "type": "number" },
+                    "inputMax": { "type": "number" },
+                    "outputMin": { "type": "number" },
+                    "outputMax": { "type": "number" },
+                    "round": { "type": "integer", "minimum": 0, "maximum": 12 },
+                    "clamp": { "type": "boolean" }
+                  }
+                } } }
+              }]
             }
           },
           "resultOnError": {

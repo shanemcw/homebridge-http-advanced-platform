@@ -4,6 +4,15 @@ import { JSONPath } from 'jsonpath-plus';
 import { evaluateLegacy } from './compatibility.js';
 import { ActionError, type MapperConfig, type State } from './types.js';
 
+function numericInput(value: unknown): number | undefined {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined;
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(trimmed)) return undefined;
+  const parsed = Number(trimmed);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 export function mapValue(mappers: MapperConfig[] = [], input: unknown, state: State = {}): unknown {
   return mapPipeline(mappers, input, state, false);
 }
@@ -64,6 +73,31 @@ function mapPipeline(mappers: MapperConfig[], input: unknown, state: State, resp
           if (Array.isArray(result) && result.length > index) { unmatched = false; invalidDocument = false; result = result[index]; }
           else unmatched = true;
           return result instanceof Object ? JSON.stringify(result) : result;
+        }
+        case 'scale': {
+          const numeric = numericInput(value);
+          if (numeric === undefined) {
+            if (!response) throw new ActionError('mapper');
+            unmatched = true;
+            return 'inconclusive';
+          }
+          const { inputMin, inputMax, outputMin, outputMax, round, clamp } = mapper.parameters;
+          const bounded = clamp ? Math.max(inputMin, Math.min(inputMax, numeric)) : numeric;
+          const scaled = outputMin + (bounded - inputMin) / (inputMax - inputMin) * (outputMax - outputMin);
+          if (!Number.isFinite(scaled)) {
+            if (!response) throw new ActionError('mapper');
+            unmatched = true;
+            return 'inconclusive';
+          }
+          unmatched = false; invalidDocument = false;
+          if (round === undefined) return scaled;
+          const rounded = Math.round(scaled * 10 ** round) / 10 ** round;
+          if (!Number.isFinite(rounded)) {
+            if (!response) throw new ActionError('mapper');
+            unmatched = true;
+            return 'inconclusive';
+          }
+          return rounded === 0 ? 0 : rounded;
         }
         case 'eval': {
           const result = evaluateLegacy(mapper.parameters.expression, value, state);

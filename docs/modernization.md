@@ -1,6 +1,6 @@
 # Modernization details and developer reference
 
-This reference describes the **unpublished 2.0.0-alpha.9 source**. Alpha.8 is the current published release. HTTP and caching behavior remains as in Alpha.8; Alpha.9 adds optional additional services. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
+This reference describes the **unpublished 2.0.0-alpha.9 source**. Alpha.8 is the current published release. HTTP and caching behavior remains as in Alpha.8; Alpha.9 adds optional additional services and a numeric `scale` mapper. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
 
 ## What non-breaking means here
 
@@ -152,6 +152,7 @@ A chain feeds each mapper's output into the next. Getter mappers consume respons
 | `regex` | `regexp`, `capture` (default `"1"`) | Return the selected capture, or original input when unmatched. |
 | `xpath` | `xpath`, `index` (default 0) | XPath text-node selection or string expression. Select `/text()` or `string(...)`, not entire elements. |
 | `jpath` | `jpath`, `index` (default 0) | JSONPath selection, indexed result, objects/arrays serialized as JSON. Malformed or non-object JSON returns `"inconclusive"`. |
+| `scale` (Alpha.9) | `inputMin`, `inputMax`, `outputMin`, `outputMax`; optional `round`, `clamp` | Linearly convert a finite number between ranges. Getter input may be a numeric string. Invalid numeric input yields `"inconclusive"` on a getter and fails a setter before sending. |
 | `eval` | `expression` | Execute the legacy JavaScript expression with `value`, `self.state`, and `this.state`. |
 
 ```json
@@ -160,6 +161,21 @@ A chain feeds each mapper's output into the next. Getter mappers consume respons
   { "type": "static", "parameters": { "mapping": { "0": "0", "1": "1", "unset": "0" } } }
 ]
 ```
+
+For a JSON response such as `{ "level": 128 }`, chain extraction and scaling:
+
+```json
+[
+  { "type": "jpath", "parameters": { "jpath": "$.level" } },
+  { "type": "scale", "parameters": {
+    "inputMin": 0, "inputMax": 255,
+    "outputMin": 0, "outputMax": 100,
+    "round": 0, "clamp": true
+  } }
+]
+```
+
+`inputMin` must be less than `inputMax`; output endpoints may descend to invert a range. All four endpoints must be finite numbers. `round` is an integer from 0 to 12 decimal places. `clamp` defaults to false, which permits extrapolation beyond the input range. `scale` accepts only finite numbers or complete decimal strings, including exponent notation and surrounding whitespace; it rejects blank, partial and nondecimal strings. If a getter cannot scale its value, its result is `"inconclusive"` and a configured `inconclusive` action can run. A setter failure prevents the HTTP request. The [dimmer example](../README.md#scale-a-device-value-unpublished-alpha9) shows inverse getter and setter ranges.
 
 **Eval and `${...}` templates execute trusted configuration as JavaScript with the privileges of Homebridge. They are not sandboxed.** Do not paste untrusted expressions. Evaluation is isolated in the compatibility module and exceptions are contained; a deliberately nonterminating expression can still block Node. JSONPath uses the maintained library's safe filter evaluator; exotic executable legacy JSONPath scripts need individual compatibility verification.
 

@@ -4,6 +4,8 @@
 
 The current Alpha.9 source adds `additionalServices` to legacy accessories and platform devices, addressing the multi-service/Battery use case in [upstream issue #12](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/12). Each additional service has a stable `id` used as its HomeKit subtype and its own actions and optional characteristics. Authentication and timing can inherit from the containing device. Existing single-service configurations keep their primary service identity. The [Front Door example](../README.md#add-battery-information-to-a-device-unpublished-alpha9) shows a Contact Sensor with Battery status and level on one accessory.
 
+The source also adds a declarative `scale` mapper for linear conversion between numeric ranges, including an optional decimal `round` and input `clamp`. It works in getter and setter pipelines without writing an `eval` expression. Invalid getter input is inconclusive; an invalid setter value fails before sending. The [dimmer example](../README.md#scale-a-device-value-unpublished-alpha9) shows the inverse ranges needed to read and write a `0` to `255` device through HomeKit Brightness.
+
 Local source tests exercise both adapters, cached platform restoration, duplicate-ID rejection and removal of an added service. Paired Apple Home presentation, automations, live endpoint behavior and the final package/CI review remain to be checked before publication. These notes will be finalized when Alpha.9 is ready.
 
 ## Published Alpha.8

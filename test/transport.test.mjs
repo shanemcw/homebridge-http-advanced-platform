@@ -51,6 +51,19 @@ test('SET maps outgoing values and expands state templates', async t => {
   await actions.set({url:server.url+'/${value}/{value}',httpMethod:'POST',body:'t=${state.getTargetTemperature}&v={value}',mappers:[{type:'static',parameters:{mapping:{true:'on'}}}]},{},'a',{getTargetTemperature:20},true);
   assert.equal(server.requests[0].url,'/true/on'); assert.equal(server.requests[0].body,'t=20&v=on');
 });
+test('scale maps an HTTP brightness read and outgoing write, and rejects bad values before a write', async t => {
+  const server=await fakeServer(t,(req,res)=>res.end(req.url==='/bad'?'busy':'128'));
+  const {actions}=harness(t);
+  const getter={url:server.url+'/level',mappers:[{type:'scale',parameters:{inputMin:0,inputMax:255,outputMin:0,outputMax:100,round:0}}]};
+  assert.equal(await actions.get(getter,{},'dimmer',{}),50);
+  assert.equal(await actions.get({...getter,url:server.url+'/bad',inconclusive:{url:server.url+'/fallback'}},{},'dimmer',{}),'128');
+  const setter={url:server.url+'/set/{value}',mappers:[{type:'scale',parameters:{inputMin:0,inputMax:100,outputMin:0,outputMax:255,round:0}}]};
+  await actions.set(setter,{},'dimmer',{},50);
+  assert.equal(server.requests.at(-1).url,'/set/128');
+  const count=server.requests.length;
+  await assert.rejects(actions.set(setter,{},'dimmer',{},'busy'),{category:'mapper'});
+  assert.equal(server.requests.length,count);
+});
 test('queue bounds, per-origin concurrency and fairness', async t => {
   let release;
   const gate=new Promise(resolve=>{release=resolve;});

@@ -10,7 +10,7 @@ This is a platform conversion of [staromeste's homebridge-http-advanced-accessor
 - **More resilient HTTP handling:** bounded requests, background recovery and quieter logs accommodate slow or temporarily unavailable servers, including older systems you cannot change.
 - **Migration at your pace:** maintain existing accessories through JSON Config, and add platform devices alongside them when useful. The plugin also keeps a requested switch state visible while the server catches up, avoiding a brief reversal caused by stale reads.
 
-**Published release: `2.0.0-alpha.8`. Unpublished development version: `2.0.0-alpha.9`.** Alpha.9 adds optional additional services on one accessory, starting with the Battery use case in [upstream issue #12](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/12). The Alpha.9 source is still under development and cannot yet be selected from npm or Homebridge UI. Alpha.8 added optional accessory information fields from upstream PR #46. Source checks and isolated Homebridge UI acceptance have passed for earlier Alphas; paired Apple Home and live-device soak remain incomplete. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain the boundaries.
+**Published release: `2.0.0-alpha.8`. Unpublished development version: `2.0.0-alpha.9`.** Alpha.9 adds optional additional services on one accessory, starting with the Battery use case in [upstream issue #12](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/12), and a declarative `scale` mapper for numeric values. The Alpha.9 source is still under development and cannot yet be selected from npm or Homebridge UI. Alpha.8 added optional accessory information fields from upstream PR #46. Source checks and isolated Homebridge UI acceptance have passed for earlier Alphas; paired Apple Home and live-device soak remain incomplete. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain the boundaries.
 
 [User guide](#user-guide) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
 
@@ -112,6 +112,41 @@ Use **Also use as a platform** in the settings screen, or add an `HttpAdvanced` 
 
 Choose a permanent device `id` before pairing, and keep the platform name stable. The device's display name can then change without changing its platform identity. Disabling a platform keeps its definitions and cached identities but stops device updates.
 
+### Scale a device value (unpublished Alpha.9)
+
+Use `scale` when a device and HomeKit use different numeric ranges. For example, a dimmer that reports and accepts `0` to `255` can map to HomeKit Brightness `0` to `100`:
+
+```json
+{
+  "accessory": "HttpAdvancedAccessory",
+  "name": "Example Dimmer",
+  "service": "Lightbulb",
+  "optionCharacteristic": ["Brightness"],
+  "urls": {
+    "getOn": { "url": "http://device.example/power" },
+    "setOn": { "url": "http://device.example/power/{value}" },
+    "getBrightness": {
+      "url": "http://device.example/level",
+      "mappers": [{ "type": "scale", "parameters": {
+        "inputMin": 0, "inputMax": 255,
+        "outputMin": 0, "outputMax": 100,
+        "round": 0, "clamp": true
+      } }]
+    },
+    "setBrightness": {
+      "url": "http://device.example/level/{value}",
+      "mappers": [{ "type": "scale", "parameters": {
+        "inputMin": 0, "inputMax": 100,
+        "outputMin": 0, "outputMax": 255,
+        "round": 0, "clamp": true
+      } }]
+    }
+  }
+}
+```
+
+The same `urls` work inside a platform device; use its `id`, `name` and `service` instead of the accessory alias. `round` chooses decimal places and `clamp` limits values to the input range; both are optional. Without `clamp`, out-of-range numbers extrapolate. Invalid numeric responses become inconclusive, so a configured `inconclusive` getter action can handle them. Invalid setter values fail before an HTTP request. See the [mapper reference](docs/modernization.md#mappers) for chaining and validation details.
+
 ### Add battery information to a device (unpublished Alpha.9)
 
 Add `additionalServices` to a legacy accessory or a platform device. This example is one **platform device** with a Contact Sensor and a Battery service; the endpoint examples return `0` or `1` for contact/low-battery status and `0` through `100` for battery level:
@@ -204,7 +239,7 @@ The [modernization and developer reference](docs/modernization.md) contains the 
 
 - What compatibility preserves, and which runtime behaviors change.
 - Shared caching, persistence, polling, request scheduling and outage recovery.
-- HTTP actions, older-server response handling, writes, templates and all five mapper types.
+- HTTP actions, older-server response handling, writes, templates, the five legacy mapper types and Alpha.9 `scale`.
 - Service support, optional characteristics, configuration editing and platform lifecycle.
 - Benchmark interpretation, development commands, test coverage and release policy.
 

@@ -7,6 +7,7 @@ export type MapperConfig =
   | { type: 'regex'; parameters: { regexp: string; capture?: number | string } }
   | { type: 'xpath'; parameters: { xpath: string; index?: number } }
   | { type: 'jpath'; parameters: { jpath: string; index?: number } }
+  | { type: 'scale'; parameters: { inputMin: number; inputMax: number; outputMin: number; outputMax: number; round?: number; clamp?: boolean } }
   | { type: 'eval'; parameters: { expression: string } };
 export interface ActionConfig {
   url: string;

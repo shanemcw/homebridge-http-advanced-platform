@@ -33,6 +33,24 @@ deployment has been made.
   including the updated schema, README, public docs and built adapters.
 - Relative Markdown file links and `git diff --check` passed.
 
+## Numeric mapper milestone
+
+Recorded: 2026-09-29 (America/New_York). The local Alpha.9 source also adds a
+declarative `scale` mapper for getters and setters. It validates finite numeric
+ranges, accepts complete decimal response strings, supports optional decimal
+rounding and input clamping, and rejects invalid setter values before sending.
+The README now has an inverse-range dimmer example; the schema, mapper reference
+and draft release notes describe this unpublished feature.
+
+- `npm run check`: typecheck, lint and 106/106 tests passed on Node 24 with
+  Homebridge 2.4.0.
+- `HB_TEST_VERSION=1 npm test`: 106/106 tests passed on Node 24 with
+  Homebridge 1.11.4.
+- Focused tests cover chained mapping, clamping, rounding, invalid values,
+  configuration validation, the documented example and HTTP read/write behavior.
+- `npm pack --dry-run --json` completed with an isolated npm cache: 56 files,
+  including the schema, README, mapper reference, release notes and built mapper.
+
 ## Before publication
 
 Review the final Alpha.9 diff and archive, then run the Node 22/24 by Homebridge
