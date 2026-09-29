@@ -6,7 +6,7 @@ The examples use `HttpAdvancedAccessory` blocks because they are compact and rem
 
 When `mappers` is present, it is an ordered array. The output of one mapper becomes the input of the next. Use [`lookup`](modernization.md#mappers) when the accepted input vocabulary is exact, and retain legacy `static` when pass-through behavior is intentional.
 
-> **Refresh behavior:** Alpha serves getter values from shared cached state while HTTP acquisition runs in the background. A positive `forceRefreshDelay` keeps that device's explicit normal polling interval. `forceRefreshDelay: 0` uses the shared active/idle refresh schedule; unlike 1.3.0, it no longer means "fetch only when HomeKit asks." See [shared caching and polling](modernization.md#shared-caching-and-polling).
+> **Refresh behavior:** Alpha serves getter values from shared cached state while HTTP acquisition runs in the background. A positive `forceRefreshDelay` keeps that device's explicit normal polling interval. `forceRefreshDelay: 0` uses the shared active/idle refresh schedule; unlike 1.3.0, it no longer means "fetch only when HomeKit asks." See [how reads and freshness work](modernization.md#how-reads-and-freshness-work).
 
 ## 1. Read a value from JSON
 
@@ -385,6 +385,7 @@ For a new platform-managed device, the configuration inside `devices[]` uses the
 {
   "platform": "HttpAdvanced",
   "name": "HTTP Advanced",
+  "enabled": true,
   "devices": [
     {
       "id": "patio-temperature",
