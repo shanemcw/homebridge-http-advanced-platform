@@ -205,7 +205,101 @@ Suppose a light reports brightness from `0` to `255`, while HomeKit Brightness u
 
 `scale` is useful when the relationship is numeric and linear. Use `lookup` or another mapper when device values are symbolic or irregular.
 
-## 5. Coordinate related characteristics
+## 5. Control a full HSB color light
+
+A HomeKit `Lightbulb` always has `On`; add `Hue`, `Saturation`, and `Brightness` when the device supports color. Suppose one status endpoint returns all four values:
+
+```json
+{
+  "on": true,
+  "hue": 210,
+  "saturation": 65,
+  "brightness": 80
+}
+```
+
+The three color characteristics are optional, so list them in `optionCharacteristic`. Each getter can read the same status endpoint and extract its own field:
+
+```json
+{
+  "accessory": "HttpAdvancedAccessory",
+  "service": "Lightbulb",
+  "name": "Color Lamp",
+  "optionCharacteristic": [
+    "Hue",
+    "Saturation",
+    "Brightness"
+  ],
+  "urls": {
+    "getOn": {
+      "url": "http://color-light.local/status",
+      "requireResponseMatch": true,
+      "mappers": [
+        {
+          "type": "jpath",
+          "parameters": {
+            "jpath": "$.on"
+          }
+        }
+      ]
+    },
+    "setOn": {
+      "url": "http://color-light.local/power/{value}"
+    },
+    "getHue": {
+      "url": "http://color-light.local/status",
+      "requireResponseMatch": true,
+      "mappers": [
+        {
+          "type": "jpath",
+          "parameters": {
+            "jpath": "$.hue"
+          }
+        }
+      ]
+    },
+    "setHue": {
+      "url": "http://color-light.local/hue/{value}"
+    },
+    "getSaturation": {
+      "url": "http://color-light.local/status",
+      "requireResponseMatch": true,
+      "mappers": [
+        {
+          "type": "jpath",
+          "parameters": {
+            "jpath": "$.saturation"
+          }
+        }
+      ]
+    },
+    "setSaturation": {
+      "url": "http://color-light.local/saturation/{value}"
+    },
+    "getBrightness": {
+      "url": "http://color-light.local/status",
+      "requireResponseMatch": true,
+      "mappers": [
+        {
+          "type": "jpath",
+          "parameters": {
+            "jpath": "$.brightness"
+          }
+        }
+      ]
+    },
+    "setBrightness": {
+      "url": "http://color-light.local/brightness/{value}"
+    }
+  }
+}
+```
+
+HomeKit Hue uses degrees from `0` through `360`; Saturation and Brightness use percentages from `0` through `100`. If the device uses different numeric ranges, chain a `scale` mapper after the getter extraction and apply the inverse scale on the setter, as in the previous example.
+
+This example assumes the device can update each component independently. If its API requires a complete color payload for every change, use the device's required request shape and coordinate the related values deliberately rather than sending these component URLs unchanged.
+
+## 6. Coordinate related characteristics
 
 A garage door exposes separate current and target states. If one endpoint returns both:
 
@@ -269,7 +363,7 @@ the two getters can read the same endpoint and select different fields:
 
 This example deliberately maps the setter instead of embedding JavaScript in the URL. Legacy template expressions remain supported, but declarative mappings are easier to validate and maintain when a direct mapping is sufficient.
 
-## 6. Fall back when the first response is inconclusive
+## 7. Fall back when the first response is inconclusive
 
 Some APIs need more than one request to determine state. Suppose an alarm endpoint returns `DISARMED`, `ALARM`, or the generic state `ARMED`:
 
