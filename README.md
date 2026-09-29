@@ -27,7 +27,9 @@ Older environments need a runtime upgrade before testing this Alpha. Plugin 1.3.
 
 ### Install or upgrade
 
-Back up Homebridge first, including configuration, cached accessories and pairing data. This is a separate npm package, not an automatic update to the original accessory package. Follow the [replacement and rollback guide](docs/migration.md) before changing an existing installation.
+**Replacing `homebridge-http-advanced-accessory`? Save your legacy accessory JSON before using the Homebridge UI.** Make a full Homebridge backup, then separately save the exact `accessories[]` entries from the raw `config.json` editor in a private file. They may contain credentials or private URLs. The UI's **Remove plugin config?** option is enabled by default when uninstalling the old package and can delete those entries; its child-bridge removal option can also remove pairings. This is a separate npm package, not an automatic update to the original accessory package. Follow the [replacement and recovery guide](docs/migration.md) before changing an existing installation.
+
+If the legacy accessories disappear from the new setup, [paste only the missing saved entries back into the current `accessories[]` array](docs/migration.md#if-the-accessories-are-missing). Restoring their JSON does **not** guarantee that Apple Home will recover room assignments, scenes or automations after it has seen the accessories removed; those references may need to be rebuilt. A full Homebridge backup restore also reinstalls the npm plugins recorded in that backup, potentially including the old package.
 
 Check the [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions) and matching [GitHub prerelease](https://github.com/shanemcw/homebridge-http-advanced-platform/releases) before installing. Choose a published Alpha; a local candidate archive alone does not establish public availability.
 
@@ -49,11 +51,11 @@ npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/ho
 
 Alpha.7 includes this correction in its packaged README. The earlier published Alpha.6 archive remains unchanged.
 
-Preserve Homebridge storage and bridge identity. Remove the old plugin package as part of the backed-up replacement before starting Homebridge with the new package; loading both would make their shared configuration aliases ambiguous. See the migration guide for package-qualified entries and plugin allowlists. Restart Homebridge and its UI, then verify devices, state updates, controls and existing automations. Installed UI and managed-child-bridge acceptance passed in an isolated Node 24/Homebridge 2 fixture with HAP disabled; paired Apple Home identity and live controls still need acceptance.
+Preserve Homebridge storage and bridge identity. Remove the old plugin package as part of the backed-up replacement before starting Homebridge with the new package; loading both would make their shared configuration aliases ambiguous. Check the migration guide before changing any package-qualified identifiers: changing a qualified legacy accessory identifier can change its HomeKit identity. Restart Homebridge and its UI, then verify devices, state updates, controls and existing automations. Installed UI and managed-child-bridge acceptance passed in an isolated Node 24/Homebridge 2 fixture with HAP disabled; paired Apple Home identity and live controls still need acceptance.
 
 ### Keep using existing accessories
 
-Existing devices stay in `accessories[]`. Unqualified aliases remain unchanged; update any explicit old package prefixes as described in the migration guide. A basic definition looks like this:
+Existing devices stay in `accessories[]`. Leave unqualified aliases unchanged; see the migration guide before changing an explicitly package-qualified accessory identifier. A basic definition looks like this:
 
 ```json
 {
@@ -67,7 +69,7 @@ Existing devices stay in `accessories[]`. Unqualified aliases remain unchanged; 
 }
 ```
 
-Keep each existing accessory's name, alias and service definition unchanged when upgrading to preserve its identity. Your existing GET/POST methods, bodies, encoded strings, mapper chains, optional characteristics and property settings remain supported. See the [action and HTTP reference](docs/modernization.md#actions-and-http), [mapper reference](docs/modernization.md#mappers) and [legacy examples](docs/legacy-reference.md) for more elaborate configurations.
+Keep each existing accessory's name, unqualified alias, `uuid_base` when present, service definition and bridge assignment unchanged to give HomeKit the best chance of retaining its identity. Your existing GET/POST methods, bodies, encoded strings, mapper chains, optional characteristics and property settings remain supported. See the [action and HTTP reference](docs/modernization.md#actions-and-http), [mapper reference](docs/modernization.md#mappers) and [legacy examples](docs/legacy-reference.md) for more elaborate configurations.
 
 To customize HomeKit's Accessory Information, optionally add `manufacturer`, `model` and `serialNumber` to an accessory or platform device. Omitted fields keep their previous values. A platform device's `id` still controls its HomeKit identity; `serialNumber` does not replace `id` or change the generated UUID.
 
@@ -254,6 +256,7 @@ During a temporary outage, the plugin retries background reads with backoff and 
 | A toggle returns to its old state | Whether the write failed, the server applied it, or the confirmation window expired. |
 | Busy/error text becomes an unexpected value | The mapper chain and optional `responsePattern`, `requireResponseMatch` or `strictHTTP` settings. See [servers you cannot change](docs/modernization.md#servers-you-cannot-change). |
 | Configuration does not load | Service support, action names, mapper syntax and duplicate platform IDs. |
+| Legacy accessories are missing after replacing the old package | Inspect the raw `accessories[]` array before editing. If entries were deleted, [restore only the missing saved JSON objects](docs/migration.md#if-the-accessories-are-missing); then check Apple Home rooms, scenes and automations. |
 
 Set `debug: true` on one device to enable a shared diagnostic snapshot every 30 seconds. It includes request timing, queue usage, cache ages and recovery status. Shared messages use **HTTP Advanced** as their log prefix; device-specific messages retain their accessory name. Diagnostics omit URLs, credentials, request bodies and device values, and are not sent externally.
 

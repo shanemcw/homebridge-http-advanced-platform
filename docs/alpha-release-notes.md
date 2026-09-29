@@ -32,9 +32,13 @@ retaining the Apache-2.0 license, contributor credit and Git history.
 
 Configuration aliases remain `HttpAdvancedAccessory` and `HttpAdvanced`. The
 platform UUID namespace remains the Alpha.5 namespace. Package-qualified
-configuration and plugin lists must use the new package name; do not load both
-old and new packages. Follow the [replacement and rollback guide](migration.md)
-and preserve Homebridge configuration, cached accessories and pairing data.
+configuration and plugin lists need review when changing packages; changing the
+package prefix of a qualified legacy accessory can change its HomeKit UUID. Do
+not load both old and new packages. Save the exact legacy `accessories[]` JSON
+before uninstalling the old package: Homebridge UI can remove it during uninstall,
+and restoring JSON later may not restore Apple Home rooms, scenes or automations.
+Follow the [replacement and recovery guide](migration.md) and preserve Homebridge
+configuration, cached accessories and pairing data.
 Moving a legacy accessory into platform mode remains an explicit manual
 conversion that creates a new HomeKit identity.
 

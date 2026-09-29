@@ -10,7 +10,7 @@ Compatibility does not mean every runtime behavior is identical to 1.3.0. In par
 
 | Area | Compatibility and limits |
 |---|---|
-| HomeKit identity | The legacy adapter retains its registration, service ordering and characteristic identities. Preserve accessory names and Homebridge pairing/identifier storage. Regression tests check identity continuity; physical-device and automation verification remains part of Alpha testing. |
+| HomeKit identity | The legacy adapter retains its registration, service ordering and characteristic identities. Preserve unqualified accessory identifiers, names, optional `uuid_base` values, bridge assignments and Homebridge pairing/identifier storage. Changing a package-qualified legacy accessory identifier changes Homebridge's UUID seed. Regression tests check identity continuity; physical-device and automation verification remains part of Alpha testing. |
 | Optional platform | Legacy and platform devices can coexist. Moving an existing device to the platform creates a different identity; plan room, scene and automation assignments. There is no automatic identity-preserving migration tool. |
 | Additional services | Opting into `additionalServices` retains the primary accessory UUID and primary service identity. Each added service uses its stable `id` as a HAP subtype. Removing or changing an added service may affect HomeKit automations that refer to it. |
 | Runtime support | Node 22.13+ in the 22.x line or Node 24.x; Homebridge 1.11.4+ in the 1.x line or 2.4+ in the 2.x line. Historical HAP services removed by a newer Homebridge version cannot be restored by this plugin. |
