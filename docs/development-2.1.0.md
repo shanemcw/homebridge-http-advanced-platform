@@ -67,6 +67,6 @@ Node 22/24 × Homebridge 1/2 matrix, inspect and install the package in isolatio
 and validate relevant device behavior. Record any prerelease or production
 deployment separately from this development checkpoint.
 
-The [branch archive](../maintenance/platform-release/BRANCH-ARCHIVE-20261004.md)
+The [branch archive](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/main/maintenance/platform-release/BRANCH-ARCHIVE-20261004.md)
 preserves the old history. Contribution and coordination plans for the original
 accessory maintainer are retired.
