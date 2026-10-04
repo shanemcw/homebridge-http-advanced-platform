@@ -65,7 +65,7 @@ Dated local checkpoints are recorded below; historical results are not evidence 
 - Measure sustained cache age, backend request rate and the unchanged Home Control reader's `took` metric; compare equivalent workloads rather than warmed snapshot speed alone.
 - Verify backup/rollback and inspect the final candidate diff and tarball. Run remote CI on the final review commit when committing/pushing is authorized.
 
-The maintainer announcement is planned for Beta.1 after these gates. Committing, deployment, npm publication and upstream contact require the owner's next instruction. If publication is later authorized, use a matching prerelease version and channel (`alpha` or `beta`); stable/latest remain forbidden by the guard.
+These were the Alpha.5 release gates. Plans to contribute or announce this work to the original maintainer are retired; development continues in the owned platform repository. Stable `2.0.0` has since been published under that package name. See the [branch archive](../maintenance/platform-release/BRANCH-ARCHIVE-20261004.md) and [current release notes](release-notes.md).
 
 ### Initial implementation matrix
 
