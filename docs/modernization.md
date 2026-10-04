@@ -1,6 +1,6 @@
 # Modernization details and developer reference
 
-This reference describes **2.0.0-alpha.9**. HTTP and caching behavior remains as in Alpha.8; Alpha.9 adds optional additional services and `scale`/`lookup` mappers. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
+This reference describes stable **2.0.0**, which promotes the Alpha.9 runtime with optional additional services and `scale`/`lookup` mappers. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
 
 ## What non-breaking means here
 
@@ -10,7 +10,7 @@ Compatibility does not mean every runtime behavior is identical to 1.3.0. In par
 
 | Area | Compatibility and limits |
 |---|---|
-| HomeKit identity | The legacy adapter retains its registration, service ordering and characteristic identities. Preserve unqualified accessory identifiers, names, optional `uuid_base` values, bridge assignments and Homebridge pairing/identifier storage. Changing a package-qualified legacy accessory identifier changes Homebridge's UUID seed. Regression tests check identity continuity; physical-device and automation verification remains part of Alpha testing. |
+| HomeKit identity | The legacy adapter retains its registration, service ordering and characteristic identities. Preserve unqualified accessory identifiers, names, optional `uuid_base` values, bridge assignments and Homebridge pairing/identifier storage. Changing a package-qualified legacy accessory identifier changes Homebridge's UUID seed. Regression tests check identity continuity; physical-device and automation verification remains a per-installation acceptance check. |
 | Optional platform | Legacy and platform devices can coexist. Moving an existing device to the platform creates a different identity; plan room, scene and automation assignments. There is no automatic identity-preserving migration tool. |
 | Additional services | Opting into `additionalServices` retains the primary accessory UUID and primary service identity. Each added service uses its stable `id` as a HAP subtype. Removing or changing an added service may affect HomeKit automations that refer to it. |
 | Runtime support | Node 22.13+ in the 22.x line or Node 24.x; Homebridge 1.11.4+ in the 1.x line or 2.4+ in the 2.x line. Historical HAP services removed by a newer Homebridge version cannot be restored by this plugin. |
@@ -19,7 +19,7 @@ Compatibility does not mean every runtime behavior is identical to 1.3.0. In par
 | Responses and errors | Existing non-2xx body mapping remains the default, except 429/503 with `Retry-After`. Timeouts, size limits and invalid values produce contained failures. Stricter HTTP/extraction checks are optional. |
 | Mapper compatibility | Legacy pass-through and raw-state semantics remain. Maintained JSONPath dependencies use a safe evaluator; unusual executable legacy JSONPath expressions require individual verification. |
 
-See [upgrade and migration](migration.md), [supported services](service-support.md) and the behavior below before opting into Alpha on an existing installation.
+See [upgrade and migration](migration.md), [supported services](service-support.md) and the behavior below before replacing the original package on an existing installation.
 
 ## Shared settings and precedence
 
@@ -73,7 +73,7 @@ Temporary network failures, timeouts, inconclusive responses, HTTP 429/503 respo
 
 Short interruptions stay quiet in normal logs. After 90 seconds without a usable response, one endpoint warning appears, with reminders at most every five minutes and one recovery notice. Short recoveries use debug logging. Enabling device diagnostics does not multiply warnings. Unknown state remains unknown until acquired; known state remains available unless an explicit `resultOnError` supplies a fallback. Actual mapper/configuration failures remain action-specific warnings. An endpoint that stays unavailable continues probing; there is no 30-second outage cutoff.
 
-This changes the acquisition timing of `forceRefreshDelay: 0`: old versions fetched on demand, while Alpha learns state ahead of reads. It introduces bounded background traffic and finite staleness. Measure both freshness and load for your devices; very slow fleets can exceed the nominal interval. A 500-second configured interval still allows approximately 500 seconds of staleness. No cache promises mathematically instantaneous remote state.
+This changes the acquisition timing of `forceRefreshDelay: 0`: old versions fetched on demand, while this plugin learns state ahead of reads. It introduces bounded background traffic and finite staleness. Measure both freshness and load for your devices; very slow fleets can exceed the nominal interval. A 500-second configured interval still allows approximately 500 seconds of staleness. No cache promises mathematically instantaneous remote state.
 
 Successful reads update HAP using `updateValue`, never a setter. Last successful values and timestamps are stored under Homebridge's persistence directory and restored only for an identical configuration fingerprint. Cache files contain values and hashes, not action URLs or credentials. A missing/corrupt cache is ignored. Persistence is periodic and at graceful shutdown; a crash can lose recent cache updates.
 
@@ -97,7 +97,7 @@ Each action supports:
 
 For compatibility, non-2xx response bodies are mapped by default, as in 1.3.0, except HTTP 429/503 responses carrying `Retry-After`: those explicitly signal temporary unavailability and are never mapped as successful state or accepted as successful writes. Retry guidance accepts seconds or an HTTP date, bounded to five minutes; invalid guidance uses normal backoff. Status errors are counted separately in diagnostics. Enable `strictHTTP` to make other non-2xx responses fail and use `resultOnError`. GET/HEAD redirects are followed (up to ten); each hop goes through the coordinator. Credentials and cookies are removed on cross-origin redirects. POST redirects are not automatically followed, matching legacy defaults. Responses are limited to 8 MiB to bound memory use.
 
-Set `username` and `password` on a device for Basic Auth. Supplied credentials are sent immediately, including when legacy `immediately: false` is present: 1.3.0's explicit Authorization header already overrode that setting. Alpha preserves that behavior. Without credentials, Alpha omits the old empty `Basic Og==` header. Credentials embedded in a URL are also handled by Node's HTTP client. Use HTTPS for sensitive endpoints.
+Set `username` and `password` on a device for Basic Auth. Supplied credentials are sent immediately, including when legacy `immediately: false` is present: 1.3.0's explicit Authorization header already overrode that setting. This plugin preserves that behavior. Without credentials, it omits the old empty `Basic Og==` header. Credentials embedded in a URL are also handled by Node's HTTP client. Use HTTPS for sensitive endpoints.
 
 ### Servers you cannot change
 
@@ -149,11 +149,11 @@ A chain feeds each mapper's output into the next. Getter mappers consume respons
 | Type | Parameters | Semantics |
 |---|---|---|
 | `static` | `mapping` object | Lookup by input value; unmatched values pass through. Legacy falsey mapped values (`0`, `false`, `""`) also pass through. Use strings `"0"`/`"1"` for numeric state, or opt into `lookup` for intentional falsey results. |
-| `lookup` (Alpha.9) | Nonempty `mapping` object with string, finite number or boolean results | Match an own key exactly and return its value, including `0`, `false` or `""`. Unknown getter input is `"inconclusive"`; unknown setter input fails before sending. |
+| `lookup`  | Nonempty `mapping` object with string, finite number or boolean results | Match an own key exactly and return its value, including `0`, `false` or `""`. Unknown getter input is `"inconclusive"`; unknown setter input fails before sending. |
 | `regex` | `regexp`, `capture` (default `"1"`) | Return the selected capture, or original input when unmatched. |
 | `xpath` | `xpath`, `index` (default 0) | XPath text-node selection or string expression. Select `/text()` or `string(...)`, not entire elements. |
 | `jpath` | `jpath`, `index` (default 0) | JSONPath selection, indexed result, objects/arrays serialized as JSON. Malformed or non-object JSON returns `"inconclusive"`. |
-| `scale` (Alpha.9) | `inputMin`, `inputMax`, `outputMin`, `outputMax`; optional `round`, `clamp` | Linearly convert a finite number between ranges. Getter input may be a numeric string. Invalid numeric input yields `"inconclusive"` on a getter and fails a setter before sending. |
+| `scale`  | `inputMin`, `inputMax`, `outputMin`, `outputMax`; optional `round`, `clamp` | Linearly convert a finite number between ranges. Getter input may be a numeric string. Invalid numeric input yields `"inconclusive"` on a getter and fails a setter before sending. |
 | `eval` | `expression` | Execute the legacy JavaScript expression with `value`, `self.state`, and `this.state`. |
 
 ```json
@@ -163,7 +163,7 @@ A chain feeds each mapper's output into the next. Getter mappers consume respons
 ]
 ```
 
-`lookup` is an opt-in strict counterpart to `static`. Keys use the string form of a string, finite number or boolean input; matching is case-sensitive and does not trim whitespace. Missing keys and non-scalar inputs do not pass through. Its result must be a string, finite number or boolean; `null`, arrays and objects are rejected at configuration validation. A missing getter key becomes `"inconclusive"`, which can run an `inconclusive` fallback action. A missing setter key fails before its HTTP request. The [relay example](../README.md#look-up-exact-device-states-alpha9) shows both directions; legacy `static` behavior remains unchanged.
+`lookup` is an opt-in strict counterpart to `static`. Keys use the string form of a string, finite number or boolean input; matching is case-sensitive and does not trim whitespace. Missing keys and non-scalar inputs do not pass through. Its result must be a string, finite number or boolean; `null`, arrays and objects are rejected at configuration validation. A missing getter key becomes `"inconclusive"`, which can run an `inconclusive` fallback action. A missing setter key fails before its HTTP request. The [relay example](../README.md#look-up-exact-device-states) shows both directions; legacy `static` behavior remains unchanged.
 
 For a JSON response such as `{ "level": 128 }`, chain extraction and scaling:
 
@@ -178,7 +178,7 @@ For a JSON response such as `{ "level": 128 }`, chain extraction and scaling:
 ]
 ```
 
-`inputMin` must be less than `inputMax`; output endpoints may descend to invert a range. All four endpoints must be finite numbers. `round` is an integer from 0 to 12 decimal places. `clamp` defaults to false, which permits extrapolation beyond the input range. `scale` accepts only finite numbers or complete decimal strings, including exponent notation and surrounding whitespace; it rejects blank, partial and nondecimal strings. If a getter cannot scale its value, its result is `"inconclusive"` and a configured `inconclusive` action can run. A setter failure prevents the HTTP request. The [dimmer example](../README.md#scale-a-device-value-alpha9) shows inverse getter and setter ranges.
+`inputMin` must be less than `inputMax`; output endpoints may descend to invert a range. All four endpoints must be finite numbers. `round` is an integer from 0 to 12 decimal places. `clamp` defaults to false, which permits extrapolation beyond the input range. `scale` accepts only finite numbers or complete decimal strings, including exponent notation and surrounding whitespace; it rejects blank, partial and nondecimal strings. If a getter cannot scale its value, its result is `"inconclusive"` and a configured `inconclusive` action can run. A setter failure prevents the HTTP request. The [dimmer example](../README.md#scale-a-device-value) shows inverse getter and setter ranges.
 
 **Eval and `${...}` templates execute trusted configuration as JavaScript with the privileges of Homebridge. They are not sandboxed.** Do not paste untrusted expressions. Evaluation is isolated in the compatibility module and exceptions are contained; a deliberately nonterminating expression can still block Node. JSONPath uses the maintained library's safe filter evaluator; exotic executable legacy JSONPath scripts need individual compatibility verification.
 
@@ -198,11 +198,11 @@ Malformed XML, invalid values, expression failures and exhausted numeric/boolean
 }
 ```
 
-In Alpha.9, `additionalServices` is an optional array on either a legacy accessory or a platform device. Each entry has a required `id` and `service`, plus its own optional `name`, `urls`, `optionCharacteristic` and `props`. The `id` becomes the HomeKit service subtype, so keep it stable after pairing. IDs must be unique within the accessory and have no surrounding whitespace. A service type may appear more than once when the additional entries have different IDs; `AccessoryInformation` is reserved for the containing accessory. The primary service has no subtype, preserving its existing identity. Additional services do not inherit the primary service's action URLs, optional characteristics or property overrides; they inherit authentication, refresh and timing settings unless explicitly overridden. Request spacing applies across the containing device's services. All services use the same process-wide HTTP coordinator, but each has its own action cache and mapper state. Up to 32 additional services are accepted per accessory.
+`additionalServices` is an optional array on either a legacy accessory or a platform device. Each entry has a required `id` and `service`, plus its own optional `name`, `urls`, `optionCharacteristic` and `props`. The `id` becomes the HomeKit service subtype, so keep it stable after pairing. IDs must be unique within the accessory and have no surrounding whitespace. A service type may appear more than once when the additional entries have different IDs; `AccessoryInformation` is reserved for the containing accessory. The primary service has no subtype, preserving its existing identity. Additional services do not inherit the primary service's action URLs, optional characteristics or property overrides; they inherit authentication, refresh and timing settings unless explicitly overridden. Request spacing applies across the containing device's services. All services use the same process-wide HTTP coordinator, but each has its own action cache and mapper state. Up to 32 additional services are accepted per accessory.
 
-For Battery, `StatusLowBattery` is required by HAP. `BatteryLevel` and `ChargingState` are optional; list them in `optionCharacteristic` when used. Supply a getter action for each value your endpoint reports. The [Front Door example](../README.md#add-battery-information-to-a-device-alpha9) shows a Battery service attached to a Contact Sensor. Adding or removing services requires restarting Homebridge after saving configuration. A previously standalone Battery accessory is not moved automatically; doing so would change its HomeKit accessory identity.
+For Battery, `StatusLowBattery` is required by HAP. `BatteryLevel` and `ChargingState` are optional; list them in `optionCharacteristic` when used. Supply a getter action for each value your endpoint reports. The [Front Door example](../README.md#add-battery-information-to-a-device) shows a Battery service attached to a Contact Sensor. Adding or removing services requires restarting Homebridge after saving configuration. A previously standalone Battery accessory is not moved automatically; doing so would change its HomeKit accessory identity.
 
-Both adapters accept optional `manufacturer`, `model` and `serialNumber` strings for the HomeKit Accessory Information service. When omitted, legacy accessories retain the 1.3.0 Manufacturer, Model and SerialNumber defaults. Platform devices retain their existing Manufacturer and Model defaults and use `id` as their default serial number when present. A configured `serialNumber` overrides that display value without changing the platform device's UUID. All historical extended examples (security system, contact sensor, Daikin, Yamaha and lightbulb) remain in [the legacy reference](legacy-reference.md).
+Both adapters accept optional `manufacturer`, `model` and `serialNumber` strings for the HomeKit Accessory Information service. When omitted, legacy accessories retain the 1.3.0 Manufacturer, Model and SerialNumber defaults. Platform devices retain their existing Manufacturer and Model defaults and use `id` as their default serial number when present. A configured `serialNumber` overrides that display value without changing the platform device's UUID. Current examples for switches, lights, security systems, contact sensors, Daikin and Yamaha devices are in the [configuration examples](configuration-examples.md).
 
 ## Platform lifecycle
 
@@ -214,7 +214,7 @@ Local integration tests serialize and deserialize Homebridge platform accessorie
 
 The recorded synthetic fixture compares about 2.15 seconds for a blocking 41-getter read with about 3 ms for a warmed 44-device cached snapshot, issuing no new HTTP getter requests for that snapshot. Refreshing all 44 devices separately took about 2.25 seconds. These measure different stages: the cache speeds up HomeKit reads; it does not make the web server or physical device instantaneous. They are fixture measurements, not a promised speedup on every installation.
 
-Use the [measurement guide](performance.md) to compare read latency, cache freshness and sustained backend load together. The [Alpha release notes](alpha-release-notes.md) summarize the Alpha, completed isolated acceptance and remaining public-installation and live-soak checks.
+Use the [measurement guide](performance.md) to compare read latency, cache freshness and sustained backend load together. The [release notes](release-notes.md) summarize stable 2.0.0, completed checks and remaining field coverage.
 
 ## Development and release policy
 
@@ -230,6 +230,6 @@ npm pack --dry-run
 
 CI exercises Node 22/24 and real Homebridge v1/v2 HAP implementations. Unit/integration tests use only loopback fake servers. `legacy-plugin` is a test-only alias of published 1.3.0; its obsolete dependencies are excluded from production installation and the tarball. `npm audit --omit=dev` audits the maintained runtime separately.
 
-Any future public prerelease must use an explicit tag matching its version channel (`alpha` or `beta`) and be marked as a GitHub prerelease. The guard rejects stable versions, channel mismatches and manual publication to `latest`. npm requires a `latest` dist-tag and assigned it to the first public Alpha; retaining that registry-required tag does not make the package stable. The `alpha` and `latest` tags can point to different prerelease versions. `publishConfig.tag` remains `alpha` for this Alpha candidate; update it deliberately when preparing Beta. No automatic publishing workflow is enabled. Stable requires broader device, restart and real-installation evidence, not merely one working household fixture.
+Public prereleases require an explicit tag matching their version channel (`alpha` or `beta`) and a matching GitHub prerelease. Stable versions require an explicit `latest` tag and a regular GitHub release. The guard rejects channel mismatches, malformed versions and publication under the original accessory package name. `publishConfig.tag` is `latest` for stable 2.0.0; `alpha` retains the earlier testing release. No automatic publishing workflow is enabled. Release review covers the exact candidate, compatibility CI, production dependency audit, fresh package installation and field evidence. Household soak for 2.0.0 covers legacy Switch configurations; optional platform devices, additional services and new mapper modes have automated and isolated coverage rather than household soak.
 
 The existing Apache-2.0 LICENSE remains unchanged. Package metadata is reconciled to that file, which has existed since the initial commit; historical authorship is retained and the current maintainer is credited.

@@ -19,8 +19,22 @@ test('prerelease guard matches alpha and beta versions to their tag, never lates
   assert.throws(() => validateRelease({...pkg, name: 'another-plugin'}, 'alpha'));
   assert.throws(() => validateRelease({...pkg, name: 'homebridge-http-advanced-accessory'}, 'alpha'));
   const run = tag => spawnSync(process.execPath, [fileURLToPath(new URL('../scripts/release-guard.mjs', import.meta.url))], {env: {...process.env, npm_config_tag: tag}, encoding: 'utf8'});
-  assert.equal(run('alpha').status, 0);
-  assert.notEqual(run('latest').status, 0);
+  assert.equal(run(pkg.publishConfig.tag).status, 0);
+  assert.notEqual(run(pkg.publishConfig.tag === 'latest' ? 'alpha' : 'latest').status, 0);
+});
+
+test('stable platform releases require latest and reject prerelease channels or malformed versions', () => {
+  for (const version of ['1.0.0', '2.0.0', '2.1.0', '3.0.1']) {
+    const candidate = {...pkg, version};
+    assert.doesNotThrow(() => validateRelease(candidate, 'latest'));
+    for (const tag of [undefined, 'alpha', 'beta']) assert.throws(() => validateRelease(candidate, tag));
+  }
+  for (const version of ['02.0.0', '2.00.0', '2.0.01', '2.0.0-rc.1', '2.0.0extra', '2.0']) {
+    assert.throws(() => validateRelease({...pkg, version}, 'latest'));
+  }
+  for (const name of ['another-plugin', 'homebridge-http-advanced-accessory']) {
+    assert.throws(() => validateRelease({...pkg, name, version: '2.0.0'}, 'latest'));
+  }
 });
 
 test('runtime startup identifies the actual package version', t => {

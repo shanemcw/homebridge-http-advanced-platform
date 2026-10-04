@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge HTTP Advanced Platform",
   "name": "homebridge-http-advanced-platform",
-  "version": "2.0.0-alpha.9",
+  "version": "2.0.0",
   "description": "Connect HTTP/HTTPS devices and REST APIs to HomeKit with JSON/XML mapping, polling and shared cached reads. A platform conversion of staromeste's homebridge-http-advanced-accessory with support for existing accessory configurations.",
   "license": "Apache-2.0",
   "keywords": [
@@ -74,10 +74,12 @@
     "docs/performance.md",
     "docs/service-support.md",
     "docs/modernization.md",
-    "docs/legacy-reference.md",
+    "docs/configuration-examples.md",
     "docs/alpha-release-notes.md",
     "sample-config.json",
-    "homebridge-ui"
+    "homebridge-ui",
+    "docs/release-notes.md",
+    "CHANGELOG.md"
   ],
   "bugs": {
     "url": "https://github.com/shanemcw/homebridge-http-advanced-platform/issues"
@@ -88,6 +90,6 @@
     "Shane McWhorter"
   ],
   "publishConfig": {
-    "tag": "alpha"
+    "tag": "latest"
   }
 }

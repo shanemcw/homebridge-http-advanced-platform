@@ -101,7 +101,7 @@ test('scale parameters reject invalid bounds and options during configuration va
 
 test('documented dimmer example is valid accessory configuration', () => {
   const readme=readFileSync(new URL('../README.md',import.meta.url),'utf8');
-  const section=readme.split('### Scale a device value (Alpha.9)')[1].split('### Add battery information')[0];
+  const section=readme.split('### Scale a device value')[1].split('### Add battery information')[0];
   const example=JSON.parse(section.match(/```json\s*([\s\S]*?)\s*```/)[1]);
   const schema=JSON.parse(readFileSync(new URL('../config.schema.json',import.meta.url),'utf8'));
   const Ajv=require('ajv');
@@ -114,7 +114,7 @@ test('documented dimmer example is valid accessory configuration', () => {
 
 test('documented strict lookup relay is valid accessory configuration', () => {
   const readme=readFileSync(new URL('../README.md',import.meta.url),'utf8');
-  const section=readme.split('### Look up exact device states (Alpha.9)')[1].split('### Scale a device value')[0];
+  const section=readme.split('### Look up exact device states')[1].split('### Scale a device value')[0];
   const example=JSON.parse(section.match(/```json\s*([\s\S]*?)\s*```/)[1]);
   const schema=JSON.parse(readFileSync(new URL('../config.schema.json',import.meta.url),'utf8'));
   const Ajv=require('ajv');

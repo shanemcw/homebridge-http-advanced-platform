@@ -6,7 +6,7 @@ The examples use `HttpAdvancedAccessory` blocks because they are compact and rem
 
 When `mappers` is present, it is an ordered array. The output of one mapper becomes the input of the next. Use [`lookup`](modernization.md#mappers) when the accepted input vocabulary is exact, and retain legacy `static` when pass-through behavior is intentional.
 
-> **Refresh behavior:** Alpha serves getter values from shared cached state while HTTP acquisition runs in the background. A positive `forceRefreshDelay` keeps that device's explicit normal polling interval. `forceRefreshDelay: 0` uses the shared active/idle refresh schedule; unlike 1.3.0, it no longer means "fetch only when HomeKit asks." See [how reads and freshness work](modernization.md#how-reads-and-freshness-work).
+> **Refresh behavior:** This plugin serves getter values from shared cached state while HTTP acquisition runs in the background. A positive `forceRefreshDelay` keeps that device's explicit normal polling interval. `forceRefreshDelay: 0` uses the shared active/idle refresh schedule; unlike 1.3.0, it no longer means "fetch only when HomeKit asks." See [how reads and freshness work](modernization.md#how-reads-and-freshness-work).
 
 ## 1. Read a value from JSON
 
@@ -509,6 +509,6 @@ Choose the `id` before pairing and keep it stable. Moving an existing legacy acc
 
 ## More references
 
-- The root [README](../README.md) covers installation, platform coexistence, Alpha.9 `lookup`/`scale`, additional services, shared settings, and troubleshooting.
+- The root [README](../README.md) covers installation, platform coexistence, `lookup`/`scale`, additional services, shared settings, and troubleshooting.
 - The [modernization reference](modernization.md) documents action semantics, caching, scheduling, response guards, mapper behavior, and release policy.
 - The [service support table](service-support.md) lists services available for the supported Homebridge/HAP versions.
