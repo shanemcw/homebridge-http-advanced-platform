@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.1.0 - In progress
+
+Working development version; not published. Stable npm `latest` remains `2.0.0`.
+
+- Strip all configured headers, including custom API-key headers, when GET/HEAD
+  requests redirect to another origin. Preserve headers and authentication on
+  same-origin redirects.
+- Extend the publication guard to recognize Alpha/Beta versions of later
+  releases, while retaining package-name and matching-channel checks.
+- Track optional per-action command handling as planned work; it is not yet
+  implemented. See the [development plan](docs/development-2.1.0.md).
+
 ## 2.0.0 - 2026-10-04
 
 First stable release of `homebridge-http-advanced-platform`, promoting the

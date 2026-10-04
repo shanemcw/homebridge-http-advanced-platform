@@ -12,6 +12,8 @@ This is a platform conversion of [staromeste's homebridge-http-advanced-accessor
 
 **Stable release: `2.0.0`.** This release promotes the Alpha.9 runtime, including optional additional services on one accessory, declarative `scale` and strict `lookup` mappers, and configurable accessory information. This package is not Homebridge-verified. See the [release notes](docs/release-notes.md) for validation and field coverage. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain the boundaries.
 
+**Working version: `2.1.0` — in progress on `develop/2.1.0`.** This development version is not published. It begins with cross-origin redirect header hardening; individual-command handling remains planned. See the [development plan](docs/development-2.1.0.md). Installation instructions below continue to select stable `2.0.0`.
+
 [User guide](#user-guide) · [Configuration examples](docs/configuration-examples.md) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
 
 ## User guide
