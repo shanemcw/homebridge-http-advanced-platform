@@ -44,3 +44,32 @@ claim Homebridge verification, completed beta soak or stable promotion yet.
 
 See the [local installation record](LOCAL-DEV-20261013.md) for backups, preserved
 configuration/accessory identities and user-reported Apple Home acceptance.
+
+## Publication and Install Popup Verification
+
+Published October 13, 2026, after npm CLI login and its separate security-key
+publishing confirmation. npm accepted the exact reviewed archive.
+
+- GitHub prerelease:
+  https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.1.0-beta.1
+- Release commit: `4efc9d8c3f96cbd23bae26b069a45fd6cf26ef1d`.
+- GitHub compatibility runs for the branch and tag both completed successfully:
+  https://github.com/shanemcw/homebridge-http-advanced-platform/actions/runs/38431967891
+  and https://github.com/shanemcw/homebridge-http-advanced-platform/actions/runs/38431967832.
+- Public npm `beta` resolves to `2.1.0-beta.1`; `latest` remains `2.0.0`, and
+  `alpha` remains `2.0.0-alpha.9`. GitHub's latest regular release remains v2.0.0.
+- Downloading the package through npm `@beta` produces the same SHA-256 as the
+  tested archive and GitHub release asset.
+- Real Homebridge UI Manage Version displays the beta channel. Choosing the
+  beta opens its installation popup with the complete matching release notes,
+  including schema correction, legacy editor behavior, title case and redirect
+  compatibility guidance. Verification stopped at the notes screen.
+- Homebridge remains active/running with zero automatic restarts. Stinky-1 still
+  has local package version `2.1.0`; no package installation or restart occurred
+  during public beta publication. Its runtime, schema and UI are identical to
+  the public beta, as recorded above.
+
+Review the household soak on or after October 20, 2026. Only promote stable
+2.1.0 to `latest` after satisfactory device/automation acceptance, then request
+Homebridge's verification bot to check the stable package again. This checkpoint
+does not schedule an automatic promotion or submit another verification request.
