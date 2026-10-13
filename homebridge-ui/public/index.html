@@ -11,10 +11,10 @@
   .http-settings textarea { font-family: monospace; tab-size: 2; min-height: 260px; resize: vertical; }
   .http-settings .form-control { background-color: transparent; color: inherit; padding: 8px 12px; }
   .http-settings .form-control::placeholder { color: inherit; opacity: .65; }
-  .http-settings .btn { justify-self: start; padding: 8px 16px; margin: 0; }
+  .http-settings .btn { justify-self: start; padding: 8px 16px; margin: 0; text-transform: none; }
   .http-settings .legacy-navigation { display: flex; align-items: baseline; flex-wrap: wrap; gap: 16px 24px; }
-  .http-settings .legacy-list { max-height: 220px; overflow-y: auto; margin: 12px 0 0; padding-left: 24px; }
-  .http-settings .legacy-list li + li { margin-top: 4px; }
+  .http-settings .legacy-accessory + .legacy-accessory { margin-top: 16px; }
+  .http-settings .legacy-accessory textarea { margin: 8px 0 12px; }
   .http-settings summary { cursor: pointer; padding: 8px 0; }
   .http-settings .timings { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px 16px; }
   .http-settings .timings > div { display: grid; grid-template-rows: 1fr auto; gap: 8px; min-width: 0; }
@@ -41,31 +41,31 @@
   <form id="settings" hidden>
     <fieldset id="settings-fields">
     <section aria-labelledby="legacy-title">
-      <h2 id="legacy-title">Legacy accessories <span id="legacy-count"></span></h2>
+      <h2 id="legacy-title">Legacy Accessories <span id="legacy-count"></span></h2>
       <p id="legacy-summary"></p>
-      <p>To edit, add or delete an accessory, close this screen and choose <strong>JSON Config</strong> from this plugin's menu. Each accessory has its own editor for URLs, mappings and other settings.</p>
-      <p>Save any changes below before leaving this screen. Keep an existing accessory's name and alias unchanged to retain its HomeKit identity.</p>
-      <div class="legacy-navigation">
-      <button type="button" id="legacy-config" class="btn btn-outline-primary">Back to plugin menu</button>
+      <p>Expand an accessory to edit its URLs, mappings and other settings. Keep an existing accessory's name and alias unchanged to retain its HomeKit identity. Removing an accessory takes effect when you save and restart Homebridge.</p>
       <details id="legacy-details">
-        <summary>View configured accessories</summary>
-        <ul id="legacy-list" class="legacy-list"></ul>
+        <summary>Edit Configured Accessories</summary>
+        <div id="legacy-accessories"></div>
       </details>
+      <div class="legacy-navigation">
+      <button type="button" id="add-accessory" class="btn btn-outline-primary">Add Legacy Accessory</button>
+      <button type="button" id="legacy-config" class="btn btn-outline-primary">Back to Plugin Menu</button>
       </div>
     </section>
     <section aria-labelledby="global-title">
-      <h2 id="global-title">Shared settings</h2>
+      <h2 id="global-title">Shared Settings</h2>
       <p>Defaults for legacy accessories and platforms, including child bridges. Existing per-device and per-action values take precedence. Blank fields use the built-in default shown.</p>
       <div id="timings" class="timings"></div>
     </section>
     <section aria-labelledby="platform-title">
-      <h2 id="platform-title">Optional platforms</h2>
-      <p>Add new devices here while maintaining legacy accessories through JSON Config. Moving an existing accessory here creates a new HomeKit identity; plan room, scene and automation reassignment. Do not define the same device in both sections.</p>
+      <h2 id="platform-title">Optional Platforms</h2>
+      <p>Add new devices here while maintaining legacy accessories above. Moving an existing accessory here creates a new HomeKit identity; plan room, scene and automation reassignment. Do not define the same device in both sections.</p>
       <div id="platforms"></div>
-      <button type="button" id="add-platform" class="btn btn-outline-primary">Also use as a platform</button>
+      <button type="button" id="add-platform" class="btn btn-outline-primary">Also Use as a Platform</button>
     </section>
     <div class="actions">
-      <button type="submit" id="save" class="btn btn-primary">Save all settings</button>
+      <button type="submit" id="save" class="btn btn-primary">Save All Settings</button>
       <span>Restart Homebridge after saving to apply changes.</span>
     </div>
     </fieldset>

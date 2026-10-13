@@ -20,6 +20,8 @@
   let loaded;
   let hasChanges = false;
   let saving = false;
+  let accessoryEditors = [];
+  let nextAccessoryID = 0;
   let platformEditors = [];
   const message = (text, error = false) => {
     $('status').textContent = text; $('status').className = error ? 'text-danger' : '';
@@ -29,13 +31,34 @@
     try { return JSON.parse(editor.value); }
     catch { throw new Error(`${label} contains invalid JSON; no changes saved`); }
   };
+  const updateAccessoryCount = () => {
+    $('legacy-count').textContent = `(${accessoryEditors.length})`;
+    $('legacy-details').hidden = accessoryEditors.length === 0;
+  };
+  const addAccessory = block => {
+    const index = ++nextAccessoryID;
+    const container = document.createElement('details'); container.className = 'legacy-accessory';
+    const summary = document.createElement('summary');
+    const describe = value => { summary.textContent = `${value?.name ?? 'New accessory'} — ${value?.service ?? 'Choose a service'}`; };
+    describe(block);
+    const label = document.createElement('label'); label.htmlFor = `accessory-${index}`; label.textContent = `Legacy accessory ${index} configuration (JSON object):`;
+    const editor = document.createElement('textarea'); editor.id = label.htmlFor; editor.className = 'form-control'; editor.spellcheck = false; editor.autocomplete = 'off'; editor.value = JSON.stringify(block, null, 2);
+    editor.addEventListener('input', () => { try { describe(JSON.parse(editor.value)); } catch { /* allow incomplete JSON while editing */ } });
+    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-outline-danger'; remove.textContent = 'Remove This Accessory';
+    remove.addEventListener('click', () => {
+      accessoryEditors = accessoryEditors.filter(item => item !== editor); container.remove(); updateAccessoryCount(); hasChanges = true;
+    });
+    container.append(summary, label, editor, remove); $('legacy-accessories').append(container);
+    accessoryEditors.push(editor); updateAccessoryCount();
+    return container;
+  };
   const addPlatform = block => {
     const index = platformEditors.length + 1;
     const container = document.createElement('div'); container.className = 'platform';
     const enabledLabel = document.createElement('label');
     const enabled = document.createElement('input'); enabled.type = 'checkbox'; enabled.checked = block.enabled !== false;
-    enabledLabel.append(enabled, ` Enable platform ${index}`);
-    const label = document.createElement('label'); label.htmlFor = `platform-${index}`; label.textContent = `Platform ${index} configuration (JSON object)`;
+    enabledLabel.append(enabled, ` Enable platform ${index}:`);
+    const label = document.createElement('label'); label.htmlFor = `platform-${index}`; label.textContent = `Platform ${index} configuration (JSON object):`;
     const editor = document.createElement('textarea'); editor.id = label.htmlFor; editor.className = 'form-control'; editor.spellcheck = false; editor.autocomplete = 'off'; editor.value = JSON.stringify(block, null, 2);
     const note = document.createElement('p'); note.textContent = 'After restart, disabling retains definitions and cached identities but reports devices unavailable for reads and commands. Its name and device IDs determine HomeKit identity.';
     const limitsNote = document.createElement('p');
@@ -56,21 +79,15 @@
   const render = result => {
     loaded = result;
     const accessories = result.draft.accessories;
-    $('legacy-count').textContent = `(${accessories.length})`;
     $('legacy-summary').textContent = accessories.length
-      ? `${accessories.length} ${accessories.length === 1 ? 'accessory uses' : 'accessories use'} the shared settings below. Manage their individual definitions in JSON Config.`
-      : 'No legacy accessories are configured. Add one through JSON Config, or use an optional platform below.';
-    $('legacy-list').replaceChildren();
-    for (const accessory of accessories) {
-      const item = document.createElement('li');
-      item.textContent = `${accessory.name} — ${accessory.service}`;
-      $('legacy-list').append(item);
-    }
-    $('legacy-details').hidden = accessories.length === 0;
+      ? 'These accessories use the shared settings below. Each definition stays in accessories[].'
+      : 'Add a legacy accessory here, or use an optional platform below.';
+    accessoryEditors = []; nextAccessoryID = 0; $('legacy-accessories').replaceChildren();
+    accessories.forEach(addAccessory); updateAccessoryCount();
     $('timings').replaceChildren();
     for (const [key, title, fallback] of fields) {
       const box = document.createElement('div'); const label = document.createElement('label');
-      label.htmlFor = key; label.textContent = title;
+      label.htmlFor = key; label.textContent = `${title}:`;
       const input = document.createElement('input'); input.id = key; input.className = 'form-control'; input.type = 'number'; input.step = key.startsWith('coordinator.') ? '1' : 'any'; input.min = key.startsWith('coordinator.') ? '1' : '0'; input.placeholder = String(fallback);
       const value = key.split('.').reduce((v, k) => v?.[k], result.draft.settings);
       input.value = value === undefined ? '' : String(value);
@@ -93,6 +110,14 @@
     }
     homebridge.closeSettings();
   });
+  $('add-accessory').addEventListener('click', () => {
+    const names = accessoryEditors.map(editor => { try { return JSON.parse(editor.value).name; } catch { return undefined; } });
+    let number = 1; let name = 'HTTP Accessory';
+    while (names.includes(name)) name = `HTTP Accessory ${++number}`;
+    addAccessory({ accessory: 'HttpAdvancedAccessory', name, service: 'Switch', urls: {} }).open = true;
+    $('legacy-details').open = true;
+    hasChanges = true;
+  });
   $('add-platform').addEventListener('click', () => {
     const names = platformEditors.map(editor => { try { return JSON.parse(editor.value).name; } catch { return undefined; } });
     let number = 1; let name = 'HTTP Advanced';
@@ -107,7 +132,7 @@
     message('Saving settings…');
     try {
       const draft = structuredClone(loaded.draft);
-      // legacy definitions stay unchanged here; JSON Config owns their editing workflow
+      draft.accessories = accessoryEditors.map((editor, index) => parse(editor, `Legacy accessory ${index + 1}`));
       draft.platforms = platformEditors.map((editor, index) => parse(editor, `Platform ${index + 1}`));
       for (const [key] of fields) {
         const input = $(key).value;

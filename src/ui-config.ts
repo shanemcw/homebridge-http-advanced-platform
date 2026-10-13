@@ -36,7 +36,7 @@ export function validatePluginSettings(value: unknown): asserts value is PluginS
     validateSettings(value.settings);
     const legacyNames = new Set<string>();
     for (const [index, block] of value.accessories.entries()) {
-      location = `Legacy accessory ${index + 1} in JSON Config`;
+      location = `Legacy accessory ${index + 1}`;
       if (!owns(block, 'accessory')) throw new Error();
       validateDevice(block as DeviceConfig);
       if (legacyNames.has(block.name)) throw new Error();

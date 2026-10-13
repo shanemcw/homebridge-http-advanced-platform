@@ -65,7 +65,7 @@ test('installed official custom UI IPC preserves qualified config, bridge fields
     platforms: [{platform: `${pkg.name}.HttpAdvanced`, name: 'Fixture Platform', enabled: false, devices: []}]};
   writeFileSync(configPath, JSON.stringify(config), {mode: 0o600});
   const schema = JSON.parse(readFileSync(join(installedRoot, 'config.schema.json'), 'utf8'));
-  assert.equal(schema.pluginAlias, 'HttpAdvancedAccessory'); assert.equal(schema.pluginType, 'accessory');
+  assert.equal(schema.pluginAlias, 'HttpAdvanced'); assert.equal(schema.pluginType, 'platform');
   assert.equal(schema.customUi, true);
   const child = fork(join(installedRoot, 'homebridge-ui/server.js'), [], {
     env: {...process.env, HOMEBRIDGE_CONFIG_PATH: configPath}, stdio: ['ignore', 'ignore', 'ignore', 'ipc'],

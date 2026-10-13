@@ -1,152 +1,153 @@
 {
-  "pluginAlias": "HttpAdvancedAccessory",
-  "pluginType": "accessory",
+  "pluginAlias": "HttpAdvanced",
+  "pluginType": "platform",
   "singular": false,
   "strictValidation": false,
   "schema": {
     "type": "object",
     "required": [
       "name",
-      "service"
+      "devices"
     ],
     "additionalProperties": true,
     "properties": {
-      "id": {
-        "type": "string",
-        "description": "Stable platform identity; set before pairing"
-      },
       "name": {
-        "type": "string"
-      },
-      "service": {
         "type": "string",
-        "default": "Switch"
+        "default": "HTTP Advanced"
       },
-      "manufacturer": {
-        "type": "string"
-      },
-      "model": {
-        "type": "string"
-      },
-      "serialNumber": {
-        "type": "string"
-      },
-      "username": {
-        "type": "string"
-      },
-      "password": {
+      "platform": {
         "type": "string",
-        "format": "password"
+        "default": "HttpAdvanced"
       },
-      "immediately": {
-        "type": "boolean",
-        "default": true
-      },
-      "debug": {
-        "type": "boolean",
-        "default": false
-      },
-      "additionalServices": {
-        "type": "array",
-        "maxItems": 32,
-        "items": { "$ref": "#/definitions/additionalService" },
-        "description": "Additional HomeKit services on this accessory; each id is a stable service subtype"
-      },
-      "optionCharacteristic": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
-      "props": {
-        "type": "object",
-        "additionalProperties": {
-          "type": "object",
-          "additionalProperties": true
-        }
-      },
-      "forceRefreshDelay": {
-        "type": "number",
-        "minimum": 0,
-        "description": "Legacy polling interval in seconds; 0 selects adaptive refresh"
-      },
-      "setterDelay": {
-        "type": "number",
-        "minimum": 0,
-        "description": "Legacy debounce in milliseconds"
-      },
-      "uriCallsDelay": {
-        "type": "number",
-        "minimum": 0,
-        "description": "Minimum milliseconds between request starts for this device"
-      },
-      "refresh": {
+      "coordinator": {
         "type": "object",
         "properties": {
-          "activeInterval": {
-            "type": "number",
-            "exclusiveMinimum": 0,
-            "default": 5
+          "concurrency": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 4
           },
-          "idleInterval": {
-            "type": "number",
-            "exclusiveMinimum": 0,
-            "default": 60
+          "perOrigin": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 2
           },
-          "idleAfter": {
-            "type": "number",
-            "exclusiveMinimum": 0,
-            "default": 60
+          "maxQueue": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 256
           }
-        },
-        "description": "All intervals are in seconds"
+        }
       },
-      "urls": {
-        "type": "object",
-        "additionalProperties": {
-          "$ref": "#/definitions/action"
-        },
-        "description": "Complete action definitions, including encoded URLs, templates, recursive fallbacks and arbitrary mapper parameters"
+      "devices": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/device"
+        }
       },
-      "accessory": {
-        "type": "string",
-        "default": "HttpAdvancedAccessory"
-      },
-      "writeConfirmationTimeout": {
-        "type": "number",
-        "minimum": 0,
-        "description": "Milliseconds to hold a requested value while confirming it after HTTP success; default 10000, 0 disables the confirmation window"
+      "enabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable this platform; after restart, disabling retains device definitions and cached identities but reports devices unavailable"
       }
     },
     "definitions": {
       "refresh": {
         "type": "object",
         "properties": {
-          "activeInterval": { "type": "number", "exclusiveMinimum": 0 },
-          "idleInterval": { "type": "number", "exclusiveMinimum": 0 },
-          "idleAfter": { "type": "number", "exclusiveMinimum": 0 }
+          "activeInterval": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "idleInterval": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "idleAfter": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
         }
       },
       "additionalService": {
         "type": "object",
-        "required": ["id", "service"],
+        "required": [
+          "id",
+          "service"
+        ],
         "additionalProperties": true,
         "properties": {
-          "id": { "type": "string", "minLength": 1, "description": "Stable service subtype; keep it unchanged after pairing" },
-          "service": { "type": "string", "minLength": 1, "not": { "enum": ["AccessoryInformation"] } },
-          "name": { "type": "string", "description": "Defaults to the accessory name" },
-          "username": { "type": "string", "description": "Overrides inherited HTTP basic auth username" },
-          "password": { "type": "string", "format": "password", "description": "Overrides inherited HTTP basic auth password" },
-          "immediately": { "type": "boolean" },
-          "debug": { "type": "boolean" },
-          "optionCharacteristic": { "type": "array", "items": { "type": "string" } },
-          "props": { "type": "object", "additionalProperties": { "type": "object", "additionalProperties": true } },
-          "forceRefreshDelay": { "type": "number", "minimum": 0 },
-          "setterDelay": { "type": "number", "minimum": 0 },
-          "uriCallsDelay": { "type": "number", "minimum": 0 },
-          "writeConfirmationTimeout": { "type": "number", "minimum": 0 },
-          "refresh": { "$ref": "#/definitions/refresh" },
-          "urls": { "type": "object", "additionalProperties": { "$ref": "#/definitions/action" } },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Stable service subtype; keep it unchanged after pairing"
+          },
+          "service": {
+            "type": "string",
+            "minLength": 1,
+            "not": {
+              "enum": [
+                "AccessoryInformation"
+              ]
+            }
+          },
+          "name": {
+            "type": "string",
+            "description": "Defaults to the accessory name"
+          },
+          "username": {
+            "type": "string",
+            "description": "Overrides inherited HTTP basic auth username"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "description": "Overrides inherited HTTP basic auth password"
+          },
+          "immediately": {
+            "type": "boolean"
+          },
+          "debug": {
+            "type": "boolean"
+          },
+          "optionCharacteristic": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "props": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "forceRefreshDelay": {
+            "type": "number",
+            "minimum": 0
+          },
+          "setterDelay": {
+            "type": "number",
+            "minimum": 0
+          },
+          "uriCallsDelay": {
+            "type": "number",
+            "minimum": 0
+          },
+          "writeConfirmationTimeout": {
+            "type": "number",
+            "minimum": 0
+          },
+          "refresh": {
+            "$ref": "#/definitions/refresh"
+          },
+          "urls": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/definitions/action"
+            }
+          },
           "additionalServices": false
         }
       },
@@ -211,32 +212,90 @@
                   "description": "Mapper-specific static/lookup mapping, regexp/capture, xpath/index, jpath/index, scale range/round/clamp, or expression. See README."
                 }
               },
-              "allOf": [{
-                "if": { "properties": { "type": { "const": "lookup" } }, "required": ["type"] },
-                "then": { "properties": { "parameters": {
-                  "required": ["mapping"],
-                  "additionalProperties": false,
-                  "properties": { "mapping": {
-                    "type": "object",
-                    "minProperties": 1,
-                    "additionalProperties": { "type": ["string", "number", "boolean"] }
-                  } }
-                } } }
-              }, {
-                "if": { "properties": { "type": { "const": "scale" } }, "required": ["type"] },
-                "then": { "properties": { "parameters": {
-                  "required": ["inputMin", "inputMax", "outputMin", "outputMax"],
-                  "additionalProperties": false,
-                  "properties": {
-                    "inputMin": { "type": "number" },
-                    "inputMax": { "type": "number" },
-                    "outputMin": { "type": "number" },
-                    "outputMax": { "type": "number" },
-                    "round": { "type": "integer", "minimum": 0, "maximum": 12 },
-                    "clamp": { "type": "boolean" }
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": {
+                        "const": "lookup"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "parameters": {
+                        "required": [
+                          "mapping"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "mapping": {
+                            "type": "object",
+                            "minProperties": 1,
+                            "additionalProperties": {
+                              "type": [
+                                "string",
+                                "number",
+                                "boolean"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
-                } } }
-              }]
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "type": {
+                        "const": "scale"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "parameters": {
+                        "required": [
+                          "inputMin",
+                          "inputMax",
+                          "outputMin",
+                          "outputMax"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "inputMin": {
+                            "type": "number"
+                          },
+                          "inputMax": {
+                            "type": "number"
+                          },
+                          "outputMin": {
+                            "type": "number"
+                          },
+                          "outputMax": {
+                            "type": "number"
+                          },
+                          "round": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 12
+                          },
+                          "clamp": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
             }
           },
           "resultOnError": {
@@ -300,120 +359,7 @@
           "devices": {
             "type": "array",
             "items": {
-              "type": "object",
-              "required": [
-                "name",
-                "service"
-              ],
-              "additionalProperties": true,
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "Stable platform identity; set before pairing"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "service": {
-                  "type": "string",
-                  "default": "Switch"
-                },
-                "manufacturer": {
-                  "type": "string"
-                },
-                "model": {
-                  "type": "string"
-                },
-                "serialNumber": {
-                  "type": "string"
-                },
-                "username": {
-                  "type": "string"
-                },
-                "password": {
-                  "type": "string",
-                  "format": "password"
-                },
-                "immediately": {
-                  "type": "boolean",
-                  "default": true
-                },
-                "debug": {
-                  "type": "boolean",
-                  "default": false
-                },
-                "additionalServices": {
-                  "type": "array",
-                  "maxItems": 32,
-                  "items": { "$ref": "#/definitions/additionalService" },
-                  "description": "Additional HomeKit services on this device; each id is a stable service subtype"
-                },
-                "optionCharacteristic": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "props": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "additionalProperties": true
-                  }
-                },
-                "forceRefreshDelay": {
-                  "type": "number",
-                  "minimum": 0,
-                  "description": "Legacy polling interval in seconds; 0 selects adaptive refresh"
-                },
-                "setterDelay": {
-                  "type": "number",
-                  "minimum": 0,
-                  "description": "Legacy debounce in milliseconds"
-                },
-                "uriCallsDelay": {
-                  "type": "number",
-                  "minimum": 0,
-                  "description": "Minimum milliseconds between request starts for this device"
-                },
-                "refresh": {
-                  "type": "object",
-                  "properties": {
-                    "activeInterval": {
-                      "type": "number",
-                      "exclusiveMinimum": 0,
-                      "default": 5
-                    },
-                    "idleInterval": {
-                      "type": "number",
-                      "exclusiveMinimum": 0,
-                      "default": 60
-                    },
-                    "idleAfter": {
-                      "type": "number",
-                      "exclusiveMinimum": 0,
-                      "default": 60
-                    }
-                  },
-                  "description": "All intervals are in seconds"
-                },
-                "urls": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "$ref": "#/definitions/action"
-                  },
-                  "description": "Complete action definitions, including encoded URLs, templates, recursive fallbacks and arbitrary mapper parameters"
-                },
-                "accessory": {
-                  "type": "string",
-                  "default": "HttpAdvancedAccessory"
-                },
-                "writeConfirmationTimeout": {
-                  "type": "number",
-                  "minimum": 0,
-                  "description": "Milliseconds to hold a requested value while confirming it after HTTP success; default 10000, 0 disables the confirmation window"
-                }
-              }
+              "$ref": "#/definitions/device"
             }
           },
           "enabled": {
@@ -518,9 +464,127 @@
             "description": "Milliseconds to hold a requested value while confirming it after HTTP success; default 10000, 0 disables the confirmation window"
           }
         }
+      },
+      "device": {
+        "type": "object",
+        "required": [
+          "name",
+          "service"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable platform identity; set before pairing"
+          },
+          "name": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string",
+            "default": "Switch"
+          },
+          "manufacturer": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          },
+          "immediately": {
+            "type": "boolean",
+            "default": true
+          },
+          "debug": {
+            "type": "boolean",
+            "default": false
+          },
+          "additionalServices": {
+            "type": "array",
+            "maxItems": 32,
+            "items": {
+              "$ref": "#/definitions/additionalService"
+            },
+            "description": "Additional HomeKit services on this accessory; each id is a stable service subtype"
+          },
+          "optionCharacteristic": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "props": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "forceRefreshDelay": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Legacy polling interval in seconds; 0 selects adaptive refresh"
+          },
+          "setterDelay": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Legacy debounce in milliseconds"
+          },
+          "uriCallsDelay": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Minimum milliseconds between request starts for this device"
+          },
+          "refresh": {
+            "type": "object",
+            "properties": {
+              "activeInterval": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "default": 5
+              },
+              "idleInterval": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "default": 60
+              },
+              "idleAfter": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "default": 60
+              }
+            },
+            "description": "All intervals are in seconds"
+          },
+          "urls": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/definitions/action"
+            },
+            "description": "Complete action definitions, including encoded URLs, templates, recursive fallbacks and arbitrary mapper parameters"
+          },
+          "accessory": {
+            "type": "string",
+            "default": "HttpAdvancedAccessory"
+          },
+          "writeConfirmationTimeout": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Milliseconds to hold a requested value while confirming it after HTTP success; default 10000, 0 disables the confirmation window"
+          }
+        }
       }
     }
   },
   "customUi": true,
-  "headerDisplay": "Homebridge HTTP Advanced Platform supports existing accessories and optional platform devices. Use Plugin Config for platforms and shared settings."
+  "headerDisplay": "Homebridge HTTP Advanced Platform supports platform devices and existing accessories. Use Plugin Config for legacy accessories and shared settings."
 }

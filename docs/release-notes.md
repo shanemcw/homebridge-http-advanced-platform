@@ -1,51 +1,52 @@
-# Homebridge HTTP Advanced Platform 2.0.0
+# Homebridge HTTP Advanced Platform 2.1.0-beta.1
 
-First stable release of `homebridge-http-advanced-platform`, published on npm's
-`latest` channel. This is a platform conversion of
-[staromeste/homebridge-http-advanced-accessory](https://github.com/staromeste/homebridge-http-advanced-accessory),
-retaining the Apache-2.0 license, history and contributor credit. The original
-accessory package does not automatically update to this separate package.
+Beta release for a week of household testing before stable promotion.
+Select **beta** or **v2.1.0-beta.1** in Homebridge UI **Manage Version**, or install
+`homebridge-http-advanced-platform@2.1.0-beta.1` in your existing plugin location.
+npm **latest remains 2.0.0**. This package is not yet Homebridge-verified.
 
-## Behavior and installation
+## Changes
 
-2.0.0 promotes the Alpha.9 device runtime without changes to HTTP handling,
-polling, caching, recovery, write confirmation, configuration aliases or the
-platform UUID namespace. It includes optional accessory information,
-`additionalServices`, and the `scale` and `lookup` mappers. Current configuration
-examples and the changelog are included in the published package.
+- Correct the configuration schema to identify the `HttpAdvanced` platform and
+  describe a platform at its root, addressing the failed automated verification
+  check. Existing `HttpAdvancedAccessory` configurations remain supported.
+- Add expandable legacy accessory JSON editors and add/remove controls to
+  **Plugin Config**. Native **JSON Config** manages platform definitions; Plugin
+  Config brings legacy accessories, shared settings and optional platforms
+  together. Opening the UI does not migrate or rewrite configuration.
+- Use title case for headings and buttons, and sentence case with a colon for
+  field labels. Buttons retain title case under the Homebridge theme.
+- Remove all configured headers and device Basic Auth when GET/HEAD requests
+  redirect to another origin. Same-origin redirects retain them.
 
-Select `latest` or `2.0.0` in Homebridge UI, or install
-`homebridge-http-advanced-platform@2.0.0` through the same account and plugin
-location your Homebridge installation uses. The `alpha` channel retains the
-earlier Alpha.9 release. Requires Node `^22.13.0 || ^24.0.0` and Homebridge
-`^1.11.4 || ^2.4.0`.
+## Before Installing
 
-Existing platform-package Alpha users can upgrade in place while keeping their
-configuration and storage. Users replacing the original accessory package must
-follow the [migration guide](migration.md): back up Homebridge, separately save
-the exact legacy accessory JSON, and preserve configuration and pairing data
-when removing the old package. Both packages register the same aliases and must
-not be loaded together. Changing package-qualified legacy identifiers or moving
-a device into platform mode can change its HomeKit identity.
+Make a full Homebridge backup. Keep existing accessory names, aliases, storage
+and bridge assignments unchanged. This update does not require converting
+legacy accessories into platform devices.
 
-## Validation and field coverage
+**Redirect compatibility:** an origin changes when the scheme, hostname or port
+changes. A redirected endpoint on another origin will no longer receive custom
+API-key headers, cookies or authentication from the starting endpoint. If that
+trusted final endpoint needs configured headers or authentication, configure
+its URL directly.
 
-The release review compares local source, GitHub compatibility CI, a fresh
-production-dependency installation and the installed household package. The
-household Alpha.9 installation matches all 56 files in the public Alpha.9 archive.
-Its retained logs show 44 legacy Switch accessories restoring all 44 cached
-getters after restarts, and successful background recovery after temporary
-backend outages. The household owner reports sustained use of this release line.
+Users replacing the original `homebridge-http-advanced-accessory` package must
+follow the [migration guide](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.1.0-beta.1/docs/migration.md).
+Do not load both packages together because their registered aliases overlap.
 
-Household configuration uses legacy switches, without platform devices,
-additional services or the new mapper modes. Those optional paths have
-automated and isolated package/UI coverage rather than household soak. Read-only
-inspection does not independently verify physical actuation, Apple Home rooms,
-scenes or automations. Detailed cache values and success ages could not be read
-through the production inspection account; state-file writes and restoration
-logs provide narrower evidence. This package is not Homebridge-verified.
+## Validation and Beta Coverage
 
-Preserve backups and verify your own device controls and HomeKit references
-after installation. The [historical Alpha notes](alpha-release-notes.md) describe
-the development milestones; the [changelog](../CHANGELOG.md) describes stable
-release changes.
+The candidate is checked on Node 22 and 24 with Homebridge 1 and 2, with fresh
+production-dependency package installation and custom UI checks. The local
+development build restored all 44 legacy device getters, retained configuration
+and cached accessory identities, and received household-owner confirmation that
+Apple Home displayed state and physical control worked correctly.
+
+Household testing covers legacy Switch accessories. Optional platforms,
+additional services and new mapper modes have automated and isolated coverage.
+Verify your own devices, scenes and automations after updating. Individual
+per-action command handling remains planned and is not included in this beta.
+
+Stable promotion and verification resubmission will follow a successful week of
+beta testing. See the [full changelog](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.1.0-beta.1/CHANGELOG.md).

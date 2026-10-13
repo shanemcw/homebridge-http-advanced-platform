@@ -1,16 +1,27 @@
 # Changelog
 
-## 2.1.0 - In progress
+## 2.1.0-beta.1 - 2026-10-13
 
-Working development version; not published. Stable npm `latest` remains `2.0.0`.
+Beta release for a week of household testing before stable promotion. npm `beta`
+selects this version; stable npm `latest` remains `2.0.0`.
 
 - Strip all configured headers, including custom API-key headers, when GET/HEAD
   requests redirect to another origin. Preserve headers and authentication on
   same-origin redirects.
 - Extend the publication guard to recognize Alpha/Beta versions of later
   releases, while retaining package-name and matching-channel checks.
-- Track optional per-action command handling as planned work; it is not yet
-  implemented. See the [development plan](docs/development-2.1.0.md).
+- Identify the registered `HttpAdvanced` platform in the configuration schema
+  and expose the platform schema at its root for Homebridge verification.
+- Keep individual legacy accessory editing in Plugin Config with expandable
+  JSON editors and add/remove controls; native JSON Config edits platforms.
+- Use title case for settings headings and buttons, and sentence case with a
+  colon for field labels. Prevent the Homebridge theme from capitalizing buttons.
+
+**Redirect compatibility:** if a trusted endpoint on another origin needs
+configured headers or authentication, configure that final endpoint directly.
+Existing accessory configurations remain supported without platform conversion.
+See the [beta release notes](docs/release-notes.md). Per-action command handling
+remains planned and is not included in this beta.
 
 ## 2.0.0 - 2026-10-04
 

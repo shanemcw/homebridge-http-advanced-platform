@@ -17,7 +17,7 @@ window.homebridge=new EventTarget();
 homebridge.disableSaveButton=()=>{};
 homebridge.closeSettings=()=>{
   document.querySelector('.http-settings').hidden=true;
-  const note=document.createElement('p');note.id='closed-settings';note.textContent='Plugin menu — choose JSON Config to edit individual accessories';document.body.append(note);
+  const note=document.createElement('p');note.id='closed-settings';note.textContent='Plugin menu — JSON Config manages platform definitions';document.body.append(note);
 };
 homebridge.request=async(path,body)=>{
   const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body??{})});

@@ -22,13 +22,16 @@ test('platform JSON schema accepts every sanitized legacy device and recursive a
   const Ajv=require('ajv');
   const schema=JSON.parse(readFileSync(new URL('../config.schema.json',import.meta.url),'utf8'));
   const devices=JSON.parse(readFileSync(new URL('./fixtures/fleet.json',import.meta.url),'utf8'));
-  assert.equal(schema.pluginAlias, 'HttpAdvancedAccessory');
-  assert.equal(schema.pluginType, 'accessory');
+  assert.equal(schema.pluginAlias, 'HttpAdvanced');
+  assert.equal(schema.pluginType, 'platform');
   assert.equal(schema.customUi, true);
   const ajv=new Ajv({formats:{password:()=>true}});
-  const legacyValidator=ajv.compile(schema.schema);
+  const legacyValidator=ajv.compile({...schema.schema.definitions.device,definitions:schema.schema.definitions});
   for (const device of devices) assert.equal(legacyValidator(device),true,JSON.stringify(legacyValidator.errors));
-  const validator=ajv.compile({definitions:schema.schema.definitions,$ref:'#/definitions/platform'});
+  const validator=ajv.compile(schema.schema);
+  assert.equal(validator(devices[0]),false);
+  assert.equal(validator({name:'Empty',platform:'HttpAdvanced',devices:[]}),true);
+  assert.equal(validator({name:'Missing devices',platform:'HttpAdvanced'}),false);
   assert.equal(validator({name:'Fixture',platform:'HttpAdvanced',devices}),true,JSON.stringify(validator.errors));
   const multiService={name:'Door',service:'ContactSensor',additionalServices:[{
     id:'battery',service:'BatteryService',optionCharacteristic:['BatteryLevel'],
@@ -58,7 +61,7 @@ test('platform JSON schema accepts every sanitized legacy device and recursive a
 test('lookup configuration requires a nonempty scalar mapping', () => {
   const schema=JSON.parse(readFileSync(new URL('../config.schema.json',import.meta.url),'utf8'));
   const Ajv=require('ajv');
-  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile(schema.schema);
+  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile({...schema.schema.definitions.device,definitions:schema.schema.definitions});
   const device=parameters=>({name:'Relay',service:'Switch',urls:{getOn:{url:'http://example.invalid',mappers:[{type:'lookup',parameters}]}}});
   for (const parameters of [
     {},{mapping:{}},{mapping:[]},{mapping:null},{mapping:{OFF:null}},
@@ -73,7 +76,7 @@ test('lookup configuration requires a nonempty scalar mapping', () => {
 test('scale parameters reject invalid bounds and options during configuration validation', () => {
   const schema=JSON.parse(readFileSync(new URL('../config.schema.json',import.meta.url),'utf8'));
   const Ajv=require('ajv');
-  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile(schema.schema);
+  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile({...schema.schema.definitions.device,definitions:schema.schema.definitions});
   const base={inputMin:0,inputMax:255,outputMin:0,outputMax:100};
   const device=parameters=>({name:'Dimmer',service:'Lightbulb',urls:{getBrightness:{url:'http://example.invalid',mappers:[{type:'scale',parameters}]}}});
   for (const parameters of [
@@ -105,7 +108,7 @@ test('documented dimmer example is valid accessory configuration', () => {
   const example=JSON.parse(section.match(/```json\s*([\s\S]*?)\s*```/)[1]);
   const schema=JSON.parse(readFileSync(new URL('../config.schema.json',import.meta.url),'utf8'));
   const Ajv=require('ajv');
-  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile(schema.schema);
+  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile({...schema.schema.definitions.device,definitions:schema.schema.definitions});
   assert.equal(schemaValidator(example),true,JSON.stringify(schemaValidator.errors));
   validateDevice(example);
   assert.equal(example.urls.getBrightness.mappers[0].type,'scale');
@@ -118,7 +121,7 @@ test('documented strict lookup relay is valid accessory configuration', () => {
   const example=JSON.parse(section.match(/```json\s*([\s\S]*?)\s*```/)[1]);
   const schema=JSON.parse(readFileSync(new URL('../config.schema.json',import.meta.url),'utf8'));
   const Ajv=require('ajv');
-  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile(schema.schema);
+  const schemaValidator=new Ajv({formats:{password:()=>true}}).compile({...schema.schema.definitions.device,definitions:schema.schema.definitions});
   assert.equal(schemaValidator(example),true,JSON.stringify(schemaValidator.errors));
   validateDevice(example);
   assert.equal(example.urls.getOn.mappers[0].parameters.mapping.OFF,false);

@@ -1,8 +1,11 @@
-# 2.1.0 — in progress
+# 2.1.0 Beta Development
 
-The working version is `2.1.0`, on `develop/2.1.0`. It is not published or
-deployed. Stable npm `latest` remains `2.0.0`. Development continues in the owned
-`shanemcw/homebridge-http-advanced-platform` repository.
+The first public candidate is `2.1.0-beta.1`, on `develop/2.1.0` and npm `beta`.
+Stable npm `latest` remains `2.0.0`. A local development build was installed on
+2026-10-13 and accepted by its household owner in Apple Home before preparing
+the beta. Plan a week of beta testing before stable promotion; promotion and
+Homebridge verification resubmission are separate later steps. Development
+continues in the owned `shanemcw/homebridge-http-advanced-platform` repository.
 
 Version policy for this project: functional improvements advance the minor
 version (`2.1.0`); the third component is reserved for cosmetic changes. A
@@ -23,12 +26,27 @@ with a single coordinator slot.
 
 Compatibility change: an endpoint on another origin will no longer receive
 custom headers from the starting endpoint. Configure that trusted final
-endpoint directly if it needs its own headers. Published `2.0.0` still forwards
-custom headers across origins; this hardening has not been distributed yet.
+endpoint directly if it needs its own headers. Stable `2.0.0` still forwards
+custom headers across origins; the beta includes the hardening.
 
 The release guard also accepts Alpha/Beta version strings for later release
-lines, including `2.1.0-alpha.1`, with matching explicit tags. This does not
-publish a candidate or change any registry tag.
+lines, including `2.1.0-beta.1`, with matching explicit tags. The beta package
+defaults to `publishConfig.tag: beta`, keeping stable `latest` unchanged.
+
+## Implemented: platform schema and legacy configuration editors
+
+Homebridge verification requires `pluginType: platform`. The schema now selects
+the registered `HttpAdvanced` platform alias and describes a platform at its
+root, with the unchanged device schema available as a reusable definition.
+Legacy `HttpAdvancedAccessory` registration, configuration and HomeKit identity
+remain supported.
+
+The native plugin JSON Config now edits platform definitions. Plugin Config
+provides individual expandable JSON editors with add and remove controls for
+legacy accessories, alongside platforms and shared settings. Opening the UI
+does not migrate or write configuration. Unedited fields, encoded commands,
+aliases, child-bridge assignments and unrelated configuration remain preserved
+by the existing validated, backed-up save path.
 
 ## Planned: preserve individual HTTP commands
 
@@ -62,10 +80,11 @@ this proposal.
 
 ## Release readiness
 
-Before distributing this changed runtime, review the final scope, run the
-Node 22/24 × Homebridge 1/2 matrix, inspect and install the package in isolation,
-and validate relevant device behavior. Record any prerelease or production
-deployment separately from this development checkpoint.
+Each public candidate must pass the Node 22/24 × Homebridge 1/2 matrix, production
+dependency audit and fresh package installation checks. Record deployment and
+device acceptance separately. The [beta release notes](release-notes.md) describe
+the released scope and the limits of household coverage. Optional per-action
+command handling is not a release requirement for this beta.
 
 The [branch archive](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/main/maintenance/platform-release/BRANCH-ARCHIVE-20261004.md)
 preserves the old history. Contribution and coordination plans for the original

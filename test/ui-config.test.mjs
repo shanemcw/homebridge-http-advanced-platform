@@ -116,3 +116,19 @@ test('official Homebridge custom UI IPC server loads and saves both config types
   assert.equal(saved.draft.platforms[0].enabled,true);assert.equal(saved.draft.accessories.length,44);
   assert.ok(!output.includes('%24home'));assert.ok(!output.includes('000-00-000'));
 });
+
+test('legacy editor changes, additions and removals preserve other devices and bridge assignments', t => {
+  const {editor,path,config}=setup(t);
+  const loaded=editor.load();
+  loaded.draft.accessories[0].manufacturer='Edited Fixture Manufacturer';
+  loaded.draft.accessories.splice(2,1);
+  loaded.draft.accessories.push({accessory:'HttpAdvancedAccessory',name:'Added Fixture',service:'Switch',urls:{}});
+  assert.equal(editor.save(loaded).changed,true);
+  const saved=JSON.parse(readFileSync(path,'utf8'));
+  const changed={...config.accessories[1],manufacturer:'Edited Fixture Manufacturer'};
+  assert.deepEqual(saved.accessories,[config.accessories[0],changed,config.accessories[2],...config.accessories.slice(4,-1),loaded.draft.accessories.at(-1),config.accessories.at(-1)]);
+  assert.deepEqual(saved.platforms,config.platforms);
+  assert.deepEqual(saved.bridge,config.bridge);
+  assert.deepEqual(saved.unrelated,config.unrelated);
+  assert.equal(editor.save(editor.load()).changed,false);
+});
