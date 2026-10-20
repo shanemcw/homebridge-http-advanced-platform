@@ -12,7 +12,7 @@ This is a platform conversion of [staromeste's homebridge-http-advanced-accessor
 
 **Stable release: `2.0.0`.** This release promotes the Alpha.9 runtime, including optional additional services on one accessory, declarative `scale` and strict `lookup` mappers, and configurable accessory information. This package is not Homebridge-verified. See the [stable GitHub release](https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.0.0) for validation and field coverage. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain the boundaries.
 
-**Beta release: `2.1.0-beta.1`.** The `beta` channel adds redirect header hardening, the platform schema correction and improved configuration editors. It will receive a week of household testing before stable promotion. Review the [beta release notes](docs/release-notes.md), especially the redirect compatibility change. Individual-command handling remains planned. Installation instructions below select stable `2.0.0` unless you explicitly choose the beta.
+**Beta release: `2.1.0-beta.2`.** The `beta` channel adds individual platform-device editors and clearer named platform controls, carrying forward redirect header hardening and the platform schema correction. Household testing continues before stable promotion. Review the [beta release notes](docs/release-notes.md), especially the redirect compatibility change. Individual-command handling remains planned. Installation instructions below select stable `2.0.0` unless you explicitly choose the beta.
 
 [User guide](#user-guide) · [Configuration examples](docs/configuration-examples.md) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
 
@@ -52,12 +52,12 @@ npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/ho
 **The `latest` channel selects stable `2.0.0`.** The `alpha` channel retains the earlier testing release. These tags affect only the new platform package; the original accessory package is separate and does not update automatically to it.
 
 To join beta testing, make a Homebridge backup, then use **Manage Version** and
-choose **beta** or **v2.1.0-beta.1**. The installation popup displays the matching
-[GitHub prerelease notes](https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.1.0-beta.1).
+choose **beta** or **v2.1.0-beta.2**. The installation popup displays the matching
+[GitHub prerelease notes](https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.1.0-beta.2).
 For a command-line beta installation in your existing plugin location:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.1.0-beta.1
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.1.0-beta.2
 ```
 
 The beta preserves existing configuration aliases and does not automatically
@@ -94,9 +94,11 @@ The plugin settings screen brings three areas together:
 |---|---|
 | **Legacy Accessories** | An accessory count and individual expandable JSON editors, with add and remove controls. |
 | **Shared Settings** | Timing, request limits and recovery defaults for both accessories and platforms. |
-| **Optional Platforms** | Separate platform definitions, with an enable checkbox for each. |
+| **Optional Platforms** | Individual expandable device JSON editors with add/remove controls, separate platform settings, and an enable checkbox for each platform. |
 
-To edit, add or remove a legacy accessory, use **Plugin Config**. Expand its individual JSON editor to maintain custom fields, encoded commands and mappings. **JSON Config** in the plugin menu now manages platform definitions. **Back to Plugin Menu** closes Plugin Config after you save any pending changes.
+To edit, add or remove a legacy accessory or platform device, use **Plugin Config**. Under a platform, expand **Edit Configured Devices**, then the device's name. Each device has its own JSON editor for custom fields, encoded commands and mappings. **Edit Platform Settings** maintains the platform's name, alias, child bridge and other platform fields separately. Keep an existing device's `id` and platform name unchanged to retain its HomeKit identity; if `id` is omitted, its name supplies the identity. Newly added devices receive a fresh ID that you can choose before pairing. **JSON Config** in the plugin menu edits complete platform definitions. **Back to Plugin Menu** closes Plugin Config after you save any pending changes.
+
+Individual platform device editors are included in `2.1.0-beta.2`.
 
 Choose **Save All Settings** inside Plugin Config to save legacy accessories, shared settings and optional platforms, then restart Homebridge to apply changes. Existing accessory definitions stay unchanged unless you edit or remove them. A changed save keeps a private configuration backup and preserves unrelated plugins and bridge settings. Avoid editing the same configuration from multiple windows at once.
 
@@ -104,7 +106,7 @@ You can also maintain `config.json` directly through Homebridge's JSON editor. E
 
 ### Add a platform when you choose
 
-Use **Also Use as a Platform** in the settings screen, or add an `HttpAdvanced` entry to `platforms[]`. You can start with a new device while keeping all existing accessories as they are:
+Use **Add Platform** in the settings screen, or add an `HttpAdvanced` entry to `platforms[]`. Every HTTP Advanced instance uses the same `platform` identifier. Give each instance a unique `name`; it appears in the heading, **Enable platform** checkbox and **Add Device to “…”** button. Apple Home shows the individual devices rather than a separate accessory for the platform. You can start with a new device while keeping all existing accessories as they are:
 
 ```json
 {

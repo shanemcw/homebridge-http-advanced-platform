@@ -1,4 +1,4 @@
-/* global homebridge, document */
+/* global homebridge, document, crypto */
 (() => {
   const $ = id => document.getElementById(id);
   const fields = [
@@ -54,27 +54,94 @@
   };
   const addPlatform = block => {
     const index = platformEditors.length + 1;
+    if (!block || typeof block !== 'object' || Array.isArray(block) || !Array.isArray(block.devices)) {
+      throw new Error(`Platform ${index}: devices must be an array; correct it in JSON Config, then reopen Plugin Config`);
+    }
     const container = document.createElement('div'); container.className = 'platform';
+    const heading = document.createElement('h3');
     const enabledLabel = document.createElement('label');
     const enabled = document.createElement('input'); enabled.type = 'checkbox'; enabled.checked = block.enabled !== false;
-    enabledLabel.append(enabled, ` Enable platform ${index}:`);
-    const label = document.createElement('label'); label.htmlFor = `platform-${index}`; label.textContent = `Platform ${index} configuration (JSON object):`;
-    const editor = document.createElement('textarea'); editor.id = label.htmlFor; editor.className = 'form-control'; editor.spellcheck = false; editor.autocomplete = 'off'; editor.value = JSON.stringify(block, null, 2);
+    const enabledText = document.createElement('span');
+    enabledLabel.append(enabled, enabledText);
+    const settingsDetails = document.createElement('details'); settingsDetails.className = 'platform-settings';
+    const settingsSummary = document.createElement('summary'); settingsSummary.textContent = 'Edit Platform Settings';
+    const label = document.createElement('label'); label.htmlFor = `platform-${index}`; label.textContent = `Platform ${index} settings (JSON object, excluding devices):`;
+    const { devices, ...settings } = block;
+    const editor = document.createElement('textarea'); editor.id = label.htmlFor; editor.className = 'form-control'; editor.spellcheck = false; editor.autocomplete = 'off'; editor.value = JSON.stringify(settings, null, 2);
+    settingsDetails.append(settingsSummary, label, editor);
     const note = document.createElement('p'); note.textContent = 'After restart, disabling retains definitions and cached identities but reports devices unavailable for reads and commands. Its name and device IDs determine HomeKit identity.';
     const limitsNote = document.createElement('p');
     limitsNote.textContent = 'When enabled, this platform’s coordinator overrides affect all HTTP Advanced devices in the same Homebridge process. For uniform limits, keep them in Shared settings and remove coordinator from this platform.';
     const showOverrides = value => { limitsNote.hidden = !value?.coordinator || !Object.keys(value.coordinator).length; };
+    const describePlatform = value => {
+      const name = typeof value?.name === 'string' && value.name.trim() ? `“${value.name}”` : `${index} (name required)`;
+      heading.textContent = `Platform ${name} — ${deviceEditors.length} ${deviceEditors.length === 1 ? 'device' : 'devices'}`;
+      enabledText.textContent = ` Enable platform ${name}:`;
+      label.textContent = `Settings for platform ${name} (JSON object, excluding devices):`;
+      add.textContent = `Add Device to ${name}`;
+    };
+    const platformSettings = () => {
+      const value = parse(editor, `Platform ${index} settings`);
+      if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`Platform ${index} settings must be an object; no changes saved`);
+      if (Object.hasOwn(value, 'devices')) throw new Error(`Platform ${index}: edit devices in their individual editors below, and remove devices from platform settings; no changes saved`);
+      return value;
+    };
+    const deviceDetails = document.createElement('details'); deviceDetails.className = 'platform-devices';
+    const deviceSummary = document.createElement('summary');
+    const deviceList = document.createElement('div');
+    deviceDetails.append(deviceSummary, deviceList);
+    let deviceEditors = [];
+    let nextDeviceID = 0;
+    const updateDevices = () => {
+      deviceSummary.textContent = `Edit Configured Devices (${deviceEditors.length})`;
+      deviceDetails.hidden = deviceEditors.length === 0;
+      for (const [deviceIndex, item] of deviceEditors.entries()) item.label.textContent = `Platform ${index}, device ${deviceIndex + 1} configuration (JSON object):`;
+      try { describePlatform(JSON.parse(editor.value)); } catch { /* retain the title while editing incomplete JSON */ }
+    };
+    const addDevice = device => {
+      const details = document.createElement('details'); details.className = 'platform-device';
+      const summary = document.createElement('summary');
+      const describe = value => { summary.textContent = `${value?.name ?? 'New device'} — ${value?.service ?? 'Choose a service'}${value?.id ? ` (${value.id})` : ''}`; };
+      describe(device);
+      const deviceLabel = document.createElement('label'); deviceLabel.htmlFor = `platform-${index}-device-${++nextDeviceID}`;
+      const deviceEditor = document.createElement('textarea'); deviceEditor.id = deviceLabel.htmlFor; deviceEditor.className = 'form-control'; deviceEditor.spellcheck = false; deviceEditor.autocomplete = 'off'; deviceEditor.value = JSON.stringify(device, null, 2);
+      deviceEditor.addEventListener('input', () => { try { describe(JSON.parse(deviceEditor.value)); } catch { /* allow incomplete JSON while editing */ } });
+      const item = { editor: deviceEditor, label: deviceLabel };
+      const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn btn-outline-danger'; remove.textContent = 'Remove This Device';
+      remove.addEventListener('click', () => {
+        deviceEditors = deviceEditors.filter(entry => entry !== item); details.remove(); updateDevices(); hasChanges = true;
+      });
+      details.append(summary, deviceLabel, deviceEditor, remove); deviceList.append(details);
+      deviceEditors.push(item); updateDevices();
+      return details;
+    };
+    const add = document.createElement('button'); add.type = 'button'; add.className = 'btn btn-outline-primary';
+    add.addEventListener('click', () => {
+      const configured = deviceEditors.map(item => { try { return JSON.parse(item.editor.value); } catch { return undefined; } });
+      let number = 1; let name = 'HTTP Device';
+      while (configured.some(value => value?.name === name)) name = `HTTP Device ${++number}`;
+      // assign a fresh identity even when a device was removed in an earlier save
+      let id;
+      do { id = 'http-device-' + Array.from(crypto.getRandomValues(new Uint8Array(16)), value => value.toString(16).padStart(2, '0')).join(''); }
+      while (configured.some(value => (value?.id ?? value?.name) === id));
+      addDevice({ id, name, service: 'Switch', urls: {} }).open = true;
+      deviceDetails.open = true; hasChanges = true;
+    });
     showOverrides(block);
     enabled.addEventListener('change', () => {
       try {
-        const value = parse(editor, `Platform ${index}`);
-        if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Platform configuration must be an object');
+        const value = platformSettings();
         value.enabled = enabled.checked; editor.value = JSON.stringify(value, null, 2);
+        hasChanges = true;
       } catch (error) { enabled.checked = !enabled.checked; message(error.message, true); }
     });
-    editor.addEventListener('input', () => { try { const value = JSON.parse(editor.value); enabled.checked = value.enabled !== false; showOverrides(value); } catch { /* allow incomplete JSON while editing */ } });
-    container.append(enabledLabel, note, limitsNote, label, editor); $('platforms').append(container);
-    platformEditors.push(editor);
+    editor.addEventListener('input', () => { try { const value = JSON.parse(editor.value); enabled.checked = value?.enabled !== false; showOverrides(value); describePlatform(value); } catch { /* allow incomplete JSON while editing */ } });
+    devices.forEach(addDevice); updateDevices();
+    container.append(heading, enabledLabel, note, limitsNote, settingsDetails, deviceDetails, add); $('platforms').append(container);
+    platformEditors.push({
+      editor,
+      collect: () => ({ ...platformSettings(), devices: deviceEditors.map((item, deviceIndex) => parse(item.editor, `Platform ${index}, device ${deviceIndex + 1}`)) }),
+    });
   };
   const render = result => {
     loaded = result;
@@ -119,7 +186,7 @@
     hasChanges = true;
   });
   $('add-platform').addEventListener('click', () => {
-    const names = platformEditors.map(editor => { try { return JSON.parse(editor.value).name; } catch { return undefined; } });
+    const names = platformEditors.map(item => { try { return JSON.parse(item.editor.value).name; } catch { return undefined; } });
     let number = 1; let name = 'HTTP Advanced';
     while (names.includes(name)) name = `HTTP Advanced ${++number}`;
     addPlatform({ platform: 'HttpAdvanced', name, enabled: true, devices: [] });
@@ -133,7 +200,7 @@
     try {
       const draft = structuredClone(loaded.draft);
       draft.accessories = accessoryEditors.map((editor, index) => parse(editor, `Legacy accessory ${index + 1}`));
-      draft.platforms = platformEditors.map((editor, index) => parse(editor, `Platform ${index + 1}`));
+      draft.platforms = platformEditors.map(item => item.collect());
       for (const [key] of fields) {
         const input = $(key).value;
         const keys = key.split('.'); const property = keys.pop();

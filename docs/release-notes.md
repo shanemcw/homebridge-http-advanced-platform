@@ -1,52 +1,58 @@
-# Homebridge HTTP Advanced Platform 2.1.0-beta.1
+# Homebridge HTTP Advanced Platform 2.1.0-beta.2
 
-Beta release for a week of household testing before stable promotion.
-Select **beta** or **v2.1.0-beta.1** in Homebridge UI **Manage Version**, or install
-`homebridge-http-advanced-platform@2.1.0-beta.1` in your existing plugin location.
+Edit platform devices individually in Plugin Config, with clearer controls for
+each named platform. Household testing continues before stable promotion.
+Select **beta** or **v2.1.0-beta.2** in Homebridge UI **Manage Version**, or install
+`homebridge-http-advanced-platform@2.1.0-beta.2` in your existing plugin location.
 npm **latest remains 2.0.0**. This package is not yet Homebridge-verified.
 
 ## Changes
 
-- Correct the configuration schema to identify the `HttpAdvanced` platform and
-  describe a platform at its root, addressing the failed automated verification
-  check. Existing `HttpAdvancedAccessory` configurations remain supported.
-- Add expandable legacy accessory JSON editors and add/remove controls to
-  **Plugin Config**. Native **JSON Config** manages platform definitions; Plugin
-  Config brings legacy accessories, shared settings and optional platforms
-  together. Opening the UI does not migrate or rewrite configuration.
-- Use title case for headings and buttons, and sentence case with a colon for
-  field labels. Buttons retain title case under the Homebridge theme.
-- Remove all configured headers and device Basic Auth when GET/HEAD requests
-  redirect to another origin. Same-origin redirects retain them.
+- Give each platform device its own expandable JSON editor and remove control,
+  alongside separate platform settings. Preserve unedited IDs, encoded requests,
+  mappings, custom fields, bridge assignments and unrelated configuration.
+- Show the configured platform name in its heading, enable checkbox and
+  **Add Device to “…”** button. **Add Platform** creates another instance.
+- Assign fresh IDs to new devices, including replacements for removed devices.
+  Reject invalid device JSON, duplicate IDs and competing device arrays before
+  saving. Keep the existing validated save path and private configuration backup.
+
+The device runtime and dependencies are unchanged from Beta.1. This beta also
+includes Beta.1's platform-schema correction, legacy accessory editors and
+cross-origin redirect header hardening.
 
 ## Before Installing
 
-Make a full Homebridge backup. Keep existing accessory names, aliases, storage
-and bridge assignments unchanged. This update does not require converting
-legacy accessories into platform devices.
+Make a full Homebridge backup. Keep existing device IDs, platform names,
+accessory aliases, storage and bridge assignments unchanged. Platform names and
+device IDs contribute to HomeKit identity. Apple Home displays the individual
+devices. Opening Plugin Config does not migrate or rewrite configuration, and
+this update does not require converting legacy accessories into platform devices.
 
-**Redirect compatibility:** an origin changes when the scheme, hostname or port
-changes. A redirected endpoint on another origin will no longer receive custom
-API-key headers, cookies or authentication from the starting endpoint. If that
-trusted final endpoint needs configured headers or authentication, configure
-its URL directly.
+**Redirect compatibility, carried forward from Beta.1:** an origin changes when
+the scheme, hostname or port changes. GET/HEAD redirects to another origin no
+longer receive configured headers or device Basic Auth from the starting
+endpoint. If a trusted final endpoint needs them, configure its URL directly.
 
 Users replacing the original `homebridge-http-advanced-accessory` package must
-follow the [migration guide](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.1.0-beta.1/docs/migration.md).
+follow the [migration guide](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.1.0-beta.2/docs/migration.md).
 Do not load both packages together because their registered aliases overlap.
 
 ## Validation and Beta Coverage
 
-The candidate is checked on Node 22 and 24 with Homebridge 1 and 2, with fresh
-production-dependency package installation and custom UI checks. The local
-development build restored all 44 legacy device getters, retained configuration
-and cached accessory identities, and received household-owner confirmation that
-Apple Home displayed state and physical control worked correctly.
+Release checks cover Node 22 and 24 with Homebridge 1 and 2, production dependency
+audit, fresh package installation, plugin loading, loopback device control and
+custom UI IPC. The new editor regressions cover independent edits, unchanged
+saves, identity and request preservation, additions/removals and invalid drafts.
 
-Household testing covers legacy Switch accessories. Optional platforms,
-additional services and new mapper modes have automated and isolated coverage.
-Verify your own devices, scenes and automations after updating. Individual
-per-action command handling remains planned and is not included in this beta.
+Household coverage now includes three migrated platform switches alongside
+legacy accessories. One restored Home scene and a physical light's On/Off
+transitions have passed; one On command required the existing controller's X10
+retry. Repeated household use, another restored scene's live activation and
+spoken HomePod Siri checks remain pending. Additional services and new mapper
+modes have automated and isolated coverage. Verify your own rooms, scenes,
+automations and physical behavior after updating.
 
-Stable promotion and verification resubmission will follow a successful week of
-beta testing. See the [full changelog](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.1.0-beta.1/CHANGELOG.md).
+Stable promotion and verification resubmission remain separate later steps.
+Individual per-action command handling is still planned and is not included.
+See the [full changelog](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.1.0-beta.2/CHANGELOG.md).

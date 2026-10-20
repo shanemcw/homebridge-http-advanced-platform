@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.1.0-beta.2 - 2026-10-20
+
+Individual platform-device editors and clearer named platform controls. npm
+`beta` selects this version; stable npm `latest` remains `2.0.0`. The device
+runtime, dependencies and HomeKit identity rules are unchanged from Beta.1.
+
+- Name each platform in its heading and enable/add-device controls, and use
+  **Add Platform** for creating another instance. Explain the shared plugin
+  identifier, unique instance names and their role in HomeKit identity.
+- Edit each platform device independently in Plugin Config, with expandable JSON
+  editors and per-platform add/remove controls. Keep platform settings separate
+  while preserving IDs, encoded requests, custom fields and unrelated devices.
+- Assign a fresh ID to each newly added platform device, including replacements
+  for previously removed devices. Reject conflicting device arrays in the
+  platform settings editor before saving.
+
 ## 2.1.0-beta.1 - 2026-10-13
 
 Beta release for a week of household testing before stable promotion. npm `beta`

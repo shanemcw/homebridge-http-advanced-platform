@@ -1,6 +1,6 @@
 # 2.1.0 Beta Development
 
-The first public candidate is `2.1.0-beta.1`, on `develop/2.1.0` and npm `beta`.
+The current candidate is `2.1.0-beta.2`, on `develop/2.1.0` and npm `beta`.
 Stable npm `latest` remains `2.0.0`. A local development build was installed on
 2026-10-13 and accepted by its household owner in Apple Home before preparing
 the beta. Plan a week of beta testing before stable promotion; promotion and
@@ -48,6 +48,27 @@ does not migrate or write configuration. Unedited fields, encoded commands,
 aliases, child-bridge assignments and unrelated configuration remain preserved
 by the existing validated, backed-up save path.
 
+## Implemented in Beta.2: individual platform device editors
+
+Beta.2 splits each platform into
+**Edit Platform Settings** and **Edit Configured Devices**. Each device has its
+own expandable JSON editor and remove control; **Add Device to “…”** adds only
+to that platform and assigns a fresh random ID. The settings editor excludes
+`devices` and rejects a competing device array before saving.
+
+Platform headings and enable/add-device controls use the configured platform
+name and follow valid name edits in the draft. **Add Platform** creates another
+instance; each uses the same plugin alias and a unique name. The UI and schema
+explain that names contribute to device identity and stay stable after pairing.
+
+This is a UI change using the existing validated save path. Unedited IDs,
+aliases, child-bridge assignments, encoded requests, mappings and unknown fields
+are preserved. Devices without an explicit ID retain their name-based identity.
+Tests exercise the actual browser handlers against the real configuration
+editor, including unchanged byte preservation, independent edits, additions,
+removals, duplicate IDs, invalid JSON and pending-change tracking. Publication
+and stable promotion remain separate from any local UI deployment.
+
 ## Planned: preserve individual HTTP commands
 
 This is a feature plan, not an implemented configuration option. Three
@@ -79,6 +100,22 @@ Custom FanIR/TVIR service definitions and complete TV integration are outside
 this proposal.
 
 ## Release readiness
+
+Stable/latest promotion is on hold until the newly migrated Mischief platform
+device completes its household soak and the results are reviewed. That path
+entered production on October 18; the beta's October 13 installation alone does
+not establish its live coverage. The first end-to-end Home scene activation
+passed. Movie Time joined the same platform as its second device on October 18;
+its original Apple Home scene was restored. The deliberate restart preserved
+Mischief’s existing cached platform identity and all unrelated identifiers.
+Dining Ceiling Light joined as the third device on October 20, with its Apple
+Home room and Light presentation restored. Physical On and Off transitions were
+confirmed; one On attempt required the existing Perl X10 retry before succeeding.
+That restart preserved Movie Time and all other existing cached platform
+identities, supplying its later persistence observation. Repeated normal scene
+and physical-device use, live Movie Time scene acceptance, and confirmed spoken
+HomePod Siri checks remain to be observed. A tentative date
+does not authorize promotion; npm `latest` remains `2.0.0` while this work soaks.
 
 Each public candidate must pass the Node 22/24 × Homebridge 1/2 matrix, production
 dependency audit and fresh package installation checks. Record deployment and

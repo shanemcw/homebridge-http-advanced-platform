@@ -1,6 +1,6 @@
 # Modernization details and developer reference
 
-This reference describes **2.1.0-beta.1**, which retains the 2.0.0 services and mappers and adds redirect header hardening and configuration editor improvements. Stable npm `latest` remains **2.0.0**. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
+This reference describes **2.1.0-beta.2**, which retains the 2.0.0 services and mappers and adds redirect header hardening and configuration editor improvements. Stable npm `latest` remains **2.0.0**. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
 
 ## What non-breaking means here
 
@@ -230,6 +230,6 @@ npm pack --dry-run
 
 CI exercises Node 22/24 and real Homebridge v1/v2 HAP implementations. Unit/integration tests use only loopback fake servers. `legacy-plugin` is a test-only alias of published 1.3.0; its obsolete dependencies are excluded from production installation and the tarball. `npm audit --omit=dev` audits the maintained runtime separately.
 
-Public prereleases require an explicit tag matching their version channel (`alpha` or `beta`) and a matching GitHub prerelease. Stable versions require an explicit `latest` tag and a regular GitHub release. The guard rejects channel mismatches, malformed versions and publication under the original accessory package name. `publishConfig.tag` is `beta` for 2.1.0-beta.1; registry `latest` remains stable 2.0.0 and `alpha` retains the earlier testing release. No automatic publishing workflow is enabled. Release review covers the exact candidate, compatibility CI, production dependency audit, fresh package installation and field evidence. Household soak for 2.0.0 covers legacy Switch configurations; optional platform devices, additional services and new mapper modes have automated and isolated coverage rather than household soak.
+Public prereleases require an explicit tag matching their version channel (`alpha` or `beta`) and a matching GitHub prerelease. Stable versions require an explicit `latest` tag and a regular GitHub release. The guard rejects channel mismatches, malformed versions and publication under the original accessory package name. `publishConfig.tag` is `beta` for 2.1.0-beta.2; registry `latest` remains stable 2.0.0 and `alpha` retains the earlier testing release. No automatic publishing workflow is enabled. Release review covers the exact candidate, compatibility CI, production dependency audit, fresh package installation and field evidence. Household soak for 2.0.0 covers legacy Switch configurations; optional platform devices, additional services and new mapper modes have automated and isolated coverage rather than household soak.
 
 The existing Apache-2.0 LICENSE remains unchanged. Package metadata is reconciled to that file, which has existed since the initial commit; historical authorship is retained and the current maintainer is credited.

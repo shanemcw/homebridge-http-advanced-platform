@@ -13,10 +13,12 @@
     "properties": {
       "name": {
         "type": "string",
+        "description": "Unique name among HTTP Advanced platforms; shown in Plugin Config and used with device IDs for HomeKit identity. Keep it unchanged after pairing",
         "default": "HTTP Advanced"
       },
       "platform": {
         "type": "string",
+        "description": "Plugin identifier shared by all HTTP Advanced platform instances",
         "default": "HttpAdvanced"
       },
       "coordinator": {
@@ -40,7 +42,9 @@
         }
       },
       "devices": {
+        "title": "Platform Devices",
         "type": "array",
+        "description": "Use Plugin Config for individual device editors, or edit this complete device array in JSON Config",
         "items": {
           "$ref": "#/definitions/device"
         }
@@ -330,10 +334,12 @@
         "properties": {
           "name": {
             "type": "string",
+            "description": "Unique name among HTTP Advanced platforms; shown in Plugin Config and used with device IDs for HomeKit identity. Keep it unchanged after pairing",
             "default": "HTTP Advanced"
           },
           "platform": {
             "type": "string",
+            "description": "Plugin identifier shared by all HTTP Advanced platform instances",
             "default": "HttpAdvanced"
           },
           "coordinator": {
@@ -357,7 +363,9 @@
             }
           },
           "devices": {
+            "title": "Platform Devices",
             "type": "array",
+            "description": "Use Plugin Config for individual device editors, or edit this complete device array in JSON Config",
             "items": {
               "$ref": "#/definitions/device"
             }
@@ -586,5 +594,5 @@
     }
   },
   "customUi": true,
-  "headerDisplay": "Homebridge HTTP Advanced Platform supports platform devices and existing accessories. Use Plugin Config for legacy accessories and shared settings."
+  "headerDisplay": "Use Plugin Config to edit legacy accessories and platform devices independently, alongside platform settings and shared defaults. JSON Config edits complete platform definitions."
 }

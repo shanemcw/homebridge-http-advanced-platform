@@ -9,7 +9,16 @@ import { ConfigEditor, SettingsError } from '../dist/ui-config.js';
 const root=mkdtempSync(join(tmpdir(),'http-advanced-ui-preview-'));
 const configPath=join(root,'config.json');
 const accessories=JSON.parse(readFileSync(new URL('../test/fixtures/fleet.json',import.meta.url),'utf8'));
-writeFileSync(configPath,JSON.stringify({accessories,platforms:[{platform:'Other',name:'Unrelated fixture'}]}),{mode:0o600});
+const fixtureDevice = (name, id) => {
+  const device = structuredClone(accessories[0]);
+  delete device.accessory;
+  return {...device, name, id};
+};
+writeFileSync(configPath,JSON.stringify({accessories,platforms:[
+  {platform:'Other',name:'Unrelated fixture'},
+  {platform:'HttpAdvanced',name:'Fixture Platform',devices:[fixtureDevice('Fixture Switch', 'fixture-switch'),fixtureDevice('Second Fixture Switch', 'fixture-switch-2')],custom:{keep:true}},
+  {platform:'HttpAdvanced',name:'Disabled Fixture',enabled:false,devices:[fixtureDevice('Disabled Fixture Switch', 'disabled-switch')]},
+]}),{mode:0o600});
 const editor=new ConfigEditor(configPath);
 const html=readFileSync(new URL('../homebridge-ui/public/index.html',import.meta.url),'utf8');
 const mock=`<script>
