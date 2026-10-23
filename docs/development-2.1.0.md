@@ -1,11 +1,12 @@
-# 2.1.0 Beta Development
+# 2.1.0 Development and Release Scope
 
-The current candidate is `2.1.0-beta.2`, on `develop/2.1.0` and npm `beta`.
-Stable npm `latest` remains `2.0.0`. A local development build was installed on
-2026-10-13 and accepted by its household owner in Apple Home before preparing
-the beta. Plan a week of beta testing before stable promotion; promotion and
-Homebridge verification resubmission are separate later steps. Development
-continues in the owned `shanemcw/homebridge-http-advanced-platform` repository.
+The stable `2.1.0` candidate promotes the runtime and editors published as
+`2.1.0-beta.2`, after field use of legacy accessories and migrated platform
+switches. Stable publication selects npm `latest`; the earlier beta remains on
+`beta`. Confirm the exact public version before installing. A local development
+build was evaluated before preparing the beta. Homebridge verification
+resubmission remains a separate later step. Development continues in the
+maintained platform repository.
 
 Version policy for this project: functional improvements advance the minor
 version (`2.1.0`); the third component is reserved for cosmetic changes. A
@@ -101,26 +102,15 @@ this proposal.
 
 ## Release readiness
 
-Stable/latest promotion is on hold until the newly migrated Mischief platform
-device completes its household soak and the results are reviewed. That path
-entered production on October 18; the beta's October 13 installation alone does
-not establish its live coverage. The first end-to-end Home scene activation
-passed. Movie Time joined the same platform as its second device on October 18;
-its original Apple Home scene was restored. The deliberate restart preserved
-Mischief’s existing cached platform identity and all unrelated identifiers.
-Dining Ceiling Light joined as the third device on October 20, with its Apple
-Home room and Light presentation restored. Physical On and Off transitions were
-confirmed; one On attempt required the existing Perl X10 retry before succeeding.
-That restart preserved Movie Time and all other existing cached platform
-identities, supplying its later persistence observation. Repeated normal scene
-and physical-device use, live Movie Time scene acceptance, and confirmed spoken
-HomePod Siri checks remain to be observed. A tentative date
-does not authorize promotion; npm `latest` remains `2.0.0` while this work soaks.
+Stable preparation follows successful field testing of legacy and migrated
+platform operation. Acceptance covers scene activation, voice control, physical
+control and cached identity persistence across restarts. These results complete
+the earlier field acceptance hold; publication remains a separate release step.
 
 Each public candidate must pass the Node 22/24 × Homebridge 1/2 matrix, production
 dependency audit and fresh package installation checks. Record deployment and
 device acceptance separately. The [beta release notes](release-notes.md) describe
-the released scope and the limits of household coverage. Optional per-action
+the released scope and the limits of field coverage. Optional per-action
 command handling is not a release requirement for this beta.
 
 The [branch archive](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/main/maintenance/platform-release/BRANCH-ARCHIVE-20261004.md)

@@ -32,7 +32,7 @@ before the retained platform-conversion lineage and original contributor/license
 - Annotated `v2.0.0-alpha.7` resolves to that commit. The matching
   [GitHub prerelease](https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.0.0-alpha.7)
   is public, not a draft and not designated GitHub's latest release.
-- Archive: `/Users/shanemcw/Downloads/http-advanced-platform-alpha7-launch-20260926/homebridge-http-advanced-platform-2.0.0-alpha.7.tgz`.
+- Archive: `/path/to/homebridge-http-advanced-platform-2.0.0-alpha.7.tgz`.
 - 56 files, 69764 compressed bytes.
 - SHA-256: `7cc5ae503b7ca68739113b92d2bf2dd0d478b5c72003eb6e6b4fc5db267a42fc`.
   The registry download and GitHub archive asset both match. The sibling

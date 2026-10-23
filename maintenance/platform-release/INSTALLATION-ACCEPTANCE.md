@@ -9,7 +9,7 @@ changes no distributable files and does not require rebuilding the candidate.
 
 - Package: `homebridge-http-advanced-platform@2.0.0-alpha.6`.
 - Archive:
-  `/Users/shanemcw/Downloads/http-advanced-platform-alpha6-20260926/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz`.
+  `/path/to/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz`.
 - Verified SHA-256:
   `899161d4e5a8a83e3941b06636b9bd75c34e98dbad1dbcdd00c261650e32bc22`.
 - Installed with `--omit=dev --ignore-scripts --no-audit --no-fund`, using a

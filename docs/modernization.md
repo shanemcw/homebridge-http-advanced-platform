@@ -1,6 +1,6 @@
 # Modernization details and developer reference
 
-This reference describes **2.1.0-beta.2**, which retains the 2.0.0 services and mappers and adds redirect header hardening and configuration editor improvements. Stable npm `latest` remains **2.0.0**. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
+This reference describes **2.1.0**, which retains the 2.0.0 services and mappers and adds redirect header hardening and configuration editor improvements. npm `latest` selects **2.1.0**. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
 
 ## What non-breaking means here
 
@@ -208,11 +208,15 @@ Both adapters accept optional `manufacturer`, `model` and `serialNumber` strings
 
 After saving and restarting, a disabled platform retains cached identities but reports its device reads and commands unavailable. Re-enabling with the same platform name and device IDs restores those identities. Invalid enable flags or inventories retain cached accessories and report them unavailable instead of accepting commands without a working device handler. A valid empty inventory explicitly unregisters its devices.
 
-Local integration tests serialize and deserialize Homebridge platform accessories between fresh API instances, covering disable, rename/re-enable, real getter/setter handlers, invalid inventory retention, additional service retention/removal and explicit accessory removal. This verifies the persistence boundary without pairing a household HomeKit controller.
+Local integration tests serialize and deserialize Homebridge platform accessories between fresh API instances, covering disable, rename/re-enable, real getter/setter handlers, invalid inventory retention, additional service retention/removal and explicit accessory removal. This verifies the persistence boundary without pairing a paired HomeKit controller.
 
 ## Measurements and validation
 
-The recorded synthetic fixture compares about 2.15 seconds for a blocking 41-getter read with about 3 ms for a warmed 44-device cached snapshot, issuing no new HTTP getter requests for that snapshot. Refreshing all 44 devices separately took about 2.25 seconds. These measure different stages: the cache speeds up HomeKit reads; it does not make the web server or physical device instantaneous. They are fixture measurements, not a promised speedup on every installation.
+The synthetic fixture compares blocking on-demand reads, a warmed cached
+snapshot and a separate refresh sweep. These measure different stages: the cache
+speeds up HomeKit reads; it does not make the web server or physical device
+instantaneous. Fixture measurements are not a promised speedup on every
+installation. See [the measurement guide](performance.md).
 
 Use the [measurement guide](performance.md) to compare read latency, cache freshness and sustained backend load together. The [release notes](release-notes.md) summarize the beta, completed checks and remaining field coverage.
 
@@ -230,6 +234,6 @@ npm pack --dry-run
 
 CI exercises Node 22/24 and real Homebridge v1/v2 HAP implementations. Unit/integration tests use only loopback fake servers. `legacy-plugin` is a test-only alias of published 1.3.0; its obsolete dependencies are excluded from production installation and the tarball. `npm audit --omit=dev` audits the maintained runtime separately.
 
-Public prereleases require an explicit tag matching their version channel (`alpha` or `beta`) and a matching GitHub prerelease. Stable versions require an explicit `latest` tag and a regular GitHub release. The guard rejects channel mismatches, malformed versions and publication under the original accessory package name. `publishConfig.tag` is `beta` for 2.1.0-beta.2; registry `latest` remains stable 2.0.0 and `alpha` retains the earlier testing release. No automatic publishing workflow is enabled. Release review covers the exact candidate, compatibility CI, production dependency audit, fresh package installation and field evidence. Household soak for 2.0.0 covers legacy Switch configurations; optional platform devices, additional services and new mapper modes have automated and isolated coverage rather than household soak.
+Public prereleases require an explicit tag matching their version channel (`alpha` or `beta`) and a matching GitHub prerelease. Stable versions require an explicit `latest` tag and a regular GitHub release. The guard rejects channel mismatches, malformed versions and publication under the original accessory package name. `publishConfig.tag` is `latest` for stable 2.1.0; `beta` retains 2.1.0-beta.2 and `alpha` retains the earlier testing release. No automatic publishing workflow is enabled. Release review covers the exact candidate, compatibility CI, production dependency audit, fresh package installation and field evidence. Field use covers legacy Switch configurations and migrated platform switches. Additional services and new mapper modes have automated and isolated coverage rather than field soak. See the current release notes for the recorded field boundaries.
 
 The existing Apache-2.0 LICENSE remains unchanged. Package metadata is reconciled to that file, which has existed since the initial commit; historical authorship is retained and the current maintainer is credited.

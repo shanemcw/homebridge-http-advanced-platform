@@ -1,8 +1,8 @@
 # 2.1.0-beta.1 Release Checkpoint
 
-Shane authorized a GitHub beta prerelease and npm publication on October 13,
+The maintainer authorized a GitHub beta prerelease and npm publication on October 13,
 2026, after accepting the local development build in Apple Home. Publish only
-on npm `beta`; keep `latest` at `2.0.0`. Review a successful week of household
+on npm `beta`; keep `latest` at `2.0.0`. Review a successful week of field
 soak before stable promotion and Homebridge verification resubmission.
 
 ## Candidate and Validation
@@ -38,7 +38,7 @@ capitalization and cross-origin redirect header hardening. Release notes explain
 that authenticated redirected endpoints on another origin should be configured
 directly. Individual per-action command handling remains planned.
 
-Household acceptance covers 44 legacy Switch accessories. Optional platform
+Field acceptance covers legacy Switch accessories. Optional platform
 modes and other services/mappers have automated and isolated coverage. Do not
 claim Homebridge verification, completed beta soak or stable promotion yet.
 
@@ -64,12 +64,10 @@ publishing confirmation. npm accepted the exact reviewed archive.
   beta opens its installation popup with the complete matching release notes,
   including schema correction, legacy editor behavior, title case and redirect
   compatibility guidance. Verification stopped at the notes screen.
-- Homebridge remains active/running with zero automatic restarts. Stinky-1 still
-  has local package version `2.1.0`; no package installation or restart occurred
-  during public beta publication. Its runtime, schema and UI are identical to
-  the public beta, as recorded above.
+- Opening the release notes did not install a package or restart Homebridge.
+  The earlier test-build acceptance is recorded separately.
 
-Review the household soak on or after October 20, 2026. Only promote stable
+Review the field soak on or after October 20, 2026. Only promote stable
 2.1.0 to `latest` after satisfactory device/automation acceptance, then request
 Homebridge's verification bot to check the stable package again. This checkpoint
 does not schedule an automatic promotion or submit another verification request.

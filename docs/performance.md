@@ -2,11 +2,18 @@
 
 ## Reproducible fixture
 
-Run `npm run benchmark -- --save` from the source checkout. It uses real HAP serialization and a loopback backend that serializes 50 ms responses, modeling a single-command backend. It never contacts household devices.
+Run `npm run benchmark -- --save` from the source checkout. It uses real HAP serialization and a loopback backend that serializes 50 ms responses, modeling a single-command backend. It never contacts field devices.
 
-The baseline uses the 41 on-demand entries from the 44-device fixture; the three 500-second pollers are separately covered by interval tests. The Alpha warms all 44 entries, then serializes their HAP state. Acquisition is separated from measurement so every network request caused by the bulk read can be attributed exactly. Timings are diagnostic rather than portable absolute performance guarantees.
+The baseline reads the on-demand entries in a synthetic fixture. Explicit
+polling intervals are covered separately. The cached implementation warms the
+fixture before serializing HAP state. Acquisition is separated from measurement
+so network requests caused by the bulk read can be attributed correctly.
+Timings are diagnostic rather than portable performance guarantees.
 
-`benchmark-results.json` records baseline bulk time, Alpha bulk time, getter request counts, full refresh sweep time, median/p95/max cache age and request latency, queue high-water mark, concurrency and failures. Cache age is measured at the end of a sweep and is not a long-running household freshness result.
+A local benchmark result records bulk-read time, getter requests, refresh time,
+cache age, request latency, queue pressure, concurrency and failures. Inventory
+sizes are omitted from the checked-in summary. Cache age at the end of a sweep
+does not establish sustained field freshness.
 
 ## Actual Homebridge measurements still required
 
@@ -28,7 +35,7 @@ Debug snapshots expose per-action hashes for correlation without exposing endpoi
 
 If an external reader adds orchestration or polling delay, measure that separately. Do not attribute an end-to-end improvement to the plugin without isolating its contribution.
 
-Approve default cadence based on actual freshness and sustained load. If a full sweep is slower than the desired interval, reduce workload or deliberately tune the shared concurrency for the backend; do not simply remove the bounds. Avoid changing the three existing 500-second intervals unintentionally.
+Approve default cadence based on actual freshness and sustained load. If a full sweep is slower than the desired interval, reduce workload or deliberately tune the shared concurrency for the backend; do not simply remove the bounds. Avoid changing existing explicit polling intervals unintentionally.
 
 ## Measurement caveat
 

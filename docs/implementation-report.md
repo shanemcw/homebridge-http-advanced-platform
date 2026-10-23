@@ -2,7 +2,7 @@
 
 > Historical Alpha.5 implementation record. For current release status and Alpha.9 changes, see the [release notes](alpha-release-notes.md) and [README](../README.md). Statements below are scoped to their dated checkpoints.
 
-Status as of 2026-09-13: Alpha.5 is a local, uncommitted candidate. The four-combination test matrix passes; the current review and remaining field gates are tracked in [Beta readiness](beta-readiness.md). Alpha.4 is the last verified household deployment. No publication or upstream announcement is part of this checkpoint.
+Status as of 2026-09-13: Alpha.5 is a local, uncommitted candidate. The four-combination test matrix passes; the current review and remaining field gates are tracked in [Beta readiness](beta-readiness.md). Alpha.4 is the last verified field deployment. No publication or upstream announcement is part of this checkpoint.
 
 ## Baseline and architecture
 
@@ -18,7 +18,7 @@ Normal GET handlers read memory. Acquisition runs independently, with global/per
 - Preserve static mapper falsey pass-through, immediate credential sending even with `immediately:false`, and non-2xx body mapping. These surprising behaviors are observable in npm 1.3.0. Strict HTTP status rejection is opt-in.
 - Preserve raw mapper-output types in legacy template state. Numeric polling state remains numeric. HAP itself normalizes bounds/steps on an unbound characteristic using supported APIs, avoiding a second implementation of HAP coercion.
 - Preserve immediate acknowledgement and last-write debounce when `setterDelay` is configured. Delayed errors remain log-only, with cache restoration.
-- Preserve explicit polling intervals, including all three 500-second entries in the 44-device fixture. Default on-demand acquisition becomes adaptive background refresh: five seconds during active use, sixty seconds when idle. This deliberately changes acquisition timing and needs field validation for freshness/load.
+- Preserve explicit polling intervals, including explicit long-interval polling entries in the synthetic fixture. Default on-demand acquisition becomes adaptive background refresh: five seconds during active use, sixty seconds when idle. This deliberately changes acquisition timing and needs field validation for freshness/load.
 - Omit the old empty Basic Authorization header when no credentials are configured, as allowed by the brief.
 - Bound HTTP total duration (default ten seconds), response size (8 MiB), redirects (ten), fallback depth (32), pending queue and retries. Malformed remote values no longer leave getter callbacks hanging.
 - Retain trusted eval/template execution in a dedicated compatibility module. JSONPath uses the maintained implementation's safe evaluator. Exotic executable JSONPath scripts and expressions depending on undocumented closure internals still need individual assessment.
@@ -39,21 +39,24 @@ Official references checked during the initial implementation:
 
 Repository, homepage and issue metadata point to the maintained repository. Original author metadata remains; the maintainer is credited as a contributor. The LICENSE has been Apache-2.0 since initial commit `b7f0d4c`; only the contradictory package metadata was reconciled. The LICENSE and historical notices are unchanged. This does not relicense the project.
 
-The package allowlist includes built runtime, schema, custom settings UI, documentation and sample configuration. Tests, development preview scripts, old runtime sources, the planning brief, household configuration, logs, credentials and node_modules are excluded. The schema identifies the `HttpAdvanced` platform for the plugin menu's JSON Config. The custom UI maintains individual legacy accessory JSON editors, platform JSON and global settings stored at top-level `httpAdvanced`, preserving unedited legacy definitions on save.
+The package allowlist includes built runtime, schema, custom settings UI, documentation and sample configuration. Tests, development preview scripts, old runtime sources, the planning brief, private configuration, logs, credentials and node_modules are excluded. The schema identifies the `HttpAdvanced` platform for the plugin menu's JSON Config. The custom UI maintains individual legacy accessory JSON editors, platform JSON and global settings stored at top-level `httpAdvanced`, preserving unedited legacy definitions on save.
 
 The standard Homebridge plugin config API selects one alias/type. The custom UI therefore uses an editor restricted to this plugin's two aliases and shared settings. It merges into the latest configuration, refuses conflicting plugin edits, preserves unrelated entries and unknown fields, makes a private exact backup, and atomically replaces the file. A per-file lock serializes custom editor saves; other Homebridge editors do not participate in that lock, so avoid simultaneous saves from different tools. A lock left by a terminated process is reclaimed; an unreadable lock requires stopping the UI and removing `config.json.http-advanced.lock` before retrying. File ownership, group and mode are preserved, or the save fails.
 
-Local verification covers the real custom-UI IPC helper and browser editing/save/reload against an isolated sanitized 44-device configuration. Earlier Alpha.3 device control passed owner testing, and the Alpha.4 deployment restored all 44 legacy accessories while preserving configuration and pairing identifiers. Alpha.5 has not been deployed; its changes still need field acceptance.
+Local verification covers the real custom-UI IPC helper and browser editing/save/reload against an isolated synthetic configuration. Earlier control checks on Alpha.3 passed field testing, and the Alpha.4 deployment restored all legacy accessories while preserving configuration and pairing identifiers. Alpha.5 has not been deployed; its changes still need field acceptance.
 
 ## Measurements
 
-The reproducible synthetic benchmark uses a serialized 50 ms loopback backend and real HAP serialization. The 41 legacy on-demand entries took about 2146 ms and caused 41 HTTP reads. The warmed Alpha serialized all 44 entries in about 3.1 ms with zero new getter requests. The independent 44-device sweep took about 2249 ms; median cache age at the end was 1121 ms, p95 2090 ms and max 2189 ms. Maximum concurrency was two, queue high-water 42, and there were no request failures. See `benchmark-results.json` for the exact recorded run.
-
-The owner supplied eight newly instrumented live baseline HTTP-request timings: median 4.5 seconds, seven samples between 4.3 and 5.2 seconds, and one 0.03-second result. These are a different environment and workload from the synthetic benchmark. No live Alpha improvement has yet been measured. See `performance.md` for the instrumentation boundary and recent-snapshot caveat.
+The synthetic benchmark uses a serialized loopback backend and real HAP
+serialization to compare blocking on-demand reads, warmed cached reads and a
+separate refresh sweep. It records latency, cache age, concurrency and failures.
+These measure different processing stages and do not establish a live-device
+speedup. See [the measurement guide](performance.md) for reproducible checks and
+interpretation limits.
 
 ## Validation checkpoint
 
-The automated suite covers published behavior, all five mapper types, templates, GET/POST/GET-body transport, auth, status handling, fallback recursion, timeout/abort, queue bounds, pacing/fairness, persistence, debouncing, stale-read races, HAP identity, real plugin loading, schema, platform restoration/removal and the 44-device workload.
+The automated suite covers published behavior, all five mapper types, templates, GET/POST/GET-body transport, auth, status handling, fallback recursion, timeout/abort, queue bounds, pacing/fairness, persistence, debouncing, stale-read races, HAP identity, real plugin loading, schema, platform restoration/removal and the synthetic workload.
 
 Dated local checkpoints are recorded below; historical results are not evidence for the final candidate. Development dependencies include intentionally vulnerable historical packages from the 1.3.0 regression baseline; none are runtime dependencies.
 
@@ -61,8 +64,8 @@ Dated local checkpoints are recorded below; historical results are not evidence 
 
 - Exercise Alpha.5 in the actual Homebridge UI and managed child bridges, including restart, disabled/re-enabled platform devices and retained legacy identities.
 - Verify Apple Home pairing, rooms/scenes/automations, command confirmation and manual device updates after the candidate is installed.
-- Test a backend outage longer than 30 seconds and recovery under household traffic, with commands during the outage and polite logs.
-- Measure sustained cache age, backend request rate and the unchanged Home Control reader's `took` metric; compare equivalent workloads rather than warmed snapshot speed alone.
+- Test a backend outage longer than 30 seconds and recovery under field traffic, with commands during the outage and polite logs.
+- Measure sustained cache age, backend request rate and the external reader timing; compare equivalent workloads rather than warmed snapshot speed alone.
 - Verify backup/rollback and inspect the final candidate diff and tarball. Run remote CI on the final review commit when committing/pushing is authorized.
 
 These were the Alpha.5 release gates. Plans to contribute or announce this work to the original maintainer are retired; development continues in the owned platform repository. Stable `2.0.0` has since been published under that package name. See the [branch archive](../maintenance/platform-release/BRANCH-ARCHIVE-20261004.md) and [current release notes](release-notes.md).
@@ -73,7 +76,7 @@ Node 22.23.2 and Node 24.21.0 each run the suite against Homebridge 1.11.4 and 2
 
 ### Alpha.3 write-confirmation checkpoint
 
-On Node 24.19.0, all 88 tests pass against both Homebridge 1.11.4 and 2.4.0 (176 executions); typecheck and lint pass. Added coverage includes a plain HTTP server acknowledging commands before its mapped state changes, reads completing during writes, debounced and overlapping writes, failed commands, confirmation expiry during endpoint recovery, unknown-state errors, observed-only persistence, and real Homebridge logger prefixes. The ten-second default confirmation window is configurable globally and per device. The owner reports that Apple Home toggling and manual operation at the device pass on the deployed alpha.3. Alpha.4 adds the legacy accessory summary, navigation back to the plugin menu, and theme-aware settings fields; browser checks with sanitized fixtures preserve all 44 accessory definitions exactly when saving shared settings.
+On Node 24.19.0, all 88 tests pass against both Homebridge 1.11.4 and 2.4.0 (176 executions); typecheck and lint pass. Added coverage includes a plain HTTP server acknowledging commands before its mapped state changes, reads completing during writes, debounced and overlapping writes, failed commands, confirmation expiry during endpoint recovery, unknown-state errors, observed-only persistence, and real Homebridge logger prefixes. The ten-second default confirmation window is configurable globally and per device. Field testing reports that Apple Home toggling and manual operation at the device pass on the deployed alpha.3. Alpha.4 adds the legacy accessory summary, navigation back to the plugin menu, and theme-aware settings fields; browser checks with sanitized fixtures preserve all accessory definitions exactly when saving shared settings.
 
 ### Alpha.5 local code review
 
@@ -83,16 +86,16 @@ Plugin Config now prevents editing during an in-flight save, uses field-specific
 
 Startup version reporting uses package metadata. The publication guard accepts only matching Alpha/Beta versions and tags and still rejects stable/latest. The working version remains alpha.5; no publication is enabled or performed.
 
-Validation: Node 24.19.0 passes typecheck, lint and all 92 tests against both Homebridge 1.11.4 and 2.4.0 (184 executions). The focused eight-test configuration suite also passes after the final wording adjustment. Browser checks with sanitized fixtures cover delayed-save locking, integer/positive limits, unique platform names, indexed validation errors, draft retention, error focus, and save/reload with 44 legacy accessories plus a disabled platform. Package dry-run includes package-derived version metadata and excludes tests and preview scripts. This was the first local pass; the deeper review checkpoint below supersedes its test count. These changes are local, uncommitted and undeployed.
+Validation: Node 24.19.0 passes typecheck, lint and all 92 tests against both Homebridge 1.11.4 and 2.4.0 (184 executions). The focused eight-test configuration suite also passes after the final wording adjustment. Browser checks with sanitized fixtures cover delayed-save locking, integer/positive limits, unique platform names, indexed validation errors, draft retention, error focus, and save/reload with legacy accessories plus a disabled platform. Package dry-run includes package-derived version metadata and excludes tests and preview scripts. This was the first local pass; the deeper review checkpoint below supersedes its test count. These changes are local, uncommitted and undeployed.
 
 ### Alpha.5 deeper review checkpoint — 2026-09-13
 
-Paused-origin background reads now leave the pending queue and return to the scheduler, freeing capacity for healthy origins and writes. Internal deferral does not count as another endpoint failure or invoke `resultOnError`. Tests exercise a 40-device recovery workload with a four-slot queue, preserved known state, unknown state without a fabricated fallback, a command during recovery, and bounded refresh after the pause. A malformed getter URL no longer interrupts scheduling for other origins.
+Paused-origin background reads now leave the pending queue and return to the scheduler, freeing capacity for healthy origins and writes. Internal deferral does not count as another endpoint failure or invoke `resultOnError`. Tests exercise a synthetic recovery workload with a four-slot queue, preserved known state, unknown state without a fabricated fallback, a command during recovery, and bounded refresh after the pause. A malformed getter URL no longer interrupts scheduling for other origins.
 
 Disabled platform devices retain their cached identities but fail reads and commands with HomeKit communication errors after restart. Malformed enable flags, inventories and coordinator settings also retain devices as unavailable. Tests serialize and restore real Homebridge accessories between API instances, then verify re-enable preserves UUIDs and explicit empty inventory removes devices. This does not substitute for a live managed-child-bridge restart.
 
 Settings tests cover per-action timeout, zero-valued device overrides, shared defaults and platform coordinator precedence. Separate OS processes use Homebridge's actual storage-path API to verify that shared defaults load in each process while coordinator overrides stay process-local. The [settings reference](modernization.md#shared-settings-and-precedence) records the existing discovery-order rule for multiple platform coordinator overrides. Registration aliases and package-derived version reporting now share one metadata module.
 
-Node 22.23.2 and Node 24.19.0 each pass all 97 tests against Homebridge 1.11.4 and 2.4.0: 388 test executions, no failures or skips. Typecheck and lint pass on both Node versions. Alpha.5 remains local, uncommitted and undeployed. The Beta readiness checklist distinguishes these local checks from outstanding household validation.
+Node 22.23.2 and Node 24.19.0 each pass all 97 tests against Homebridge 1.11.4 and 2.4.0: 388 test executions, no failures or skips. Typecheck and lint pass on both Node versions. Alpha.5 remains local, uncommitted and undeployed. The Beta readiness checklist distinguishes these local checks from outstanding field validation.
 
-The reviewed 59-file tarball installs with production dependencies only and loads both registration aliases without a bundled Homebridge or the historical request/polling libraries. Package metadata and UI assets are present; tests, preview scripts and household configuration are excluded. The isolated production dependency audit reports zero known vulnerabilities on 2026-09-13. These package checks are local and do not deploy or publish the candidate.
+The reviewed 59-file tarball installs with production dependencies only and loads both registration aliases without a bundled Homebridge or the historical request/polling libraries. Package metadata and UI assets are present; tests, preview scripts and private configuration are excluded. The isolated production dependency audit reports zero known vulnerabilities on 2026-09-13. These package checks are local and do not deploy or publish the candidate.

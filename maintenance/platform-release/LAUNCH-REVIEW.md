@@ -12,7 +12,7 @@ Homebridge and Apple Home were not accessed.
 ## Reviewed package
 
 - Name/version: `homebridge-http-advanced-platform@2.0.0-alpha.6`.
-- Archive: `/Users/shanemcw/Downloads/http-advanced-platform-alpha6-launch-20260926/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz`.
+- Archive: `/path/to/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz`.
 - SHA-256: `3c62cfc01ba7b9f2cbb737fc6fdfa0de4b82ea592ffda935757b0db7823af247`.
 - 56 files; 69253 compressed bytes. Relative documentation targets exist.
 - Compared with the preserved milestone 2/3 archive, only `README.md`,
@@ -147,7 +147,7 @@ Core commands after those gates are satisfied (run from this checkout):
 ```sh
 # resolve and verify this milestone's reviewed commit before using these commands
 releaseCommit=$(git rev-parse package-http-advanced-platform)
-releaseArchive=/Users/shanemcw/Downloads/http-advanced-platform-alpha6-launch-20260926/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz
+releaseArchive=/path/to/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz
 
 git push origin "${releaseCommit}:refs/heads/package-http-advanced-platform"
 git push origin "${releaseCommit}:refs/heads/main"

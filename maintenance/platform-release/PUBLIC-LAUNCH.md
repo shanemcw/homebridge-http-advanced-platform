@@ -20,7 +20,7 @@ Descriptive search indexing and the npm-page README correction remain follow-ups
 - Annotated `v2.0.0-alpha.6` resolves to the reviewed release commit
   `85d65bc5b690a0b53c224e38c3f5498327a19474`, not later documentation commits.
 - Reviewed/published archive (56 files, 69253 compressed bytes):
-  `/Users/shanemcw/Downloads/http-advanced-platform-alpha6-launch-20260926/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz`.
+  `/path/to/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz`.
 - SHA-256:
   `3c62cfc01ba7b9f2cbb737fc6fdfa0de4b82ea592ffda935757b0db7823af247`.
   The registry download and GitHub release asset digest both match it.
@@ -90,8 +90,8 @@ retag its release commit.
   a loaded configuration, zero legacy accessories, shared settings and the
   optional platform. All 56 native-UI-installed files also match the archive.
 - Evidence images are retained outside the distributable allowlist:
-  `/Users/shanemcw/Downloads/http-advanced-platform-alpha6-launch-20260926/public-alpha-version-chooser.png`
-  and `/Users/shanemcw/Downloads/http-advanced-platform-alpha6-launch-20260926/public-registry-installed-ui.png`.
+  `/path/to/public-alpha-version-chooser.png`
+  and `/path/to/public-registry-installed-ui.png`.
 
 The UI fixture used loopback port 57471, disabled HAP, disabled insecure control
 and had no device endpoints. Its duplicate startup exited with `EADDRINUSE`;

@@ -40,7 +40,7 @@ under an expandable summary so large inventories do not fill the initial view.
 - Installed loader/aliases, loopback controls and official custom UI IPC passed
   3/3 on each Homebridge version, including corrected schema metadata.
 - Browser checks on sanitized fixtures covered edit/save/reload, preservation of
-  the other 43 legacy definitions, encoded/unknown fields and bridge assignment,
+  unedited legacy definitions, encoded/unknown fields and bridge assignment,
   invalid-JSON rejection, add/remove, compact group behavior and the final copy.
 - Final tarball inspection confirmed platform metadata and final UI copy.
 - `git diff --check` passed.
@@ -48,12 +48,12 @@ under an expandable summary so large inventories do not fill the initial view.
 The four-combination regression matrix covers this source change; the last GUI
 updates were layout/copy changes and received browser, lint and tarball checks.
 The browser used the isolated preview and existing ConfigEditor, not the
-household Homebridge instance or a production configuration.
+Field test instance or a production configuration.
 
 ## Initial release boundary
 
 At this local-test checkpoint, the changes remained uncommitted on
-`develop/2.1.0`. The development tarball was installed on stinky-1 for authorized local testing after backups;
+`develop/2.1.0`. The development tarball was installed on test installation for authorized local testing after backups;
 see [the deployment record](LOCAL-DEV-20261013.md). During that local test, no package was published,
 branch pushed, or GitHub issue comment sent. The public 2.0.0 package has
 the rejected schema metadata. A new

@@ -88,9 +88,8 @@ and storage, rather than constructing a substitute configuration.
 | Restored backup rollback | accessory Alpha.5 | Both started | Preserved; old association restored |
 | Final candidate restoration | platform Alpha.6 | Both started | Preserved; new association restored |
 
-Every stage retained one cached platform accessory with UUID
-`e8d6f025-6706-4e40-ac87-b154d91f7f6b`. Its serialized service and characteristic
-UUIDs, child bridge usernames and device definitions also matched. Both package
+Every stage retained cached platform identities. Serialized service and
+characteristic UUIDs, child bridge identities and device definitions also matched. Both package
 names successfully loaded their qualified registrations and explicit allowlists.
 Final configuration matched the post-UI-edit Alpha.6 backup exactly.
 
@@ -101,7 +100,7 @@ repository was renamed or pushed, and production was not deployed or restarted.
 ## Evidence and repeating the checks
 
 - [lifecycle-results.json](lifecycle-results.json) preserves synthetic stage
-  results, process IDs and versions. Process IDs are historical observations.
+  results and versions without installation inventory or process identifiers.
 - [lifecycle-rehearsal.mjs](lifecycle-rehearsal.mjs) preserves the orchestration
   used for the package swaps and assertions. Its retained version adds archive
   path overrides, assertions for the synthetic fixture/host and a guard against
@@ -112,7 +111,7 @@ repository was renamed or pushed, and production was not deployed or restarted.
   `lifecycle/rehearsal/`; they may expire. No authentication file is included in
   the lifecycle backups or committed evidence.
 - Browser evidence remains in
-  `/Users/shanemcw/Downloads/http-advanced-platform-alpha6-20260926/`:
+  `/path/to/http-advanced-platform-alpha6-20260926`:
   `installed-ui-acceptance.png`, `native-editor-save.png`, and
   `restored-ui-acceptance.png`.
 

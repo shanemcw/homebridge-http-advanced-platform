@@ -25,27 +25,17 @@ Recorded: 2026-10-04 (America/New_York).
   loopback HTTP adapters and official custom UI IPC passed 3/3 on each Homebridge
   version. The production dependency audit reported zero known vulnerabilities.
 - All 48 runtime/UI/configuration/license files match public Alpha.9, as does the
-  household Alpha.9 install's complete 56-file archive. Stable changes affect
+  tested Alpha.9 archive. Stable changes affect
   release metadata, documentation, packaging and publication guards.
 - Current packaged Markdown links resolve within the stable archive, including
   the new configuration examples guide, release notes and full changelog.
 
-## Production and field boundary
+## Field validation boundary
 
-Read-only household inspection found Alpha.9 installed since September 29,
-Homebridge 2.4.0 on the logged Node 24.21.0 runtime, 44 unqualified legacy Switch
-definitions, no original accessory package and no duplicate legacy names.
-Homebridge was active with zero automatic systemd service restarts; the retained
-log also records deliberate supervisor/process restarts. All recorded Alpha.9
-startups restore 44/44 cached getters. Backend interruptions show successful
-background recovery, with no plugin error mentions in the retained log window.
-All 44 state files had recent write times; their private contents and detailed
-success ages were inaccessible through the inspection account.
-
-Production remains on Alpha.9. No production package, configuration, pairing or
-service changes were made. Its configuration does not exercise platform devices,
-additional services or `scale`/`lookup`; those paths retain automated/isolated
-coverage. Read-only checks do not independently verify physical controls or
-Apple Home rooms, scenes and automations. The release is not Homebridge-verified.
-See the public release notes for these limits and the migration guide for safe
-replacement of the original accessory package.
+Field testing exercised legacy Switch configurations, startup restoration,
+persistence and recovery after backend interruptions. Additional services,
+platform devices and new mapper modes had automated and isolated coverage at
+this historical checkpoint. These results do not establish every installation's
+physical controls, rooms, scenes or automations. The release was not
+Homebridge-verified. See the release notes and migration guide for compatibility
+and replacement guidance.

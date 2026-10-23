@@ -1,6 +1,6 @@
 # Homebridge HTTP Advanced Platform 2.0.0-alpha.9
 
-> Historical Alpha release notes. For stable 2.0.0, see the [current release notes](release-notes.md) and [changelog](../CHANGELOG.md).
+> Historical Alpha release notes. For the current stable release, see the [current release notes](release-notes.md) and [changelog](../CHANGELOG.md).
 
 **Alpha.9 is a public testing release, not a stable or Homebridge-verified release.** Confirm its availability in the [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions) and matching [GitHub prerelease](https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.0.0-alpha.9) before installing.
 

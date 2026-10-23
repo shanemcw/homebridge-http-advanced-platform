@@ -28,7 +28,7 @@ A minimal read-only sensor can extract that value with JSONPath:
   "forceRefreshDelay": 30,
   "urls": {
     "getCurrentTemperature": {
-      "url": "http://sensor.local/status",
+      "url": "http://sensor.example/status",
       "requireResponseMatch": true,
       "mappers": [
         {
@@ -64,7 +64,7 @@ and accepts a JSON POST body containing `"on"` or `"off"`. Chain JSONPath with `
   "name": "Desk Fan",
   "urls": {
     "getOn": {
-      "url": "http://fan.local/status",
+      "url": "http://fan.example/status",
       "requireResponseMatch": true,
       "mappers": [
         {
@@ -85,7 +85,7 @@ and accepts a JSON POST body containing `"on"` or `"off"`. Chain JSONPath with `
       ]
     },
     "setOn": {
-      "url": "http://fan.local/power",
+      "url": "http://fan.example/power",
       "httpMethod": "POST",
       "headers": {
         "Content-Type": "application/json"
@@ -129,7 +129,7 @@ This device asks for a normal refresh every five seconds:
   "forceRefreshDelay": 5,
   "urls": {
     "getOccupancyDetected": {
-      "url": "http://presence-sensor.local/readings",
+      "url": "http://presence-sensor.example/readings",
       "requireResponseMatch": true,
       "mappers": [
         {
@@ -160,13 +160,13 @@ Suppose a light reports brightness from `0` to `255`, while HomeKit Brightness u
   ],
   "urls": {
     "getOn": {
-      "url": "http://light.local/power"
+      "url": "http://light.example/power"
     },
     "setOn": {
-      "url": "http://light.local/power/{value}"
+      "url": "http://light.example/power/{value}"
     },
     "getBrightness": {
-      "url": "http://light.local/level",
+      "url": "http://light.example/level",
       "mappers": [
         {
           "type": "scale",
@@ -182,7 +182,7 @@ Suppose a light reports brightness from `0` to `255`, while HomeKit Brightness u
       ]
     },
     "setBrightness": {
-      "url": "http://light.local/level",
+      "url": "http://light.example/level",
       "httpMethod": "POST",
       "body": "{value}",
       "mappers": [
@@ -232,7 +232,7 @@ The three color characteristics are optional, so list them in `optionCharacteris
   ],
   "urls": {
     "getOn": {
-      "url": "http://color-light.local/status",
+      "url": "http://color-light.example/status",
       "requireResponseMatch": true,
       "mappers": [
         {
@@ -244,10 +244,10 @@ The three color characteristics are optional, so list them in `optionCharacteris
       ]
     },
     "setOn": {
-      "url": "http://color-light.local/power/{value}"
+      "url": "http://color-light.example/power/{value}"
     },
     "getHue": {
-      "url": "http://color-light.local/status",
+      "url": "http://color-light.example/status",
       "requireResponseMatch": true,
       "mappers": [
         {
@@ -259,10 +259,10 @@ The three color characteristics are optional, so list them in `optionCharacteris
       ]
     },
     "setHue": {
-      "url": "http://color-light.local/hue/{value}"
+      "url": "http://color-light.example/hue/{value}"
     },
     "getSaturation": {
-      "url": "http://color-light.local/status",
+      "url": "http://color-light.example/status",
       "requireResponseMatch": true,
       "mappers": [
         {
@@ -274,10 +274,10 @@ The three color characteristics are optional, so list them in `optionCharacteris
       ]
     },
     "setSaturation": {
-      "url": "http://color-light.local/saturation/{value}"
+      "url": "http://color-light.example/saturation/{value}"
     },
     "getBrightness": {
-      "url": "http://color-light.local/status",
+      "url": "http://color-light.example/status",
       "requireResponseMatch": true,
       "mappers": [
         {
@@ -289,7 +289,7 @@ The three color characteristics are optional, so list them in `optionCharacteris
       ]
     },
     "setBrightness": {
-      "url": "http://color-light.local/brightness/{value}"
+      "url": "http://color-light.example/brightness/{value}"
     }
   }
 }
@@ -320,7 +320,7 @@ the two getters can read the same endpoint and select different fields:
   "forceRefreshDelay": 5,
   "urls": {
     "getCurrentDoorState": {
-      "url": "http://garage.local/status",
+      "url": "http://garage.example/status",
       "requireResponseMatch": true,
       "mappers": [
         {
@@ -332,7 +332,7 @@ the two getters can read the same endpoint and select different fields:
       ]
     },
     "getTargetDoorState": {
-      "url": "http://garage.local/status",
+      "url": "http://garage.example/status",
       "requireResponseMatch": true,
       "mappers": [
         {
@@ -344,7 +344,7 @@ the two getters can read the same endpoint and select different fields:
       ]
     },
     "setTargetDoorState": {
-      "url": "http://garage.local/door/{value}",
+      "url": "http://garage.example/door/{value}",
       "mappers": [
         {
           "type": "lookup",
@@ -383,7 +383,7 @@ When the first endpoint says only `ARMED`, a second endpoint can identify `STAY`
   "forceRefreshDelay": 10,
   "urls": {
     "getSecuritySystemCurrentState": {
-      "url": "http://alarm.local/status.xml",
+      "url": "http://alarm.example/status.xml",
       "requireResponseMatch": true,
       "mappers": [
         {
@@ -404,7 +404,7 @@ When the first endpoint says only `ARMED`, a second endpoint can identify `STAY`
         }
       ],
       "inconclusive": {
-        "url": "http://alarm.local/mode.xml",
+        "url": "http://alarm.example/mode.xml",
         "requireResponseMatch": true,
         "mappers": [
           {
@@ -427,7 +427,7 @@ When the first endpoint says only `ARMED`, a second endpoint can identify `STAY`
       }
     },
     "getSecuritySystemTargetState": {
-      "url": "http://alarm.local/mode.xml",
+      "url": "http://alarm.example/mode.xml",
       "requireResponseMatch": true,
       "mappers": [
         {
@@ -450,7 +450,7 @@ When the first endpoint says only `ARMED`, a second endpoint can identify `STAY`
       ]
     },
     "setSecuritySystemTargetState": {
-      "url": "http://alarm.local/set-mode/{value}",
+      "url": "http://alarm.example/set-mode/{value}",
       "mappers": [
         {
           "type": "lookup",
@@ -488,7 +488,7 @@ For a new platform-managed device, the configuration inside `devices[]` uses the
       "forceRefreshDelay": 30,
       "urls": {
         "getCurrentTemperature": {
-          "url": "http://sensor.local/status",
+          "url": "http://sensor.example/status",
           "requireResponseMatch": true,
           "mappers": [
             {

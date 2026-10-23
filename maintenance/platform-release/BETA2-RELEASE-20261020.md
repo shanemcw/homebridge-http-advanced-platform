@@ -42,7 +42,7 @@ and the exact reviewed archive/checksum. Publish that archive with explicit
 verify `latest` and `alpha` are unchanged, and inspect the actual Homebridge
 Manage Version notes popup without installing.
 
-Publication is separate from the continuing platform-device household soak,
+Publication is separate from the continuing platform-device field soak,
 remaining scene/voice checks, stable promotion and Homebridge verification.
 
 ## Public publication and Homebridge acceptance
@@ -75,7 +75,6 @@ an already-installed plugin takes the Update route: the initial dialog loads
 notes, and a separate Continue invokes the update. After this evidence, the
 read-only dialog-opening action was accepted. No installation was performed.
 
-Read-only production verification after opening the dialog still reported
-`2.1.0-beta.1`, the same Homebridge process/start time, no automatic restarts and
-unchanged configuration. The local UI patches and household soak remain in
-place; public publication did not upgrade production or promote stable.
+Read-only checks confirmed that viewing release notes did not change the
+installed package, configuration or running service. Publication was separate
+from field testing, package installation and stable promotion.

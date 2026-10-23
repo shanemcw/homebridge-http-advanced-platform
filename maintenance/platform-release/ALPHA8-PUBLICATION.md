@@ -46,7 +46,7 @@ Recorded: 2026-09-28 (America/New_York).
 ## Boundary
 
 The UI service and chooser path, registry installation and isolated runtime
-passed. An actual click through the user's production Homebridge UI, replacement
+passed. An actual click through an installed Homebridge UI, replacement
 of its installed Alpha.7, paired Apple Home behavior, physical controls and live
 soak were not performed in this release task. Existing production configuration
 was read only; no production package, Homebridge process or device changed.

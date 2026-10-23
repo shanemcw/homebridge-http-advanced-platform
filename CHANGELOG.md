@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.1.0 - 2026-10-23
+
+Promote the Beta.2 runtime and configuration editors after field testing of
+legacy accessories and migrated platform switches.
+
+- Edit platform devices and legacy accessories independently in Plugin Config,
+  with add/remove controls, named platform headings and separate platform settings.
+- Preserve existing IDs, encoded requests, custom fields and bridge assignments;
+  give newly added devices fresh IDs and reject conflicting device drafts.
+- Correct the platform schema used by Homebridge verification while retaining
+  existing accessory configurations and both registration aliases.
+- Strip configured headers and device Basic Auth on cross-origin GET/HEAD
+  redirects; configure trusted final endpoints directly if they require them.
+- Select stable `2.1.0` through npm `latest`. Beta.2 remains available on `beta`.
+
+Runtime, UI, schema, dependencies and HomeKit identity rules are unchanged from
+Beta.2. Additional services and new mapper modes retain automated and isolated
+coverage. Per-action command handling remains planned. Homebridge verification
+is a separate later step. See the [release notes](docs/release-notes.md).
+
 ## 2.1.0-beta.2 - 2026-10-20
 
 Individual platform-device editors and clearer named platform controls. npm
@@ -18,7 +38,7 @@ runtime, dependencies and HomeKit identity rules are unchanged from Beta.1.
 
 ## 2.1.0-beta.1 - 2026-10-13
 
-Beta release for a week of household testing before stable promotion. npm `beta`
+Beta release for a week of field testing before stable promotion. npm `beta`
 selects this version; stable npm `latest` remains `2.0.0`.
 
 - Strip all configured headers, including custom API-key headers, when GET/HEAD
@@ -42,7 +62,7 @@ remains planned and is not included in this beta.
 ## 2.0.0 - 2026-10-04
 
 First stable release of `homebridge-http-advanced-platform`, promoting the
-published Alpha.9 runtime after household use. The original
+published Alpha.9 runtime after field use. The original
 `homebridge-http-advanced-accessory` package remains a separate project.
 
 - Support existing `HttpAdvancedAccessory` definitions and optional `HttpAdvanced`
@@ -57,7 +77,7 @@ published Alpha.9 runtime after household use. The original
   the platform package name and matching prerelease/stable tags.
 
 The device runtime, configuration aliases, platform UUID namespace and dependency
-requirements are unchanged from Alpha.9. Household soak covers 44 legacy Switch
+requirements are unchanged from Alpha.9. Field soak covers legacy Switch
 accessories; platform devices, additional services and new mappers have automated
 and isolated coverage. This package is not Homebridge-verified. See the
 [release notes](docs/release-notes.md) and [migration guide](docs/migration.md).

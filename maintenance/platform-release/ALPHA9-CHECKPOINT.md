@@ -86,7 +86,7 @@ approved and the exact version is available.
 
 ## Publication decision, 2026-09-29
 
-Shane approved publishing Alpha.9 as an npm Alpha and matching GitHub prerelease
+The maintainer approved publishing Alpha.9 as an npm Alpha and matching GitHub prerelease
 so he can install it through Homebridge UI and test paired Apple Home behavior.
 The paired Apple Home, physical endpoint and soak checks above are now
 post-publication Alpha acceptance work, not publication prerequisites. Before

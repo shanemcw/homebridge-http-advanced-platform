@@ -10,9 +10,7 @@ This is a platform conversion of [staromeste's homebridge-http-advanced-accessor
 - **More resilient HTTP handling:** bounded requests, background recovery and quieter logs accommodate slow or temporarily unavailable servers, including older systems you cannot change.
 - **Migration at your pace:** maintain existing accessories through Plugin Config or the raw Homebridge JSON editor, and add platform devices alongside them when useful. The plugin also keeps a requested switch state visible while the server catches up, avoiding a brief reversal caused by stale reads.
 
-**Stable release: `2.0.0`.** This release promotes the Alpha.9 runtime, including optional additional services on one accessory, declarative `scale` and strict `lookup` mappers, and configurable accessory information. This package is not Homebridge-verified. See the [stable GitHub release](https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.0.0) for validation and field coverage. [Compatibility details](docs/modernization.md#what-non-breaking-means-here) explain the boundaries.
-
-**Beta release: `2.1.0-beta.2`.** The `beta` channel adds individual platform-device editors and clearer named platform controls, carrying forward redirect header hardening and the platform schema correction. Household testing continues before stable promotion. Review the [beta release notes](docs/release-notes.md), especially the redirect compatibility change. Individual-command handling remains planned. Installation instructions below select stable `2.0.0` unless you explicitly choose the beta.
+**Stable release: `2.1.0`.** Individual platform-device and legacy accessory editors, clearer named platform controls, a corrected platform schema and cross-origin redirect header hardening. Existing configurations remain supported without platform conversion. This package is not Homebridge-verified. See the [stable GitHub release](https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.1.0) for validation and field coverage, and the [compatibility details](docs/modernization.md#what-non-breaking-means-here) before updating endpoints that redirect across origins. Individual-command handling remains planned.
 
 [User guide](#user-guide) · [Configuration examples](docs/configuration-examples.md) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
 
@@ -35,34 +33,21 @@ If the legacy accessories disappear from the new setup, [paste only the missing 
 
 Check the [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions) and matching [GitHub release](https://github.com/shanemcw/homebridge-http-advanced-platform/releases) before installing. Choose the stable release; a local candidate archive alone does not establish public availability.
 
-In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select **latest** or **v2.0.0** in the version chooser. Existing Alpha testers can use **Manage Version** to select **v2.0.0**. Descriptive searches such as **HTTP Advanced**, **HTTP accessory**, **REST API** or **HTTP JSON** depend on npm indexing and ranking; searching the exact original package name still finds the original accessory package.
+In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select **latest** or **v2.1.0** in the version chooser. Existing Alpha and Beta testers can use **Manage Version** to select **v2.1.0**. Descriptive searches such as **HTTP Advanced**, **HTTP accessory**, **REST API** or **HTTP JSON** depend on npm indexing and ranking; searching the exact original package name still finds the original accessory package.
 
 For command-line installation, use `homebridge-http-advanced-platform@latest`, or pin the reviewed version as shown below. Use the same plugin location and account your Homebridge installation already uses; `/var/lib/homebridge` is an example prefix:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.0.0
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.1.0
 ```
 
 To install a reviewed archive directly:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.0.0.tgz
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.1.0.tgz
 ```
 
-**The `latest` channel selects stable `2.0.0`.** The `alpha` channel retains the earlier testing release. These tags affect only the new platform package; the original accessory package is separate and does not update automatically to it.
-
-To join beta testing, make a Homebridge backup, then use **Manage Version** and
-choose **beta** or **v2.1.0-beta.2**. The installation popup displays the matching
-[GitHub prerelease notes](https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.1.0-beta.2).
-For a command-line beta installation in your existing plugin location:
-
-```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.1.0-beta.2
-```
-
-The beta preserves existing configuration aliases and does not automatically
-convert accessories into platform devices. Review its release notes before
-using endpoints that redirect across origins.
+**The `latest` channel selects stable `2.1.0`.** The `beta` channel retains `2.1.0-beta.2` and `alpha` retains the earlier testing release. These tags affect only the new platform package; the original accessory package is separate and does not update automatically to it. Beta testers can select **latest** or **v2.1.0** in **Manage Version** to move to stable.
 
 Preserve Homebridge storage and bridge identity. Remove the old plugin package as part of the backed-up replacement before starting Homebridge with the new package; loading both would make their shared configuration aliases ambiguous. Check the migration guide before changing any package-qualified identifiers: changing a qualified legacy accessory identifier can change its HomeKit identity. Restart Homebridge and its UI, then verify devices, state updates, controls and existing automations. Installed UI and managed-child-bridge acceptance passed in an isolated Node 24/Homebridge 2 fixture with HAP disabled; paired Apple Home identity and live controls still need acceptance.
 
@@ -98,7 +83,7 @@ The plugin settings screen brings three areas together:
 
 To edit, add or remove a legacy accessory or platform device, use **Plugin Config**. Under a platform, expand **Edit Configured Devices**, then the device's name. Each device has its own JSON editor for custom fields, encoded commands and mappings. **Edit Platform Settings** maintains the platform's name, alias, child bridge and other platform fields separately. Keep an existing device's `id` and platform name unchanged to retain its HomeKit identity; if `id` is omitted, its name supplies the identity. Newly added devices receive a fresh ID that you can choose before pairing. **JSON Config** in the plugin menu edits complete platform definitions. **Back to Plugin Menu** closes Plugin Config after you save any pending changes.
 
-Individual platform device editors are included in `2.1.0-beta.2`.
+Individual platform device editors are included in `2.1.0`.
 
 Choose **Save All Settings** inside Plugin Config to save legacy accessories, shared settings and optional platforms, then restart Homebridge to apply changes. Existing accessory definitions stay unchanged unless you edit or remove them. A changed save keeps a private configuration backup and preserves unrelated plugins and bridge settings. Avoid editing the same configuration from multiple windows at once.
 
@@ -289,4 +274,4 @@ The [modernization and developer reference](docs/modernization.md) contains the 
 - Service support, optional characteristics, configuration editing and platform lifecycle.
 - Benchmark interpretation, development commands, test coverage and release policy.
 
-The [release notes](docs/release-notes.md) and [changelog](CHANGELOG.md) summarize 2.0.0 and its validation boundaries. The project retains its existing [Apache-2.0 license](LICENSE) and historical authorship.
+The [release notes](docs/release-notes.md) and [changelog](CHANGELOG.md) summarize 2.1.0 and its validation boundaries. The project retains its existing [Apache-2.0 license](LICENSE) and historical authorship.

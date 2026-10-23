@@ -151,7 +151,7 @@ Do not publish a partially checked candidate because an allowance window is endi
 - Public sample passed runtime configuration validation; documentation links,
   tarball file list/metadata and whitespace checks passed. LICENSE unchanged.
 - Tarball (56 files, 68296 bytes):
-  `/Users/shanemcw/Downloads/http-advanced-platform-alpha6-20260926/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz`.
+  `/path/to/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz`.
 - SHA-256: `899161d4e5a8a83e3941b06636b9bd75c34e98dbad1dbcdd00c261650e32bc22`.
 - npm pack could not use the default cache due to EPERM. It succeeded using an
   isolated `/private/tmp/http-advanced-platform-npm-cache`; no cache ownership or
@@ -219,7 +219,7 @@ release copy is [GITHUB-PRERELEASE.md](GITHUB-PRERELEASE.md); it is not publishe
   explicit installation through UI 5.29.0's Alpha chooser or `@alpha`/exact version.
   Public availability must be confirmed from npm and the matching prerelease.
 - New archive, 56 files / 69253 bytes:
-  `/Users/shanemcw/Downloads/http-advanced-platform-alpha6-launch-20260926/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz`.
+  `/path/to/homebridge-http-advanced-platform-2.0.0-alpha.6.tgz`.
 - SHA-256: `3c62cfc01ba7b9f2cbb737fc6fdfa0de4b82ea592ffda935757b0db7823af247`.
   Its sibling `.tgz.sha256` is prepared for the eventual prerelease attachment.
 - Only four distributed documentation files differ from the preserved milestone
