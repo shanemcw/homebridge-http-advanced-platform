@@ -1,5 +1,7 @@
 # Individual command candidate - October 24, 2026
 
+> Historical preparation record. [Beta.1 publication completed](BETA22-PUBLICATION-20261024.md); physical command acceptance remains pending.
+
 Local candidate: `2.2.0-beta.1`, targeting stable `2.2.0` after beta field
 acceptance. Publication and physical command-device acceptance remain pending.
 No running Homebridge installation was changed for these checks.
