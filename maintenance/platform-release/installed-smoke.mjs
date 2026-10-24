@@ -85,3 +85,18 @@ test('installed official custom UI IPC preserves qualified config, bridge fields
   assert.deepEqual(saved.accessories, config.accessories); assert.deepEqual(saved.bridge, config.bridge);
   assert.deepEqual(saved.unrelated, config.unrelated); assert.equal(saved.platforms[0].enabled, true);
 });
+
+test('installed command mode delivers repeated presses once each and keeps observed state separate',async t=>{
+  const api=await makeAPI(t),server=await fakeServer(t,(_req,res)=>res.end('0'));
+  const {LegacyAccessory}=await import(pathToFileURL(join(installedRoot,'dist/accessory.js')).href);
+  const config={name:'Installed command',service:'Switch',setterDelay:5000,urls:{
+    getOn:{url:server.url+'/state'},setOn:{url:server.url+'/command/{value}',writeMode:'command'},
+  }};
+  const legacy=new LegacyAccessory(silentLog,config,api),runtime=sharedRuntime(api,silentLog);
+  await runtime.refresh([...runtime.entries.values()][0]);
+  const on=legacy.getServices()[1].getCharacteristic(api.hap.Characteristic.On);
+  await Promise.all([true,true,true].map(value=>on.handleSetRequest(value)));
+  assert.equal(server.requests.filter(request=>request.url==='/command/true').length,3);
+  assert.equal(await on.handleGetRequest(),false);
+  assert.equal(runtime.writes.stats.completed,3);
+});

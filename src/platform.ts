@@ -1,6 +1,6 @@
 import type { API, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig } from 'homebridge';
-import { DeviceAdapter, serviceConstructor } from './accessory.js';
-import { serviceConfigs, validateDevice } from './config.js';
+import { DeviceAdapter, serviceConstructor, validateWriteModes } from './accessory.js';
+import { hasCommands, serviceConfigs, validateDevice, WriteModeError } from './config.js';
 import { fingerprint, sharedRuntime } from './runtime.js';
 import { validateSettings } from './settings.js';
 import type { CoordinatorConfig, DeviceConfig } from './types.js';
@@ -42,9 +42,12 @@ export class HTTPPlatform implements DynamicPlatformPlugin {
     if (!Array.isArray(devices)) { this.unavailable(); this.log.error('HTTP Advanced platform requires a devices array'); return; }
     const desired = new Map<string, DeviceConfig>();
     try {
-      for (const device of devices) {
+      for (const [deviceIndex, device] of devices.entries()) {
         validateDevice(device);
-        for (const definition of serviceConfigs(device)) serviceConstructor(this.api, definition.config.service);
+        for (const [index, definition] of serviceConfigs(device).entries()) {
+          serviceConstructor(this.api, definition.config.service);
+          validateWriteModes(this.api, definition.config, `devices[${deviceIndex}].services[${index}]`);
+        }
         const id = device.id ?? device.name;
         if (typeof id !== 'string' || !id.trim()) throw new Error();
         const UUID = this.api.hap.uuid.generate(`${platformUUIDNamespace}:${this.config.name ?? platformName}:${id}`);
@@ -54,7 +57,7 @@ export class HTTPPlatform implements DynamicPlatformPlugin {
     } catch (error) {
       this.unavailable();
       const unsupported = error instanceof Error && error.message.startsWith('HTTP Advanced unsupported HomeKit service:');
-      this.log.error(unsupported ? `${error.message}; cached accessories retained` : 'HTTP Advanced platform inventory invalid or contains duplicate IDs; cached accessories retained');
+      this.log.error(unsupported || error instanceof WriteModeError ? `${error.message}; cached accessories retained` : 'HTTP Advanced platform inventory invalid or contains duplicate IDs; cached accessories retained');
       return;
     }
     const runtime = sharedRuntime(this.api, this.log);
@@ -74,7 +77,7 @@ export class HTTPPlatform implements DynamicPlatformPlugin {
           const Constructor = serviceConstructor(this.api, serviceConfig.service);
           const existing = accessory.services.find(service => service.UUID === Constructor.UUID && service.subtype === subtype);
           return new DeviceAdapter(this.api, runtime, serviceConfig,
-            subtype === undefined ? `platform:${UUID}` : `platform:${UUID}:service:${subtype}`, existing, subtype, requestOwner);
+            subtype === undefined ? `platform:${UUID}` : `platform:${UUID}:service:${subtype}`, existing, subtype, requestOwner, { owner: `platform:${UUID}`, ordered: hasCommands(device) });
         });
         for (const adapter of adapters) if (!accessory.services.includes(adapter.service)) accessory.addService(adapter.service);
         // remove obsolete services only after all desired definitions were attached

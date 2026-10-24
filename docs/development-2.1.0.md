@@ -1,12 +1,10 @@
 # 2.1.0 Development and Release Scope
 
-The stable `2.1.0` candidate promotes the runtime and editors published as
+Stable `2.1.0` promoted the runtime and editors previously published as
 `2.1.0-beta.2`, after field use of legacy accessories and migrated platform
-switches. Stable publication selects npm `latest`; the earlier beta remains on
-`beta`. Confirm the exact public version before installing. A local development
-build was evaluated before preparing the beta. Homebridge verification
-resubmission remains a separate later step. Development continues in the
-maintained platform repository.
+switches. This page records that released scope. npm `latest` selects `2.1.0`;
+Homebridge verification remains a separate step. The next release is described
+in the [2.2.0 design and acceptance plan](development-2.2.0.md).
 
 Version policy for this project: functional improvements advance the minor
 version (`2.1.0`); the third component is reserved for cosmetic changes. A
@@ -27,12 +25,12 @@ with a single coordinator slot.
 
 Compatibility change: an endpoint on another origin will no longer receive
 custom headers from the starting endpoint. Configure that trusted final
-endpoint directly if it needs its own headers. Stable `2.0.0` still forwards
-custom headers across origins; the beta includes the hardening.
+endpoint directly if it needs its own headers. Version `2.0.0` forwards custom
+headers across origins; stable `2.1.0` includes the hardening.
 
 The release guard also accepts Alpha/Beta version strings for later release
-lines, including `2.1.0-beta.1`, with matching explicit tags. The beta package
-defaults to `publishConfig.tag: beta`, keeping stable `latest` unchanged.
+lines, including `2.1.0-beta.1`, with matching explicit tags. The 2.1.0
+prereleases used `publishConfig.tag: beta`; stable `2.1.0` selected `latest`.
 
 ## Implemented: platform schema and legacy configuration editors
 
@@ -72,46 +70,28 @@ and stable promotion remain separate from any local UI deployment.
 
 ## Planned: preserve individual HTTP commands
 
-This is a feature plan, not an implemented configuration option. Three
-deliberate volume-up presses should send three commands. By contrast, combining
-rapid changes to a target brightness can be useful. Today, `setterDelay` applies
-at device or shared-default level; positive values retain only the last write.
+Individual-command handling is now targeted for the next functional release,
+`2.2.0`, with `2.2.0-beta.1` implemented for beta field testing. It is not included
+in `2.1.0`; physical command acceptance remains a stable-promotion gate.
 
-The proposed platform feature should:
-
-- Opt in per setter action, with omission preserving current behavior. Choose
-  the field name and specify its validation before implementation.
-- Bypass target-value debounce for individual commands. Define ordering across
-  commands and target writes on the same configured device, including its
-  additional services, while retaining pacing and independent-device progress.
-- Retain queue bounds, total delivery deadlines and shutdown cancellation.
-  Rejected or expired commands must not execute later. Failed or uncertain
-  commands must not be replayed automatically; a timeout can follow delivery.
-- Keep acknowledgements and observed state separate. An increment/toggle code
-  must not become a requested target or confirm resulting device state.
-  Command-only endpoints need no invented getter.
-- Preserve both adapters, configuration round-trips, mappings, aliases and
-  HomeKit identities. Do not infer command behavior from HTTP method or name.
-
-Acceptance must cover repeated and alternating commands, mixed target/command
-ordering, shared debounce overrides, pacing, queue pressure, expiry, failures,
-shutdown, feedback handling, additional services and both Homebridge versions.
-Representative device and Apple Home behavior will need separate validation.
-Custom FanIR/TVIR service definitions and complete TV integration are outside
-this proposal.
+The [2.2.0 design and acceptance plan](development-2.2.0.md) defines the
+per-setter `writeMode`, device ordering, debounce boundaries, bounded queues,
+deadlines, failure cancellation and observed-state handling. Existing definitions
+retain their behavior unless a device opts into command mode. Custom FanIR/TVIR
+services and complete television integration remain separate work.
 
 ## Release readiness
 
-Stable preparation follows successful field testing of legacy and migrated
-platform operation. Acceptance covers scene activation, voice control, physical
-control and cached identity persistence across restarts. These results complete
-the earlier field acceptance hold; publication remains a separate release step.
+Stable `2.1.0` was published after successful field testing of legacy and migrated
+platform operation, including scene activation, voice control, physical control
+and cached identity persistence across restarts. Those results completed its
+earlier field acceptance hold.
 
 Each public candidate must pass the Node 22/24 × Homebridge 1/2 matrix, production
 dependency audit and fresh package installation checks. Record deployment and
-device acceptance separately. The [beta release notes](release-notes.md) describe
-the released scope and the limits of field coverage. Optional per-action
-command handling is not a release requirement for this beta.
+device acceptance separately. The [stable 2.1.0 release notes](release-notes.md)
+describe its scope and the limits of field coverage. Individual command handling
+was outside `2.1.0` and is implemented in the separate `2.2.0-beta.1` candidate.
 
 The [branch archive](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/main/maintenance/platform-release/BRANCH-ARCHIVE-20261004.md)
 preserves the old history. Contribution and coordination plans for the original

@@ -26,13 +26,13 @@ export class Actions {
     return value;
   }
 
-  async set(action: ActionConfig, config: DeviceConfig, owner: string, state: State, value: unknown): Promise<void> {
+  async set(action: ActionConfig, config: DeviceConfig, owner: string, state: State, value: unknown, deadline?: number, reservation?: object, onDispatch?: () => void): Promise<void> {
     const mapped = mapValue(action.mappers, value, state);
     let url: string; let body: string;
     try {
       url = interpolateLegacy(action.url, value, mapped, state);
       body = action.body ? interpolateLegacy(action.body, value, mapped, state) : '';
     } catch { throw new ActionError('mapper'); }
-    await this.transport.request({ ...action, url, body }, config, owner, true);
+    await this.transport.request({ ...action, url, body }, config, owner, true, 0, deadline, reservation, onDispatch);
   }
 }

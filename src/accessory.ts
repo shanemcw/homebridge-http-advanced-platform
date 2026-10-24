@@ -1,5 +1,5 @@
 import type { API, AccessoryConfig, Characteristic, CharacteristicValue, Logging, Service } from 'homebridge';
-import { serviceConfigs, validateDevice } from './config.js';
+import { hasCommands, serviceConfigs, validateDevice, WriteModeError } from './config.js';
 import { ActionError, type CacheEntry, type DeviceConfig, type State } from './types.js';
 import { fingerprint, Runtime, sharedRuntime } from './runtime.js';
 
@@ -41,36 +41,69 @@ export function convertValue(characteristic: Characteristic, value: unknown): Ch
   return normalizer.value;
 }
 
+function prepareService(api: API, config: DeviceConfig, existing?: Service, subtype?: string): { service: Service; names: Map<string, string> } {
+  const Constructor = serviceConstructor(api, config.service);
+  const service = existing ?? new Constructor(config.name, subtype);
+  service.displayName = config.name;
+  const registry = api.hap.Characteristic as unknown as Record<string, CharacteristicConstructor>;
+  const names = new Map<string, string>();
+  for (const [name, value] of Object.entries(registry)) if (typeof value === 'function' && value.UUID) names.set(value.UUID, name);
+  if (existing) {
+    const required = new Constructor(config.name).characteristics.map(c => c.UUID);
+    for (const characteristic of existing.characteristics.slice()) {
+      const compact = characteristic.displayName.replace(/\s/g, '');
+      const canonical = names.get(characteristic.UUID) ?? compact;
+      if (!required.includes(characteristic.UUID) && !config.optionCharacteristic?.includes(compact) && !config.optionCharacteristic?.includes(canonical)) {
+        existing.removeCharacteristic(characteristic);
+      }
+    }
+  }
+  // preserve the optional service ordering used by the legacy adapter, not config order
+  for (const characteristic of service.optionalCharacteristics.slice()) {
+    const compact = characteristic.displayName.replace(/\s/g, '');
+    const canonical = names.get(characteristic.UUID) ?? compact;
+    if (config.optionCharacteristic?.includes(compact) || config.optionCharacteristic?.includes(canonical)) {
+      if (!service.characteristics.some(c => c.UUID === characteristic.UUID)) service.addCharacteristic(characteristic);
+    }
+  }
+  return { service, names };
+}
+
+export function validateWriteModes(api: API, config: DeviceConfig, path = 'device'): void {
+  const configured = Object.entries(config.urls ?? {}).filter(([, action]) => action.writeMode !== undefined);
+  if (!configured.length) return;
+  const { service, names } = prepareService(api, config);
+  const bound = new Set<string>();
+  for (const characteristic of service.characteristics) {
+    if (characteristic.UUID === api.hap.Characteristic.Name.UUID) continue;
+    const compact = characteristic.displayName.replace(/\s/g, '');
+    const canonical = names.get(characteristic.UUID) ?? compact;
+    const props = config.props?.[compact] ?? config.props?.[canonical];
+    if (props) characteristic.setProps(props);
+    const resolve = (prefix: string): string => config.urls?.[prefix + compact] ? prefix + compact : prefix + canonical;
+    const setName = resolve('set');
+    const action = config.urls?.[setName];
+    if (action?.writeMode === undefined) continue;
+    if (!characteristic.props.perms.includes(api.hap.Perms.PAIRED_WRITE)) throw new WriteModeError(`${path}.urls.${setName}.writeMode`, 'requires an exposed writable characteristic');
+    if (action.writeMode === 'command' && characteristic.props.perms.includes(api.hap.Perms.PAIRED_READ) && !config.urls?.[resolve('get')]) {
+      throw new WriteModeError(`${path}.urls.${setName}.writeMode`, 'readable commands require an explicit getter');
+    }
+    bound.add(setName);
+  }
+  for (const [name] of configured) if (!bound.has(name)) throw new WriteModeError(`${path}.urls.${name}.writeMode`, 'setter does not bind to an exposed writable characteristic');
+}
+
 export class DeviceAdapter {
   readonly state: State = {};
   readonly entries = new Map<string, CacheEntry>();
   readonly service: Service;
-  constructor(readonly api: API, readonly runtime: Runtime, readonly config: DeviceConfig, readonly identity: string, existing?: Service, subtype?: string, requestOwner?: string) {
+  constructor(readonly api: API, readonly runtime: Runtime, readonly config: DeviceConfig, readonly identity: string, existing?: Service, subtype?: string, requestOwner?: string, writeOptions?: { owner: string; ordered: boolean }) {
     validateDevice(config);
-    const Constructor = serviceConstructor(api, config.service);
-    this.service = existing ?? new Constructor(config.name, subtype);
-    this.service.displayName = config.name;
-    const registry = api.hap.Characteristic as unknown as Record<string, CharacteristicConstructor>;
-    const names = new Map<string, string>();
-    for (const [name, value] of Object.entries(registry)) if (typeof value === 'function' && value.UUID) names.set(value.UUID, name);
-    if (existing) {
-      const required = new Constructor(config.name).characteristics.map(c => c.UUID);
-      for (const characteristic of existing.characteristics.slice()) {
-        const compact = characteristic.displayName.replace(/\s/g, '');
-        const canonical = names.get(characteristic.UUID) ?? compact;
-        if (!required.includes(characteristic.UUID) && !config.optionCharacteristic?.includes(compact) && !config.optionCharacteristic?.includes(canonical)) {
-          existing.removeCharacteristic(characteristic);
-        }
-      }
-    }
-    // preserve the optional service ordering used by the legacy adapter, not config order
-    for (const characteristic of this.service.optionalCharacteristics.slice()) {
-      const compact = characteristic.displayName.replace(/\s/g, '');
-      const canonical = names.get(characteristic.UUID) ?? compact;
-      if (config.optionCharacteristic?.includes(compact) || config.optionCharacteristic?.includes(canonical)) {
-        if (!this.service.characteristics.some(c => c.UUID === characteristic.UUID)) this.service.addCharacteristic(characteristic);
-      }
-    }
+    validateWriteModes(api, config);
+    const { service, names } = prepareService(api, config, existing, subtype);
+    this.service = service;
+    const ordered = writeOptions?.ordered ?? hasCommands(config);
+    const writeOwner = writeOptions?.owner ?? identity;
     for (const characteristic of this.service.characteristics) {
       const compact = characteristic.displayName.replace(/\s/g, '');
       const canonical = names.get(characteristic.UUID) ?? compact;
@@ -85,7 +118,7 @@ export class DeviceAdapter {
       }
       let entry: CacheEntry | undefined;
       if (config.urls?.[getName]) {
-        entry = runtime.register(identity, getName, config, this.state, value => convertValue(characteristic, value), value => characteristic.updateValue(value), requestOwner);
+        entry = runtime.register(identity, getName, config, this.state, value => convertValue(characteristic, value), value => characteristic.updateValue(value), requestOwner, ordered ? writeOwner : undefined);
         this.entries.set(getName, entry);
         const cached = entry;
         characteristic.onGet(() => {
@@ -95,6 +128,12 @@ export class DeviceAdapter {
       }
       if (config.urls?.[setName]) {
         characteristic.onSet(async value => {
+          if (ordered) {
+            try { await runtime.write(config, this.state, setName, value, writeOwner, entry, requestOwner, `${identity}:${setName}`); }
+            catch { throw new api.hap.HapStatusError(api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE); }
+            finally { if (entry) setImmediate(() => runtime.publish(entry)); }
+            return;
+          }
           const intent = entry ? runtime.beginWrite(entry, value) : undefined;
           const work = async () => {
             try { await runtime.set(config, this.state, setName, value, entry, intent, requestOwner); }
@@ -127,15 +166,18 @@ export class LegacyAccessory {
     try {
       validateDevice(config);
       const definitions = serviceConfigs(config);
-      for (const definition of definitions) serviceConstructor(api, definition.config.service);
+      for (const [index, definition] of definitions.entries()) {
+        serviceConstructor(api, definition.config.service);
+        validateWriteModes(api, definition.config, `device.services[${index}]`);
+      }
       const runtime = sharedRuntime(api, log);
       const requestOwner = fingerprint(definitions[0].config);
       const services = definitions.map(({ config: serviceConfig, subtype }) => new DeviceAdapter(api, runtime, serviceConfig,
-        subtype === undefined ? `legacy:${config.name}` : `legacy:${config.name}:service:${subtype}`, undefined, subtype, requestOwner).service);
+        subtype === undefined ? `legacy:${config.name}` : `legacy:${config.name}:service:${subtype}`, undefined, subtype, requestOwner, { owner: `legacy:${config.name}`, ordered: hasCommands(config) }).service);
       this.services.push(...services);
     } catch (error) {
       const unsupported = error instanceof Error && error.message.startsWith('HTTP Advanced unsupported HomeKit service:');
-      log.error(unsupported ? error.message : 'HTTP Advanced accessory configuration failed; check action and characteristic definitions');
+      log.error(unsupported || error instanceof WriteModeError ? error.message : 'HTTP Advanced accessory configuration failed; check action and characteristic definitions');
     }
   }
   getServices(): Service[] { return this.services; }

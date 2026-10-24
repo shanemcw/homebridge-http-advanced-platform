@@ -22,6 +22,7 @@ export interface ActionConfig {
   strictHTTP?: boolean;
   responsePattern?: string;
   requireResponseMatch?: boolean;
+  writeMode?: 'target' | 'command';
 }
 export interface RefreshConfig {
   activeInterval?: number;
@@ -59,8 +60,9 @@ export interface CoordinatorConfig {
   perOrigin?: number;
   maxQueue?: number;
 }
-export type ErrorCategory = 'config' | 'network' | 'timeout' | 'aborted' | 'deferred' | 'http' | 'unavailable' | 'mapper' | 'inconclusive' | 'queue';
+export type ErrorCategory = 'config' | 'network' | 'timeout' | 'aborted' | 'cancelled' | 'deferred' | 'http' | 'unavailable' | 'mapper' | 'inconclusive' | 'queue';
 export class ActionError extends Error {
+  dispatched = false;
   constructor(public readonly category: ErrorCategory, public readonly retryAfter?: number) {
     super(`HTTP Advanced ${category} failure`);
   }
@@ -68,6 +70,7 @@ export class ActionError extends Error {
 export interface CacheEntry {
   key: string;
   requestOwner?: string;
+  writeOwner?: string;
   actionName: string;
   config: DeviceConfig;
   state: State;
@@ -89,6 +92,7 @@ export interface CacheEntry {
 }
 export interface PendingWrite {
   value: CharacteristicValue;
+  order?: number;
   // no deadline until the debounced HTTP operation has completed
   expires?: number;
 }

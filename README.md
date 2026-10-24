@@ -6,13 +6,42 @@ This is a platform conversion of [staromeste's homebridge-http-advanced-accessor
 
 **Use platform devices, retain existing accessory configurations, or migrate manually at your own pace.** Keep your `HttpAdvancedAccessory` entries, encoded command URLs, request bodies, hand-written mappings and other settings. The improvements apply to existing accessories without converting them to a platform or upgrading their web server.
 
-- **Faster HomeKit reads:** shared cached state lets Apple Home read device status promptly while HTTP refreshes run in the background.
-- **More resilient HTTP handling:** bounded requests, background recovery and quieter logs accommodate slow or temporarily unavailable servers, including older systems you cannot change.
-- **Migration at your pace:** maintain existing accessories through Plugin Config or the raw Homebridge JSON editor, and add platform devices alongside them when useful. The plugin also keeps a requested switch state visible while the server catches up, avoiding a brief reversal caused by stale reads.
+**Stable release: `2.1.0`.** The improvements listed below are included unless marked as a 2.2.0 Beta feature. This package is not Homebridge-verified. See the [stable GitHub release](https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.1.0) for validation and field coverage, and the [compatibility details](docs/modernization.md#what-non-breaking-means-here) before upgrading.
 
-**Stable release: `2.1.0`.** Individual platform-device and legacy accessory editors, clearer named platform controls, a corrected platform schema and cross-origin redirect header hardening. Existing configurations remain supported without platform conversion. This package is not Homebridge-verified. See the [stable GitHub release](https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.1.0) for validation and field coverage, and the [compatibility details](docs/modernization.md#what-non-breaking-means-here) before updating endpoints that redirect across origins. Individual-command handling remains planned.
+**Beta testing release: `2.2.0-beta.1`.** Individual command handling is ready for beta field testing toward `2.2.0`. Representative physical-device acceptance remains pending. Stable `latest` stays at `2.1.0`; confirm the matching public npm version and GitHub prerelease before installing the Beta.
 
-[User guide](#user-guide) · [Configuration examples](docs/configuration-examples.md) · [Modernization details](#modernization-details) · [Developer reference](docs/modernization.md#development-and-release-policy)
+[What's new](#what-this-platform-adds) · [Individual commands](#every-button-press-counts-220-candidate) · [User guide](#user-guide) · [Configuration examples](docs/configuration-examples.md) · [Developer reference](docs/modernization.md)
+
+## What this platform adds
+
+This project builds on the original plugin's HTTP actions, JSON/XML mappings, polling and templates. Compared with the original `1.3.0` accessory plugin, these additions give new and existing users more responsive controls, easier configuration and broader device integration.
+
+### Available in stable 2.1.0
+
+| Addition | Practical value |
+|---|---|
+| [Optional platform management](#add-a-platform-when-you-choose) | Manage devices together with stable IDs, cached accessory restoration and an enable/disable control, while continuing to use existing accessory definitions. |
+| [Individual configuration editors](#maintain-configuration-in-the-ui-or-json) | Add, edit and remove devices independently, with named platform controls and shared settings. Changed saves retain a backup, detect conflicting edits and preserve unedited custom fields and bridge assignments. |
+| [Fast cached reads and restored state](docs/modernization.md#how-reads-and-freshness-work) | HomeKit reads known status without waiting for each HTTP request. Background refresh keeps observations current, and saved observations can restore known state after a restart. |
+| [Coordinated HTTP traffic](docs/modernization.md#shared-settings-and-precedence) | Shared timing, concurrency limits, request spacing and timeouts help protect devices from bursts of requests while keeping other devices moving. |
+| [Quieter outage recovery](docs/modernization.md#how-reads-and-freshness-work) | Unavailable endpoints back off and recover in the background, with fewer repeated warnings and continued access to known state where available. |
+| [Smoother control feedback](docs/modernization.md#sets-and-templates) | A short confirmation window keeps a requested setting visible while the device catches up, reducing controls that briefly flip back after a successful write. |
+| [Multiple services on one accessory](#add-battery-information-to-a-device) | Attach battery information or other supported services to the device they belong to, instead of exposing each service as a separate accessory. |
+| [Declarative numeric scaling](#scale-a-device-value) | Convert device ranges such as brightness 0–255 into HomeKit's 0–100 range, with optional rounding and clamping, without writing JavaScript. |
+| [Exact value lookup](#look-up-exact-device-states) | Map device responses to exact values, including `false`, `0` and empty strings, and reject unknown inputs when the accepted vocabulary is fixed. |
+| [Custom accessory information](#keep-using-existing-accessories) | Set manufacturer, model and serial-number information without changing a platform device's identity. |
+| [Request headers and response checks](docs/modernization.md#actions-and-http) | Configure API-key or Bearer headers and opt into stricter HTTP, response-pattern and extraction checks so unexpected replies are less likely to become apparent device state. |
+| [Safer HTTP redirects](docs/modernization.md#actions-and-http) | Redirects to another origin discard configured headers and device credentials, including custom API-key headers. Configure a trusted final endpoint directly when it needs those credentials. |
+| [Current Homebridge support](#requirements) | Support Node 22/24 and Homebridge 1/2 through a maintained runtime and compatibility matrix, including canonical characteristic names and historical aliases. |
+| [Useful diagnostics](#troubleshooting-and-rollback) | Inspect request timing, queue use, cache ages and recovery status without exposing URLs, credentials, request bodies or device values in the diagnostic snapshot. |
+
+**Addresses requests from the original project.** Several additions address longstanding open requests and issues in the parent repository, including [multiple services and battery information (#12)](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/12), [brightness conversion (#2)](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/2), [header authentication (#26)](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/26), [custom accessory information (PR #46)](https://github.com/staromeste/homebridge-http-advanced-accessory/pull/46) and [Homebridge 2 readiness (#58)](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/58).
+
+### Every button press counts: 2.2.0 candidate
+
+Individual command handling makes each button press count: three Volume Up presses are kept as three separate commands in order. Controls such as brightness sliders can still combine rapid adjustments into the final setting. Expired or failed commands are reported and are not automatically replayed, and an HTTP acknowledgement is kept separate from confirmed device state. Existing configurations keep their current behavior unless you enable the new option.
+
+The `2.2.0-beta.1` Beta adds per-setter `writeMode: "command"` to both legacy accessories and platform devices, including additional services. See the [Beta notes and configuration example](docs/release-notes-2.2.0-beta.1.md) for ordering, deadlines, failure handling and field acceptance. Choose **beta** or **v2.2.0-beta.1** in Homebridge Manage Version after confirming public availability.
 
 ## User guide
 
@@ -47,7 +76,7 @@ To install a reviewed archive directly:
 npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.1.0.tgz
 ```
 
-**The `latest` channel selects stable `2.1.0`.** The `beta` channel retains `2.1.0-beta.2` and `alpha` retains the earlier testing release. These tags affect only the new platform package; the original accessory package is separate and does not update automatically to it. Beta testers can select **latest** or **v2.1.0** in **Manage Version** to move to stable.
+**Release channels: `latest` for stable `2.1.0`, and `beta` for `2.2.0-beta.1`.** Stable `2.0.0` remains available by exact version. The earlier 2.0.0 Alpha and 2.1.0 Beta versions were retired from npm on October 24, 2026; the new Beta uses the `beta` tag. These changes apply only to the platform package; the original accessory package is separate. Users with an older prerelease installed can select **latest** or **v2.1.0** in **Manage Version** to move to stable.
 
 Preserve Homebridge storage and bridge identity. Remove the old plugin package as part of the backed-up replacement before starting Homebridge with the new package; loading both would make their shared configuration aliases ambiguous. Check the migration guide before changing any package-qualified identifiers: changing a qualified legacy accessory identifier can change its HomeKit identity. Restart Homebridge and its UI, then verify devices, state updates, controls and existing automations. Installed UI and managed-child-bridge acceptance passed in an isolated Node 24/Homebridge 2 fixture with HAP disabled; paired Apple Home identity and live controls still need acceptance.
 

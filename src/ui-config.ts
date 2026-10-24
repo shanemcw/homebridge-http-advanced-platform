@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { closeSync, fchmodSync, fchownSync, fstatSync, fsyncSync, openSync, readFileSync, realpathSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { isDeepStrictEqual } from 'node:util';
-import { validateDevice } from './config.js';
+import { validateDevice, WriteModeError } from './config.js';
 import { validateSettings, SettingsValidationError, type GlobalSettings } from './settings.js';
 import type { DeviceConfig } from './types.js';
 
@@ -60,7 +60,8 @@ export function validatePluginSettings(value: unknown): asserts value is PluginS
       }
     }
   } catch (error) {
-    const detail = error instanceof SettingsValidationError ? error.message.replace(/^Shared settings: /, '') : 'check names, aliases, device actions and timing values';
+    const detail = error instanceof SettingsValidationError ? error.message.replace(/^Shared settings: /, '')
+      : error instanceof WriteModeError ? error.message : 'check names, aliases, device actions and timing values';
     throw new SettingsError(`${location}: ${detail}; no changes saved`);
   }
 }

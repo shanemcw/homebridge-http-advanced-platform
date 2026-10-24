@@ -1,5 +1,36 @@
 # Changelog
 
+## 2.2.0-beta.1 - 2026-10-24
+
+- Add per-setter `writeMode: "command"` to preserve repeated and alternating
+  commands without debounce; retain existing behavior for target-only devices.
+- Order writes across each opted-in device's primary and additional services.
+  Coalesce adjacent target adjustments only within their open debounce window.
+- Share bounded queue admission with transport; include device waiting in command
+  deadlines and remove expired writes before delivery. Cancel the waiting device
+  batch after an execution failure; never retry or persist commands.
+- Require 2xx command acknowledgements, honor response guards and reject redirects
+  without following them. Retain target actions' existing HTTP behavior.
+- Keep command arguments out of requested targets, mapper state and persisted
+  observations; refresh real feedback and handle Homebridge completion races.
+- Validate mode values/placement and runtime writable-characteristic bindings;
+  preserve configuration round-trips, aliases and HomeKit identities.
+
+This Beta targets the next functional release, `2.2.0`. Representative physical
+command acceptance remains pending before stable promotion. Stable latest stays
+at `2.1.0`. See the
+[Beta notes](docs/release-notes-2.2.0-beta.1.md) and
+[design and acceptance gates](docs/development-2.2.0.md).
+
+## npm prerelease retirement - 2026-10-24
+
+Retire obsolete `2.0.0-alpha.6` through `2.0.0-alpha.9`, plus `2.1.0-beta.1`
+and `2.1.0-beta.2`, from npm after retaining verified local archives. Their
+registry tarballs now return HTTP 404 and the old Alpha/Beta tags are removed.
+Stable `2.0.0` and `2.1.0` remain downloadable; `latest` stays at `2.1.0`.
+The `2.2.0-beta.1` candidate is not published by this cleanup. Earlier release
+entries below describe availability at their original publication dates.
+
 ## 2.1.0 - 2026-10-23
 
 Promote the Beta.2 runtime and configuration editors after field testing of
@@ -56,7 +87,7 @@ selects this version; stable npm `latest` remains `2.0.0`.
 **Redirect compatibility:** if a trusted endpoint on another origin needs
 configured headers or authentication, configure that final endpoint directly.
 Existing accessory configurations remain supported without platform conversion.
-See the [beta release notes](docs/release-notes.md). Per-action command handling
+See the [Beta.1 release notes](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.1.0-beta.1/docs/release-notes.md). Per-action command handling
 remains planned and is not included in this beta.
 
 ## 2.0.0 - 2026-10-04

@@ -1,12 +1,17 @@
 import { ActionError, type ActionConfig, type DeviceConfig } from './types.js';
 
-export function validateDevice(config: DeviceConfig): void {
+export class WriteModeError extends ActionError {
+  constructor(path: string, requirement: string) { super('config'); this.message = `${path}: ${requirement}`; }
+}
+
+export function validateDevice(config: DeviceConfig, path = 'device'): void {
   if (!config || typeof config.name !== 'string' || !config.name.trim() || typeof config.service !== 'string') {
     throw new ActionError('config');
   }
   for (const value of [config.forceRefreshDelay, config.setterDelay, config.uriCallsDelay, config.writeConfirmationTimeout]) {
     if (value !== undefined && (typeof value !== 'number' || !Number.isFinite(value) || value < 0)) throw new ActionError('config');
   }
+  if ('writeMode' in config) throw new WriteModeError(`${path}.writeMode`, 'belongs on a setter action');
   for (const value of Object.values(config.refresh ?? {})) {
     if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) throw new ActionError('config');
   }
@@ -14,11 +19,11 @@ export function validateDevice(config: DeviceConfig): void {
     throw new ActionError('config');
   }
   if (config.urls && (typeof config.urls !== 'object' || Array.isArray(config.urls))) throw new ActionError('config');
-  for (const action of Object.values(config.urls ?? {})) validateAction(action, new Set());
+  for (const [name, action] of Object.entries(config.urls ?? {})) validateAction(action, new Set(), `${path}.urls.${name}`, name.startsWith('set'));
   if (config.additionalServices !== undefined) {
     if (!Array.isArray(config.additionalServices) || config.additionalServices.length > 32) throw new ActionError('config');
     const ids = new Set<string>();
-    for (const additional of config.additionalServices) {
+    for (const [index, additional] of config.additionalServices.entries()) {
       if (!additional || typeof additional !== 'object' || Array.isArray(additional)
         || typeof additional.id !== 'string' || !additional.id.trim()
         || additional.id !== additional.id.trim() || ids.has(additional.id)
@@ -27,7 +32,7 @@ export function validateDevice(config: DeviceConfig): void {
         || additional.name !== undefined && (typeof additional.name !== 'string' || !additional.name.trim())
         || 'additionalServices' in additional) throw new ActionError('config');
       ids.add(additional.id);
-      validateDevice({ ...serviceDefaults(config), ...additional, name: additional.name ?? config.name });
+      validateDevice({ ...serviceDefaults(config), ...additional, name: additional.name ?? config.name }, `${path}.additionalServices[${index}]`);
     }
   }
 }
@@ -49,11 +54,19 @@ export function serviceConfigs(config: DeviceConfig): Array<{ config: DeviceConf
   }))];
 }
 
-function validateAction(action: ActionConfig, seen: Set<ActionConfig>): void {
+export function hasCommands(config: DeviceConfig): boolean {
+  return serviceConfigs(config).some(({ config: service }) => Object.values(service.urls ?? {}).some(action => action.writeMode === 'command'));
+}
+
+function validateAction(action: ActionConfig, seen: Set<ActionConfig>, path: string, setter = false): void {
   if (!action || seen.has(action) || seen.size >= 32 || typeof action.url !== 'string' || !/^https?:\/\//i.test(action.url)) {
     throw new ActionError('config');
   }
   seen.add(action);
+  if (action.writeMode !== undefined) {
+    if (!setter || !['target', 'command'].includes(action.writeMode)) throw new WriteModeError(`${path}.writeMode`, 'must be target or command on a writable setter');
+    if (action.writeMode === 'command' && action.strictHTTP !== undefined && action.strictHTTP !== true) throw new WriteModeError(`${path}.strictHTTP`, 'command mode requires strict HTTP status handling');
+  }
   if (!/^[A-Za-z]+$/.test(action.httpMethod || 'GET')) throw new ActionError('config');
   if (action.body !== undefined && typeof action.body !== 'string') throw new ActionError('config');
   if (action.timeout !== undefined && (!Number.isFinite(action.timeout) || action.timeout <= 0)) throw new ActionError('config');
@@ -95,5 +108,5 @@ function validateAction(action: ActionConfig, seen: Set<ActionConfig>): void {
       default: throw new ActionError('config');
     }
   }
-  if (action.inconclusive) validateAction(action.inconclusive, seen);
+  if (action.inconclusive) validateAction(action.inconclusive, seen, `${path}.inconclusive`);
 }

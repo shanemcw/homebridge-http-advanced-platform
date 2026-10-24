@@ -95,7 +95,7 @@ Each action supports:
 - `timeout`: milliseconds for the response body and redirects; default 10000 unless shared `requestTimeout` overrides it. Background acquisition starts its budget when first admitted to the network, so waiting behind an unavailable endpoint does not consume it. Control writes retain a total budget including initial queueing. A queued write rejects when that budget expires even if no slot has opened; it is removed from the queue and cannot execute later.
 - `strictHTTP`: default false. True treats non-2xx responses as errors. Statuses 408, 429, 500, 502, 503, and 504 use shared recovery even without retry headers; other statuses remain action-specific failures.
 
-For compatibility, non-2xx response bodies are mapped by default, as in 1.3.0, except HTTP 429/503 responses carrying `Retry-After`: those explicitly signal temporary unavailability and are never mapped as successful state or accepted as successful writes. Retry guidance accepts seconds or an HTTP date, bounded to five minutes; invalid guidance uses normal backoff. Status errors are counted separately in diagnostics. Enable `strictHTTP` to make other non-2xx responses fail and use `resultOnError`. GET/HEAD redirects are followed (up to ten); each hop goes through the coordinator. In `2.1.0-beta.1`, all configured headers and device Basic Auth are removed when a redirect changes origin (scheme, hostname or port). This includes custom API-key headers, cookies and explicit Authorization. Same-origin redirects retain them. If another origin requires those headers, configure its trusted endpoint directly. Published `2.0.0` removes Authorization, Cookie and Host across origins but still forwards other configured headers. POST redirects are not automatically followed, matching legacy defaults. Responses are limited to 8 MiB to bound memory use.
+For compatibility, non-2xx response bodies are mapped by default, as in 1.3.0, except HTTP 429/503 responses carrying `Retry-After`: those explicitly signal temporary unavailability and are never mapped as successful state or accepted as successful writes. Retry guidance accepts seconds or an HTTP date, bounded to five minutes; invalid guidance uses normal backoff. Status errors are counted separately in diagnostics. Enable `strictHTTP` to make other non-2xx responses fail and use `resultOnError`. GET/HEAD redirects are followed (up to ten); each hop goes through the coordinator. In stable `2.1.0`, all configured headers and device Basic Auth are removed when a redirect changes origin (scheme, hostname or port). This includes custom API-key headers, cookies and explicit Authorization. Same-origin redirects retain them. If another origin requires those headers, configure its trusted endpoint directly. Published `2.0.0` removes Authorization, Cookie and Host across origins but still forwards other configured headers. POST redirects are not automatically followed, matching legacy defaults. Responses are limited to 8 MiB to bound memory use.
 
 Set `username` and `password` on a device for Basic Auth. Supplied credentials are sent immediately, including when legacy `immediately: false` is present: 1.3.0's explicit Authorization header already overrode that setting. This plugin preserves that behavior. Without credentials, it omits the old empty `Basic Og==` header. Credentials embedded in a URL are also handled by Node's HTTP client. Use HTTPS for sensitive endpoints.
 
@@ -141,6 +141,23 @@ A matching usable getter response ends the window early. At expiry, HomeKit retu
 ```
 
 Expressions are available in setter URLs and bodies. Getter URLs/bodies remain literal, matching 1.3.0. `state.getOn`, `state.getTargetTemperature`, etc. retain the legacy mapper-output types; polling converts numeric characteristics as before.
+
+## Individual commands in the 2.2.0 Beta
+
+The `2.2.0-beta.1` Beta adds per-setter `writeMode: "command"`.
+It preserves each received write, bypasses debounce and serializes writes across
+the containing device's services. `writeMode: "target"` or omission retains
+target-value behavior. There is no device or shared default for the new field.
+Runtime startup verifies that mode-bearing setters bind to exposed writable
+characteristics; readable command characteristics require configured getters.
+Structural field validation also runs in the editor and JSON schema.
+
+Commands use one total deadline from receipt through HTTP delivery, require 2xx
+responses, never follow redirects and never retry or persist for later delivery.
+HTTP success acknowledges the operation without claiming resulting state. An
+execution failure cancels the writes already waiting behind it for that device.
+The Beta is separate from stable `2.1.0`; check public release availability
+before installing. See [examples, compatibility and field acceptance](release-notes-2.2.0-beta.1.md).
 
 ## Mappers
 
@@ -218,7 +235,7 @@ speeds up HomeKit reads; it does not make the web server or physical device
 instantaneous. Fixture measurements are not a promised speedup on every
 installation. See [the measurement guide](performance.md).
 
-Use the [measurement guide](performance.md) to compare read latency, cache freshness and sustained backend load together. The [release notes](release-notes.md) summarize the beta, completed checks and remaining field coverage.
+Use the [measurement guide](performance.md) to compare read latency, cache freshness and sustained backend load together. The [stable 2.1.0 release notes](release-notes.md) summarize its completed checks and field coverage. The [2.2.0 Beta notes](release-notes-2.2.0-beta.1.md) describe individual command handling and its remaining field acceptance.
 
 ## Development and release policy
 
@@ -234,6 +251,6 @@ npm pack --dry-run
 
 CI exercises Node 22/24 and real Homebridge v1/v2 HAP implementations. Unit/integration tests use only loopback fake servers. `legacy-plugin` is a test-only alias of published 1.3.0; its obsolete dependencies are excluded from production installation and the tarball. `npm audit --omit=dev` audits the maintained runtime separately.
 
-Public prereleases require an explicit tag matching their version channel (`alpha` or `beta`) and a matching GitHub prerelease. Stable versions require an explicit `latest` tag and a regular GitHub release. The guard rejects channel mismatches, malformed versions and publication under the original accessory package name. `publishConfig.tag` is `latest` for stable 2.1.0; `beta` retains 2.1.0-beta.2 and `alpha` retains the earlier testing release. No automatic publishing workflow is enabled. Release review covers the exact candidate, compatibility CI, production dependency audit, fresh package installation and field evidence. Field use covers legacy Switch configurations and migrated platform switches. Additional services and new mapper modes have automated and isolated coverage rather than field soak. See the current release notes for the recorded field boundaries.
+Public prereleases require an explicit tag matching their version channel (`alpha` or `beta`) and a matching GitHub prerelease. Stable versions require an explicit `latest` tag and a regular GitHub release. The guard rejects channel mismatches, malformed versions and publication under the original accessory package name. `publishConfig.tag` is `beta` for 2.2.0-beta.1; stable 2.1.0 uses `latest`. Stable 2.0.0 remains available by exact version. Earlier Alpha/Beta versions were retired on October 24, 2026; 2.2.0-beta.1 uses the new `beta` tag. Confirm the exact public version before installing. No automatic publishing workflow is enabled. Release review covers the exact candidate, compatibility CI, production dependency audit, fresh package installation and field evidence. Field use covers legacy Switch configurations and migrated platform switches. Additional services and new mapper modes have automated and isolated coverage rather than field soak. See the current release notes for the recorded field boundaries.
 
 The existing Apache-2.0 LICENSE remains unchanged. Package metadata is reconciled to that file, which has existed since the initial commit; historical authorship is retained and the current maintainer is credited.

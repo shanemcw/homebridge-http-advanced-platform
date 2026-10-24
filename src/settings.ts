@@ -22,6 +22,7 @@ export class SettingsValidationError extends ActionError {
 export function validateSettings(value: unknown): asserts value is GlobalSettings {
   const object = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
   if (!object(value)) throw new SettingsValidationError('httpAdvanced', 'must be an object');
+  if ('writeMode' in value) throw new SettingsValidationError('writeMode', 'belongs on an individual setter action');
   const number = (field: string, v: unknown, zero = false, integer = false): void => {
     if (v !== undefined && (typeof v !== 'number' || !Number.isFinite(v) || (zero ? v < 0 : v <= 0) || (integer && !Number.isInteger(v)))) {
       throw new SettingsValidationError(field, `must be a ${integer ? 'whole ' : ''}number ${zero ? 'of zero or greater' : 'greater than zero'}`);

@@ -7,6 +7,7 @@ import { Transport } from './transport.js';
 import { Actions } from './actions.js';
 import { readGlobalSettings, type GlobalSettings } from './settings.js';
 import { pluginVersion } from './metadata.js';
+import { DeviceWrites } from './writes.js';
 import { ActionError, type CacheEntry, type CoordinatorConfig, type DeviceConfig, type ErrorCategory, type PendingWrite, type State } from './types.js';
 
 type Persisted = { value: CharacteristicValue; stateValue?: unknown; lastSuccess: number; lastChange: number };
@@ -17,6 +18,7 @@ export class Runtime {
   readonly coordinator: Coordinator;
   readonly transport: Transport;
   readonly actions: Actions;
+  readonly writes: DeviceWrites;
   readonly entries = new Map<string, CacheEntry>();
   readonly setters = new Map<string, NodeJS.Timeout>();
   private readonly persisted: Record<string, Persisted> = {};
@@ -34,17 +36,21 @@ export class Runtime {
     this.coordinator = new Coordinator({ ...settings.coordinator, ...options });
     this.transport = new Transport(this.coordinator, settings);
     this.actions = new Actions(this.transport);
+    this.writes = new DeviceWrites(this.coordinator, (owner, action, command, error) => {
+      const category = error instanceof ActionError ? error.category : 'mapper';
+      this.log.warn(`HTTP Advanced ${command ? 'command' : 'delayed write'} ${fingerprint([owner, action]).slice(0, 12)}: ${category}; no automatic replay`);
+    });
     if (persistPath) {
       this.savePath = join(persistPath, 'http-advanced-state-v1');
     }
   }
 
-  register(owner: string, actionName: string, config: DeviceConfig, state: State, convert: CacheEntry['convert'], update: CacheEntry['update'], requestOwner?: string): CacheEntry {
+  register(owner: string, actionName: string, config: DeviceConfig, state: State, convert: CacheEntry['convert'], update: CacheEntry['update'], requestOwner?: string, writeOwner?: string): CacheEntry {
     const key = fingerprint([owner, config, actionName]);
     if (this.entries.has(key)) throw new ActionError('config');
     this.owners.add(owner);
     const now = Date.now();
-    const entry: CacheEntry = { key, requestOwner, actionName, config, state, known: false, lastSuccess: 0, lastAttempt: 0, lastChange: 0, lastDemand: now, inFlight: false, failures: 0, nextEligible: now + Math.random() * 1000, generation: 0, convert, update };
+    const entry: CacheEntry = { key, requestOwner, writeOwner, actionName, config, state, known: false, lastSuccess: 0, lastAttempt: 0, lastChange: 0, lastDemand: now, inFlight: false, failures: 0, nextEligible: now + Math.random() * 1000, generation: 0, convert, update };
     if (this.savePath) {
       try {
         const saved = JSON.parse(readFileSync(join(this.savePath, key + '.json'), 'utf8')) as Persisted;
@@ -221,8 +227,8 @@ export class Runtime {
     }
   }
 
-  beginWrite(entry: CacheEntry, value: CharacteristicValue): PendingWrite {
-    const intent = { value: entry.convert(value) };
+  beginWrite(entry: CacheEntry, value: CharacteristicValue, order?: number): PendingWrite {
+    const intent = { value: entry.convert(value), order };
     entry.generation++;
     entry.pendingWrite = intent;
     entry.lastDemand = Date.now();
@@ -241,13 +247,13 @@ export class Runtime {
     entry.update(entry.pendingWrite?.value ?? (entry.known ? entry.value : undefined) ?? new ActionError('inconclusive'));
   }
 
-  async set(config: DeviceConfig, state: State, actionName: string, value: CharacteristicValue, entry?: CacheEntry, intent?: PendingWrite, requestOwner?: string): Promise<void> {
+  async set(config: DeviceConfig, state: State, actionName: string, value: CharacteristicValue, entry?: CacheEntry, intent?: PendingWrite, requestOwner?: string, deadline?: number, reservation?: object): Promise<void> {
     if (this.stopped) throw new ActionError('aborted');
     const action = config.urls?.[actionName];
     if (!action) return;
     intent ??= entry ? this.beginWrite(entry, value) : undefined;
     try {
-      await this.actions.set(action, config, requestOwner ?? fingerprint(config), state, value);
+      await this.actions.set(action, config, requestOwner ?? fingerprint(config), state, value, deadline, reservation);
       if (entry && entry.pendingWrite === intent) intent!.expires = Date.now() + (config.writeConfirmationTimeout ?? this.settings.writeConfirmationTimeout ?? 10000);
     } catch (error) {
       if (entry && entry.pendingWrite === intent) {
@@ -264,6 +270,47 @@ export class Runtime {
     }
   }
 
+  private commandBoundary(owner: string, order: number): void {
+    if (this.stopped) return;
+    for (const entry of this.entries.values()) {
+      if (entry.writeOwner !== owner) continue;
+      entry.generation++;
+      if (entry.pendingWrite?.order !== undefined && entry.pendingWrite.order < order) delete entry.pendingWrite;
+      entry.nextEligible = Date.now();
+      this.publish(entry);
+    }
+  }
+
+  write(config: DeviceConfig, state: State, actionName: string, value: CharacteristicValue, writeOwner: string, entry?: CacheEntry, requestOwner?: string, actionKey = actionName): Promise<void> | undefined {
+    const action = config.urls![actionName];
+    const command = action.writeMode === 'command';
+    return this.writes.submit({ owner: writeOwner, action: actionKey, command,
+      delay: command ? 0 : config.setterDelay ?? this.settings.setterDelay ?? 0,
+      timeout: action.timeout ?? this.settings.requestTimeout ?? 10000,
+      prepare: order => {
+        const intent = !command && entry ? this.beginWrite(entry, value, order) : undefined;
+        return {
+          run: async (deadline, reservation) => {
+            let dispatched = false;
+            try {
+              if (command) await this.actions.set(action, config, requestOwner ?? fingerprint(config), state, value, deadline, reservation, () => {
+                dispatched = true;
+                this.commandBoundary(writeOwner, order);
+              });
+              else await this.set(config, state, actionName, value, entry, intent, requestOwner, deadline, reservation);
+            } finally {
+              if (command && dispatched) this.commandBoundary(writeOwner, order);
+              if (entry) setImmediate(() => this.publish(entry));
+            }
+          },
+          cancel: () => {
+            if (entry && entry.pendingWrite === intent) { delete entry.pendingWrite; this.publish(entry); }
+          },
+        };
+      },
+    });
+  }
+
   debounce(key: string, delay: number, work: () => Promise<void>, onFailure?: () => void): void {
     clearTimeout(this.setters.get(key));
     const timer = setTimeout(() => {
@@ -275,7 +322,8 @@ export class Runtime {
 
   snapshot(): object {
     const now = Date.now();
-    return { ...this.stats, queue: this.coordinator.queue.length, inFlight: this.coordinator.active.size, limits: this.coordinator.limits,
+    return { ...this.stats, queue: this.coordinator.queue.length, bufferedWrites: this.coordinator.reservations.size,
+      commands: { ...this.writes.stats, pendingWrites: this.writes.pending }, inFlight: this.coordinator.active.size, limits: this.coordinator.limits,
       requests: { ...this.coordinator.stats, durations: [...this.coordinator.stats.durations] }, transport: { ...this.transport.stats },
       cache: [...this.entries.values()].map(e => ({ id: e.key.slice(0, 12), known: e.known, age: e.known ? now - e.lastSuccess : null, failures: e.failures, lastError: e.lastError, nextRefresh: Math.max(0, e.nextEligible - now), inFlight: e.inFlight })),
       recovering: [...this.recovering].map(([origin, recovery]) => ({ id: fingerprint(origin).slice(0, 12), age: now - recovery.since, nextProbe: Math.max(0, recovery.nextProbe - now), attempts: recovery.attempts, category: recovery.category })),
@@ -303,6 +351,7 @@ export class Runtime {
 
   shutdown(): void {
     this.stopped = true;
+    this.writes.shutdown();
     clearInterval(this.timer); clearInterval(this.persistenceTimer);
     for (const timer of this.setters.values()) clearTimeout(timer);
     this.setters.clear(); this.transport.shutdown(); this.persist();

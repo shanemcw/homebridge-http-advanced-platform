@@ -149,10 +149,27 @@
           "urls": {
             "type": "object",
             "additionalProperties": {
-              "$ref": "#/definitions/action"
+              "allOf": [
+                {
+                  "$ref": "#/definitions/action"
+                },
+                {
+                  "not": {
+                    "required": [
+                      "writeMode"
+                    ]
+                  }
+                }
+              ]
+            },
+            "patternProperties": {
+              "^set": {
+                "$ref": "#/definitions/action"
+              }
             }
           },
-          "additionalServices": false
+          "additionalServices": false,
+          "writeMode": false
         }
       },
       "action": {
@@ -317,12 +334,52 @@
           },
           "strictHTTP": {
             "type": "boolean",
-            "default": false
+            "description": "Reject non-2xx responses; required effectively true for command actions and optional for existing target actions"
           },
           "inconclusive": {
-            "$ref": "#/definitions/action"
+            "allOf": [
+              {
+                "$ref": "#/definitions/action"
+              },
+              {
+                "not": {
+                  "required": [
+                    "writeMode"
+                  ]
+                }
+              }
+            ]
+          },
+          "writeMode": {
+            "type": "string",
+            "enum": [
+              "target",
+              "command"
+            ],
+            "description": "Per-setter behavior: target preserves debounce; command preserves individual writes with ordered delivery and observed feedback"
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "writeMode": {
+                  "const": "command"
+                }
+              },
+              "required": [
+                "writeMode"
+              ]
+            },
+            "then": {
+              "properties": {
+                "strictHTTP": {
+                  "const": true
+                }
+              }
+            }
+          }
+        ]
       },
       "platform": {
         "type": "object",
@@ -470,7 +527,8 @@
             "type": "number",
             "minimum": 0,
             "description": "Milliseconds to hold a requested value while confirming it after HTTP success; default 10000, 0 disables the confirmation window"
-          }
+          },
+          "writeMode": false
         }
       },
       "device": {
@@ -576,9 +634,25 @@
           "urls": {
             "type": "object",
             "additionalProperties": {
-              "$ref": "#/definitions/action"
+              "allOf": [
+                {
+                  "$ref": "#/definitions/action"
+                },
+                {
+                  "not": {
+                    "required": [
+                      "writeMode"
+                    ]
+                  }
+                }
+              ]
             },
-            "description": "Complete action definitions, including encoded URLs, templates, recursive fallbacks and arbitrary mapper parameters"
+            "description": "Complete action definitions, including encoded URLs, templates, recursive fallbacks and arbitrary mapper parameters",
+            "patternProperties": {
+              "^set": {
+                "$ref": "#/definitions/action"
+              }
+            }
           },
           "accessory": {
             "type": "string",
@@ -588,7 +662,8 @@
             "type": "number",
             "minimum": 0,
             "description": "Milliseconds to hold a requested value while confirming it after HTTP success; default 10000, 0 disables the confirmation window"
-          }
+          },
+          "writeMode": false
         }
       }
     }

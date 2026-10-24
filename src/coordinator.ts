@@ -15,6 +15,7 @@ interface Job {
 export class Coordinator {
   limits = { concurrency: 4, perOrigin: 2, maxQueue: 256 };
   readonly queue: Job[] = [];
+  readonly reservations = new Set<object>();
   readonly active = new Set<AbortController>();
   readonly origins = new Map<string, number>();
   readonly originStats = new Map<string, { started: number; completed: number; failed: number; maxInFlight: number }>();
@@ -34,7 +35,18 @@ export class Coordinator {
     Object.assign(this.limits, config);
   }
 
-  get available(): boolean { return !this.stopped && this.queue.length < this.limits.maxQueue; }
+  get available(): boolean { return !this.stopped && this.queue.length + this.reservations.size < this.limits.maxQueue; }
+
+  reserve(): object {
+    if (this.stopped) throw new ActionError('aborted');
+    if (!this.available) throw new ActionError('queue');
+    const reservation = {};
+    this.reservations.add(reservation);
+    this.stats.highWater = Math.max(this.stats.highWater, this.queue.length + this.reservations.size);
+    return reservation;
+  }
+
+  release(reservation: object): void { this.reservations.delete(reservation); }
 
   pauseOrigin(origin: string, until: number): void {
     this.recovering.set(origin, until);
@@ -56,7 +68,8 @@ export class Coordinator {
     this.recovering.delete(origin);
   }
 
-  submit<T>(origin: string, owner: string, spacing: number, priority: boolean, run: (signal: AbortSignal) => Promise<T>, deadline?: number): Promise<T> {
+  submit<T>(origin: string, owner: string, spacing: number, priority: boolean, run: (signal: AbortSignal) => Promise<T>, deadline?: number, reservation?: object): Promise<T> {
+    if (reservation && !this.reservations.delete(reservation)) return Promise.reject(new ActionError('aborted'));
     if (this.stopped) return Promise.reject(new ActionError('aborted'));
     if (!priority && !this.backgroundReady(origin)) return Promise.reject(new ActionError('deferred', Math.max(0, (this.recovering.get(origin) ?? 0) - Date.now())));
     if (!this.available) return Promise.reject(new ActionError('queue'));
@@ -74,7 +87,7 @@ export class Coordinator {
         };
         job.timer = setTimeout(expire, Math.max(0, Math.min(deadline - Date.now(), 2147483647)));
       }
-      this.stats.highWater = Math.max(this.stats.highWater, this.queue.length);
+      this.stats.highWater = Math.max(this.stats.highWater, this.queue.length + this.reservations.size);
       this.pump();
     });
   }
@@ -140,6 +153,7 @@ export class Coordinator {
     this.stopped = true;
     clearTimeout(this.timer);
     for (const job of this.queue.splice(0)) { clearTimeout(job.timer); job.reject(new ActionError('aborted')); }
+    this.reservations.clear();
     for (const controller of this.active) controller.abort();
   }
 }

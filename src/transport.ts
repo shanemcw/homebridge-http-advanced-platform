@@ -11,11 +11,12 @@ export class Transport {
   readonly stats = { timeouts: 0, httpErrors: 0, aborted: 0, bytes: 0 };
   constructor(readonly coordinator: Coordinator, readonly defaults: GlobalSettings = {}) {}
 
-  async request(action: ActionConfig, config: DeviceConfig, owner: string, priority = false, depth = 0, deadline: number | undefined = priority ? Date.now() + (action.timeout ?? this.defaults.requestTimeout ?? 10000) : undefined): Promise<HTTPResult> {
+  async request(action: ActionConfig, config: DeviceConfig, owner: string, priority = false, depth = 0, deadline: number | undefined = priority ? Date.now() + (action.timeout ?? this.defaults.requestTimeout ?? 10000) : undefined, reservation?: object, onDispatch?: () => void): Promise<HTTPResult> {
     if (depth > 10) throw new ActionError('http');
     let url: URL;
     try { url = new URL(action.url); } catch { return Promise.reject(new ActionError('config')); }
     if (!['http:', 'https:'].includes(url.protocol)) return Promise.reject(new ActionError('config'));
+    let dispatched = false;
     const result = await this.coordinator.submit(url.origin, owner, config.uriCallsDelay ?? this.defaults.uriCallsDelay ?? 0, priority, async signal => {
       // background work gets its request budget when admitted, including subsequent redirects
       deadline ??= Date.now() + (action.timeout ?? this.defaults.requestTimeout ?? 10000);
@@ -32,6 +33,8 @@ export class Transport {
         headers.Authorization = `Basic ${Buffer.from(`${config.username || ''}:${config.password || ''}`).toString('base64')}`;
       }
       try {
+        onDispatch?.();
+        dispatched = true;
         const result = await this.follow(url, action.httpMethod || 'GET', action.body || '', headers, controller.signal);
         return result;
       } catch (error) {
@@ -45,11 +48,17 @@ export class Transport {
         clearTimeout(timer);
         signal.removeEventListener('abort', abort);
       }
-    }, deadline).catch(error => {
+    }, deadline, reservation).catch(error => {
+      if (error instanceof ActionError) error.dispatched ||= dispatched;
       if (error instanceof ActionError && error.category === 'timeout') this.stats.timeouts++;
       throw error;
     });
     const method = (action.httpMethod || 'GET').toUpperCase();
+    // command endpoints may act before redirecting; a second request is never safe
+    if (action.writeMode === 'command' && (result.status < 200 || result.status >= 300)) {
+      this.stats.httpErrors++;
+      throw new ActionError('http');
+    }
     if ([301, 302, 303, 307, 308].includes(result.status) && result.location && ['GET', 'HEAD'].includes(method)) {
       let next: URL;
       try { next = new URL(result.location, url); } catch { throw new ActionError('http'); }
