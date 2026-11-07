@@ -1,5 +1,7 @@
 # 2.2.0-beta.1 publication - October 24, 2026
 
+> Historical publication record. See the [stable 2.2.0 publication](STABLE22-PUBLICATION.md) for the current release and field coverage.
+
 ## Public release
 
 - Source: `a2a17afe45422abf76ccfc8025befd11000ba42b`; annotated tag `v2.2.0-beta.1` resolves to this commit.
