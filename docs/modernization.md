@@ -1,6 +1,6 @@
 # Modernization details and developer reference
 
-This reference describes **2.1.0**, which retains the 2.0.0 services and mappers and adds redirect header hardening and configuration editor improvements. npm `latest` selects **2.1.0**. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
+This reference describes **2.2.0**, which adds opt-in individual commands alongside the existing services, mappers and configuration editors. npm `latest` selects **2.2.0**. Start with the [README](../README.md) for the compatibility summary, installation and everyday configuration.
 
 ## What non-breaking means here
 
@@ -142,9 +142,9 @@ A matching usable getter response ends the window early. At expiry, HomeKit retu
 
 Expressions are available in setter URLs and bodies. Getter URLs/bodies remain literal, matching 1.3.0. `state.getOn`, `state.getTargetTemperature`, etc. retain the legacy mapper-output types; polling converts numeric characteristics as before.
 
-## Individual commands in the 2.2.0 Beta
+## Individual commands
 
-The `2.2.0-beta.1` Beta adds per-setter `writeMode: "command"`.
+Version 2.2.0 adds per-setter `writeMode: "command"`.
 It preserves each received write, bypasses debounce and serializes writes across
 the containing device's services. `writeMode: "target"` or omission retains
 target-value behavior. There is no device or shared default for the new field.
@@ -156,8 +156,7 @@ Commands use one total deadline from receipt through HTTP delivery, require 2xx
 responses, never follow redirects and never retry or persist for later delivery.
 HTTP success acknowledges the operation without claiming resulting state. An
 execution failure cancels the writes already waiting behind it for that device.
-The Beta is separate from stable `2.1.0`; check public release availability
-before installing. See [examples, compatibility and field acceptance](release-notes-2.2.0-beta.1.md).
+See the [example and device-report guidance](release-notes.md).
 
 ## Mappers
 
@@ -235,7 +234,7 @@ speeds up HomeKit reads; it does not make the web server or physical device
 instantaneous. Fixture measurements are not a promised speedup on every
 installation. See [the measurement guide](performance.md).
 
-Use the [measurement guide](performance.md) to compare read latency, cache freshness and sustained backend load together. The [stable 2.1.0 release notes](release-notes.md) summarize its completed checks and field coverage. The [2.2.0 Beta notes](release-notes-2.2.0-beta.1.md) describe individual command handling and its remaining field acceptance.
+Use the [measurement guide](performance.md) to compare read latency, cache freshness and sustained backend load together. The [current release notes](release-notes.md) summarize completed checks and field coverage.
 
 ## Development and release policy
 
@@ -251,6 +250,6 @@ npm pack --dry-run
 
 CI exercises Node 22/24 and real Homebridge v1/v2 HAP implementations. Unit/integration tests use only loopback fake servers. `legacy-plugin` is a test-only alias of published 1.3.0; its obsolete dependencies are excluded from production installation and the tarball. `npm audit --omit=dev` audits the maintained runtime separately.
 
-Public prereleases require an explicit tag matching their version channel (`alpha` or `beta`) and a matching GitHub prerelease. Stable versions require an explicit `latest` tag and a regular GitHub release. The guard rejects channel mismatches, malformed versions and publication under the original accessory package name. `publishConfig.tag` is `beta` for 2.2.0-beta.1; stable 2.1.0 uses `latest`. Stable 2.0.0 remains available by exact version. Earlier Alpha/Beta versions were retired on October 24, 2026; 2.2.0-beta.1 uses the new `beta` tag. Confirm the exact public version before installing. No automatic publishing workflow is enabled. Release review covers the exact candidate, compatibility CI, production dependency audit, fresh package installation and field evidence. Field use covers legacy Switch configurations and migrated platform switches. Additional services and new mapper modes have automated and isolated coverage rather than field soak. See the current release notes for the recorded field boundaries.
+Public prereleases require an explicit tag matching their version channel (`alpha` or `beta`) and a matching GitHub prerelease. Stable versions require an explicit `latest` tag and a regular GitHub release. The guard rejects channel mismatches, malformed versions and publication under the original accessory package name. Stable 2.2.0 uses `publishConfig.tag: latest`. Earlier stable releases remain available by exact version. Confirm the exact public version before installing. No automatic publishing workflow is enabled. Release review covers the exact candidate, compatibility CI, production dependency audit, fresh package installation and field evidence. Field use covers legacy Switch configurations and migrated platform switches. Additional services, new mapper modes and individual commands have automated and isolated coverage. See the current release notes for the recorded field boundaries.
 
 The existing Apache-2.0 LICENSE remains unchanged. Package metadata is reconciled to that file, which has existed since the initial commit; historical authorship is retained and the current maintainer is credited.

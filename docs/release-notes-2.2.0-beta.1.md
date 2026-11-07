@@ -1,16 +1,14 @@
 # Homebridge HTTP Advanced Platform 2.2.0-beta.1
 
+> Historical beta release notes. For the default install and current guidance, see the [stable 2.2.0 release notes](release-notes.md).
+
 Beta testing release, October 24, 2026. Preserve individual button commands while
 retaining target-value debounce for controls such as brightness sliders.
 
-Select **beta** or **v2.2.0-beta.1** in Homebridge Manage Version after confirming
-the matching public npm version and GitHub prerelease. npm **latest stays at
-2.1.0**. This package is not Homebridge-verified. Representative physical-command
-field acceptance remains pending before stable `2.2.0` promotion.
-
-This publication does not install the package or restart an existing Homebridge
-instance. Back up Homebridge before beta installation and keep existing device
-IDs, platform names, service subtypes and bridge assignments unchanged.
+This version shipped on npm `beta` and as a GitHub prerelease while `2.1.0`
+was the stable release. The original test plan called for representative
+physical command-device testing. Publishing the beta was separate from
+installing it on a Homebridge instance.
 
 ## Individual commands
 
@@ -77,8 +75,7 @@ combination (592 source test executions), typecheck/lint, zero known production
 dependency vulnerabilities and 16 isolated installed-package checks covering
 plugin loading, target controls, UI IPC and repeated commands.
 
-Before stable promotion, record field acceptance with a representative command
-device/controller, mixed commands and targets, endpoint failures and restart.
-Recheck existing household switch/scene/voice behavior using a backed-up test
-installation. Automated loopback checks do not establish physical acceptance.
-See the [design and acceptance gates](development-2.2.0.md).
+The original field plan covered a representative command device and controller,
+mixed commands and targets, endpoint failures, restart and existing household
+switch, scene and voice behavior. See the [current design and validation plan](development-2.2.0.md)
+for the status of that coverage.

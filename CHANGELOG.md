@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.2.0 - 2026-11-07
+
+Promote the runtime and configuration editors from Beta.1 to stable.
+
+- Opt individual setters into `writeMode: "command"` to deliver repeated and
+  alternating writes in order. Setters without the option keep target behavior.
+- Preserve command order across services. Commands use a delivery deadline and
+  cancel waiting writes after execution failure. Commands never replay.
+- Require 2xx acknowledgements and use device feedback for observed state.
+
+Automated and installed-package checks cover command mode. Reports from physical
+command devices are welcome. See the [release notes](docs/release-notes.md).
+
 ## 2.2.0-beta.1 - 2026-10-24
 
 - Add per-setter `writeMode: "command"` to preserve repeated and alternating
@@ -16,9 +29,7 @@
 - Validate mode values/placement and runtime writable-characteristic bindings;
   preserve configuration round-trips, aliases and HomeKit identities.
 
-This Beta targets the next functional release, `2.2.0`. Representative physical
-command acceptance remains pending before stable promotion. Stable latest stays
-at `2.1.0`. See the
+This beta was published while `2.1.0` was the stable release. See the
 [Beta notes](docs/release-notes-2.2.0-beta.1.md) and
 [design and acceptance gates](docs/development-2.2.0.md).
 
@@ -27,9 +38,9 @@ at `2.1.0`. See the
 Retire obsolete `2.0.0-alpha.6` through `2.0.0-alpha.9`, plus `2.1.0-beta.1`
 and `2.1.0-beta.2`, from npm after retaining verified local archives. Their
 registry tarballs now return HTTP 404 and the old Alpha/Beta tags are removed.
-Stable `2.0.0` and `2.1.0` remain downloadable; `latest` stays at `2.1.0`.
-The `2.2.0-beta.1` candidate is not published by this cleanup. Earlier release
-entries below describe availability at their original publication dates.
+At the time of cleanup, stable `2.0.0` and `2.1.0` remained downloadable,
+and `latest` selected `2.1.0`. The older release entries below describe
+availability at their original publication dates.
 
 ## 2.1.0 - 2026-10-23
 
@@ -44,17 +55,17 @@ legacy accessories and migrated platform switches.
   existing accessory configurations and both registration aliases.
 - Strip configured headers and device Basic Auth on cross-origin GET/HEAD
   redirects; configure trusted final endpoints directly if they require them.
-- Select stable `2.1.0` through npm `latest`. Beta.2 remains available on `beta`.
+- At launch, npm `latest` selected stable `2.1.0` and `beta` selected Beta.2.
 
 Runtime, UI, schema, dependencies and HomeKit identity rules are unchanged from
 Beta.2. Additional services and new mapper modes retain automated and isolated
 coverage. Per-action command handling remains planned. Homebridge verification
-is a separate later step. See the [release notes](docs/release-notes.md).
+is a separate later step. See the [2.1.0 release notes](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.1.0/docs/release-notes.md).
 
 ## 2.1.0-beta.2 - 2026-10-20
 
-Individual platform-device editors and clearer named platform controls. npm
-`beta` selects this version; stable npm `latest` remains `2.0.0`. The device
+Individual platform-device editors and clearer named platform controls. At
+launch, npm `beta` selected this version and `latest` selected `2.0.0`. The device
 runtime, dependencies and HomeKit identity rules are unchanged from Beta.1.
 
 - Name each platform in its heading and enable/add-device controls, and use
@@ -69,8 +80,8 @@ runtime, dependencies and HomeKit identity rules are unchanged from Beta.1.
 
 ## 2.1.0-beta.1 - 2026-10-13
 
-Beta release for a week of field testing before stable promotion. npm `beta`
-selects this version; stable npm `latest` remains `2.0.0`.
+Beta release for a week of field testing. At launch, npm `beta` selected
+this version and `latest` selected `2.0.0`.
 
 - Strip all configured headers, including custom API-key headers, when GET/HEAD
   requests redirect to another origin. Preserve headers and authentication on
@@ -111,7 +122,7 @@ The device runtime, configuration aliases, platform UUID namespace and dependenc
 requirements are unchanged from Alpha.9. Field soak covers legacy Switch
 accessories; platform devices, additional services and new mappers have automated
 and isolated coverage. This package is not Homebridge-verified. See the
-[release notes](docs/release-notes.md) and [migration guide](docs/migration.md).
+[2.0.0 release notes](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.0.0/docs/release-notes.md) and [migration guide](docs/migration.md).
 
 ## 2.0.0-alpha.9 - 2026-09-29
 

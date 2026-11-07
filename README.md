@@ -6,17 +6,15 @@ This is a platform conversion of [staromeste's homebridge-http-advanced-accessor
 
 **Use platform devices, retain existing accessory configurations, or migrate manually at your own pace.** Keep your `HttpAdvancedAccessory` entries, encoded command URLs, request bodies, hand-written mappings and other settings. The improvements apply to existing accessories without converting them to a platform or upgrading their web server.
 
-**Stable release: `2.1.0`.** The improvements listed below are included unless marked as a 2.2.0 Beta feature. This package is not Homebridge-verified. See the [stable GitHub release](https://github.com/shanemcw/homebridge-http-advanced-platform/releases/tag/v2.1.0) for validation and field coverage, and the [compatibility details](docs/modernization.md#what-non-breaking-means-here) before upgrading.
+**Stable release: `2.2.0`.** Individual HTTP commands are available for setters that opt in. The package has automated command-mode coverage, and reports from physical devices are welcome. See the [release notes](docs/release-notes.md) and [compatibility details](docs/modernization.md#what-non-breaking-means-here) before upgrading.
 
-**Beta testing release: `2.2.0-beta.1`.** Individual command handling is ready for beta field testing toward `2.2.0`. Representative physical-device acceptance remains pending. Stable `latest` stays at `2.1.0`; confirm the matching public npm version and GitHub prerelease before installing the Beta.
-
-[What's new](#what-this-platform-adds) · [Individual commands](#every-button-press-counts-220-candidate) · [User guide](#user-guide) · [Configuration examples](docs/configuration-examples.md) · [Developer reference](docs/modernization.md)
+[What's new](#what-this-platform-adds) · [Individual commands](#individual-http-commands) · [User guide](#user-guide) · [Configuration examples](docs/configuration-examples.md) · [Developer reference](docs/modernization.md)
 
 ## What this platform adds
 
 This project builds on the original plugin's HTTP actions, JSON/XML mappings, polling and templates. Compared with the original `1.3.0` accessory plugin, these additions give new and existing users more responsive controls, easier configuration and broader device integration.
 
-### Available in stable 2.1.0
+### Platform features
 
 | Addition | Practical value |
 |---|---|
@@ -37,11 +35,11 @@ This project builds on the original plugin's HTTP actions, JSON/XML mappings, po
 
 **Addresses requests from the original project.** Several additions address longstanding open requests and issues in the parent repository, including [multiple services and battery information (#12)](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/12), [brightness conversion (#2)](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/2), [header authentication (#26)](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/26), [custom accessory information (PR #46)](https://github.com/staromeste/homebridge-http-advanced-accessory/pull/46) and [Homebridge 2 readiness (#58)](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/58).
 
-### Every button press counts: 2.2.0 candidate
+### Individual HTTP commands
 
 Individual command handling makes each button press count: three Volume Up presses are kept as three separate commands in order. Controls such as brightness sliders can still combine rapid adjustments into the final setting. Expired or failed commands are reported and are not automatically replayed, and an HTTP acknowledgement is kept separate from confirmed device state. Existing configurations keep their current behavior unless you enable the new option.
 
-The `2.2.0-beta.1` Beta adds per-setter `writeMode: "command"` to both legacy accessories and platform devices, including additional services. See the [Beta notes and configuration example](docs/release-notes-2.2.0-beta.1.md) for ordering, deadlines, failure handling and field acceptance. Choose **beta** or **v2.2.0-beta.1** in Homebridge Manage Version after confirming public availability.
+Set `writeMode: "command"` on an individual setter for legacy accessories or platform devices, including additional services. See the [command configuration example](docs/release-notes.md#individual-commands) for ordering, deadlines and failure handling.
 
 ## User guide
 
@@ -62,21 +60,21 @@ If the legacy accessories disappear from the new setup, [paste only the missing 
 
 Check the [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions) and matching [GitHub release](https://github.com/shanemcw/homebridge-http-advanced-platform/releases) before installing. Choose the stable release; a local candidate archive alone does not establish public availability.
 
-In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select **latest** or **v2.1.0** in the version chooser. Existing Alpha and Beta testers can use **Manage Version** to select **v2.1.0**. Descriptive searches such as **HTTP Advanced**, **HTTP accessory**, **REST API** or **HTTP JSON** depend on npm indexing and ranking; searching the exact original package name still finds the original accessory package.
+In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select **latest** or **v2.2.0** in the version chooser. Existing Alpha and Beta testers can use **Manage Version** to select **v2.2.0**. Descriptive searches such as **HTTP Advanced**, **HTTP accessory**, **REST API** or **HTTP JSON** depend on npm indexing and ranking; searching the exact original package name still finds the original accessory package.
 
 For command-line installation, use `homebridge-http-advanced-platform@latest`, or pin the reviewed version as shown below. Use the same plugin location and account your Homebridge installation already uses; `/var/lib/homebridge` is an example prefix:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.1.0
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.2.0
 ```
 
 To install a reviewed archive directly:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.1.0.tgz
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.2.0.tgz
 ```
 
-**Release channels: `latest` for stable `2.1.0`, and `beta` for `2.2.0-beta.1`.** Stable `2.0.0` remains available by exact version. The earlier 2.0.0 Alpha and 2.1.0 Beta versions were retired from npm on October 24, 2026; the new Beta uses the `beta` tag. These changes apply only to the platform package; the original accessory package is separate. Users with an older prerelease installed can select **latest** or **v2.1.0** in **Manage Version** to move to stable.
+**Release channels.** npm `latest` selects stable `2.2.0`. The historical `2.2.0-beta.1` remains on `beta`. Stable `2.0.0` and `2.1.0` remain available by exact version. The older Alpha and 2.1.0 Beta versions were retired on October 24, 2026.
 
 Preserve Homebridge storage and bridge identity. Remove the old plugin package as part of the backed-up replacement before starting Homebridge with the new package; loading both would make their shared configuration aliases ambiguous. Check the migration guide before changing any package-qualified identifiers: changing a qualified legacy accessory identifier can change its HomeKit identity. Restart Homebridge and its UI, then verify devices, state updates, controls and existing automations. Installed UI and managed-child-bridge acceptance passed in an isolated Node 24/Homebridge 2 fixture with HAP disabled; paired Apple Home identity and live controls still need acceptance.
 
@@ -303,4 +301,4 @@ The [modernization and developer reference](docs/modernization.md) contains the 
 - Service support, optional characteristics, configuration editing and platform lifecycle.
 - Benchmark interpretation, development commands, test coverage and release policy.
 
-The [release notes](docs/release-notes.md) and [changelog](CHANGELOG.md) summarize 2.1.0 and its validation boundaries. The project retains its existing [Apache-2.0 license](LICENSE) and historical authorship.
+The [release notes](docs/release-notes.md) and [changelog](CHANGELOG.md) summarize 2.2.0 and its validation coverage. The project retains its existing [Apache-2.0 license](LICENSE) and historical authorship.

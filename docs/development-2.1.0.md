@@ -2,9 +2,8 @@
 
 Stable `2.1.0` promoted the runtime and editors previously published as
 `2.1.0-beta.2`, after field use of legacy accessories and migrated platform
-switches. This page records that released scope. npm `latest` selects `2.1.0`;
-Homebridge verification remains a separate step. The next release is described
-in the [2.2.0 design and acceptance plan](development-2.2.0.md).
+switches. This page records that released scope. The
+[2.2.0 design and validation plan](development-2.2.0.md) covers individual commands.
 
 Version policy for this project: functional improvements advance the minor
 version (`2.1.0`); the third component is reserved for cosmetic changes. A
@@ -66,13 +65,12 @@ are preserved. Devices without an explicit ID retain their name-based identity.
 Tests exercise the actual browser handlers against the real configuration
 editor, including unchanged byte preservation, independent edits, additions,
 removals, duplicate IDs, invalid JSON and pending-change tracking. Publication
-and stable promotion remain separate from any local UI deployment.
+and stable promotion were separate from the local UI deployment.
 
 ## Planned: preserve individual HTTP commands
 
-Individual-command handling is now targeted for the next functional release,
-`2.2.0`, with `2.2.0-beta.1` implemented for beta field testing. It is not included
-in `2.1.0`; physical command acceptance remains a stable-promotion gate.
+Individual-command handling shipped in [2.2.0](release-notes.md) after the
+`2.2.0-beta.1` implementation and automated validation.
 
 The [2.2.0 design and acceptance plan](development-2.2.0.md) defines the
 per-setter `writeMode`, device ordering, debounce boundaries, bounded queues,
@@ -89,9 +87,8 @@ earlier field acceptance hold.
 
 Each public candidate must pass the Node 22/24 × Homebridge 1/2 matrix, production
 dependency audit and fresh package installation checks. Record deployment and
-device acceptance separately. The [stable 2.1.0 release notes](release-notes.md)
-describe its scope and the limits of field coverage. Individual command handling
-was outside `2.1.0` and is implemented in the separate `2.2.0-beta.1` candidate.
+device acceptance separately. The [2.1.0 release notes](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.1.0/docs/release-notes.md)
+describe its scope and field coverage.
 
 The [branch archive](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/main/maintenance/platform-release/BRANCH-ARCHIVE-20261004.md)
 preserves the old history. Contribution and coordination plans for the original

@@ -1,8 +1,8 @@
 # 2.2.0 Plan: Individual HTTP Commands
 
-Status: implemented for `2.2.0-beta.1`, October 24, 2026. Automated release
-validation passed; representative physical command-device acceptance remains
-pending before stable `2.2.0`. Publication evidence is recorded separately.
+Status: stable `2.2.0` promotes the runtime implemented for `2.2.0-beta.1`.
+The release proceeds on automated command-mode coverage and household use of
+ordinary switches. Physical command-device reports are a follow-up.
 Package publication and production installation are separate operations.
 
 ## Outcome and scope
@@ -189,14 +189,14 @@ and child-bridge assignments.
 4. Add configuration examples, compatibility notes, command diagnostics and
    regression coverage; prepare a reviewed `2.2.0-beta.1` candidate only after
    the automated acceptance below passes.
-5. Validate representative controls and household regression behavior during
-   beta field testing; promote to stable `2.2.0` only after recording acceptance.
+5. Promote the validated beta runtime to stable `2.2.0`. Track representative
+   physical command behavior through device reports.
 
 Each milestone should be reviewable on its own. Package version/tag changes,
 publication and deployment remain deliberate later release steps. Keep the
 scope focused on this command feature and the validation/documentation it needs.
 
-## Acceptance and release gates
+## Validation and field coverage
 
 | Area | Required evidence |
 |---|---|
@@ -218,10 +218,9 @@ servers for HTTP behavior and real Homebridge characteristic handlers for HAP
 feedback. Tests must exercise observable delivery/state results and queue cleanup,
 not merely duplicate queue implementation details.
 
-The beta must record its physical device/controller and distinguish HTTP delivery
-from observed effects. A suitable representative command device is not selected
-yet; selecting and testing one is required before stable promotion. Existing
-switch field coverage does not establish relative-command acceptance.
+For field reports, record the device and controller and distinguish HTTP
+delivery from observed effects. Reports on relative commands are especially
+welcome. See the [issue reporting guidance](release-notes.md#validation-and-device-reports).
 
 ## Background
 

@@ -1,67 +1,86 @@
-# Homebridge HTTP Advanced Platform 2.1.0
+# Homebridge HTTP Advanced Platform 2.2.0
 
-Maintain platform devices and legacy accessories individually in Plugin Config,
-with clearer named platform controls and safer HTTP redirects. This stable
-release promotes the Beta.2 runtime and editors after field testing of
-legacy accessories and migrated platform switches.
+Stable release, November 7, 2026. Preserve individual button commands while
+retaining target-value debounce for controls such as brightness sliders.
 
-Select **latest** or **v2.1.0** in Homebridge UI **Manage Version**, or install
-`homebridge-http-advanced-platform@2.1.0` in your existing plugin location.
-Confirm the matching public release is available before installing. This package
-is not yet Homebridge-verified.
+Select **latest** or **v2.2.0** in Homebridge Manage Version, or install
+`homebridge-http-advanced-platform@2.2.0` in the existing plugin location.
+Requires Node 22.13 or later in the 22.x line, or Node 24.x, and Homebridge 1.11.4
+or later in the 1.x line, or Homebridge 2.4 or later in the 2.x line.
+Homebridge verification is tracked separately.
 
-## Changes Since 2.0.0
+Back up Homebridge before upgrading. Keep existing device IDs, platform names,
+service subtypes and bridge assignments. Follow the [migration guide](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.2.0/docs/migration.md)
+when replacing the original accessory package.
 
-- Give each platform device and legacy accessory its own expandable JSON editor
-  and remove control. Keep platform settings separate from their device editors.
-- Show the configured platform name in its heading, enable checkbox and
-  **Add Device to “…”** button. **Add Platform** creates another instance.
-- Preserve unedited IDs, encoded requests, mappings, custom fields and bridge
-  assignments. Assign fresh IDs to new platform devices, including replacements
-  for removed devices. Reject invalid JSON, duplicate IDs and competing device
-  arrays before saving through the existing validated, backed-up save path.
-- Correct the configuration schema to identify the registered `HttpAdvanced`
-  platform and describe a platform at its root. Existing `HttpAdvancedAccessory`
-  configurations remain supported.
-- Remove all configured headers and device Basic Auth when GET/HEAD requests
-  redirect to another origin. Same-origin redirects retain them.
+## Individual commands
 
-The device runtime, UI, schema, dependencies and HomeKit identity rules are
-unchanged from Beta.2. Stable promotion changes release metadata, documentation
-and the default publication channel.
+Set `writeMode: "command"` on an individual setter action when every received
+write represents a separate operation, such as a Volume Up press. Repeated and
+alternating presses are preserved and delivered in order. Omit the field, or
+use `"target"`, to retain target-value behavior such as brightness debounce.
 
-## Before Installing
+Example action fragment for a service that already exposes VolumeSelector:
 
-Make a full Homebridge backup. Keep existing device IDs, platform names,
-accessory aliases, storage and bridge assignments unchanged. Platform names and
-device IDs contribute to HomeKit identity. Opening Plugin Config does not
-migrate or rewrite configuration, and this update does not require converting
-legacy accessories into platform devices.
+```json
+{
+  "setVolumeSelector": {
+    "url": "http://device.example/volume/{value}",
+    "writeMode": "command",
+    "mappers": [
+      { "type": "lookup", "parameters": { "mapping": { "0": "up", "1": "down" } } }
+    ]
+  }
+}
+```
 
-**Redirect compatibility:** an origin changes when the scheme, hostname or port
-changes. GET/HEAD redirects to another origin no longer receive configured
-headers or device Basic Auth from the starting endpoint. If a trusted final
-endpoint needs them, configure its URL directly.
+Add this inside the service's `urls` object and expose its optional
+`VolumeSelector` characteristic where appropriate. Adapt the endpoint and
+mapping to the device. This is not a complete accessory definition or a new
+television integration. The feature preserves writes received by the plugin;
+the HomeKit controller must actually generate the repeated writes.
 
-Users replacing the original `homebridge-http-advanced-accessory` package must
-follow the [migration guide](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.1.0/docs/migration.md).
-Do not load both packages together because their registered aliases overlap.
-After a manual legacy-to-platform conversion, verify Apple Home rooms, scenes,
-automations and physical controls because the converted device has a new identity.
+## Behavior when enabled
 
-## Validation
+- A command action bypasses device/shared `setterDelay`. It still obeys
+  `uriCallsDelay`, queue capacity, origin limits and its delivery deadline.
+- Any command action enables one ordered write queue for its containing device,
+  across primary and additional services. Other devices remain independent.
+- Adjacent target writes for the same action may coalesce while their debounce
+  window is open. A command or different action forms an ordering boundary;
+  an earlier target's debounce can delay a later command.
+- A command's timeout begins when its setter is received and includes all queue
+  waiting and HTTP delivery. Expired writes are removed before delivery. Queue
+  rejection/expiry is reported as failure rather than silently dropping a press.
+- Command success requires a 2xx HTTP response and any configured response guard.
+  Commands never follow redirects, even for GET. Configure the final command URL
+  directly. Explicit `strictHTTP: false` is invalid in command mode.
+- An execution failure cancels that device's already-waiting writes. A subsequent
+  explicit write can start fresh; other devices continue. Commands are never
+  automatically retried or restored after restart. A timeout/abort after dispatch
+  may leave physical delivery unknown.
+- Command arguments do not become requested target values or persisted observed
+  state. Readable command characteristics require explicit getters; write-only
+  characteristics need none. Real feedback supplies device state, while HTTP
+  success acknowledges delivery only.
 
-Release validation covers Node 22 and 24 with Homebridge 1 and 2, production
-dependency audit, fresh package installation, plugin loading, loopback device
-control and custom UI IPC. Editor regressions cover independent edits, unchanged
-saves, identity and request preservation, additions/removals and invalid drafts.
+Existing target-only configurations retain their scheduling, mapping, HTTP and
+confirmation behavior. Opted-in devices gain serialized writes and the ordering
+boundaries above. Registration aliases, HomeKit UUIDs and service identities are
+preserved. The feature works through both legacy and platform adapters.
 
-Field acceptance covered legacy accessory operation, migrated platform
-operation, scene activation, voice control and identity persistence across
-restarts. Additional services and new mapper modes retain automated and isolated
-coverage. Verify your own rooms, scenes, automations and physical behavior after
-updating.
+## Validation and device reports
 
-Homebridge verification resubmission is a separate later step. Individual
-per-action command handling remains planned and is not included in 2.1.0.
-See the [full changelog](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.1.0/CHANGELOG.md).
+Source and clean-install checks cover Node 22 and 24 with Homebridge 1 and 2.
+They exercise repeated writes, mixed targets and commands, deadlines, failure
+cancellation, shutdown, feedback and editor round-trips. Household field use
+covered ordinary switches and migrated platform devices. Command mode has
+automated and loopback coverage. Physical command-device results are welcome.
+
+Please [open a GitHub issue](https://github.com/shanemcw/homebridge-http-advanced-platform/issues/new)
+with the device and controller models, Node and Homebridge versions, a sanitized
+setter configuration, the sequence you sent and what the device actually did.
+Keep credentials, private URLs and request bodies out of the report.
+
+See the [design and validation plan](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.2.0/docs/development-2.2.0.md)
+and [changelog](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.2.0/CHANGELOG.md).

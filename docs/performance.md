@@ -41,4 +41,4 @@ Approve default cadence based on actual freshness and sustained load. If a full 
 
 Homebridge/HAP may reuse a recent `/accessories` snapshot. Space repeated measurements beyond the installed implementation's reuse window and record versions so snapshot reuse is not mistaken for a plugin improvement.
 
-A controlled field performance comparison for this packaging candidate remains pending. Synthetic timings are not live-device measurements.
+The timings above come from the synthetic fixture. A controlled comparison on physical devices remains open.

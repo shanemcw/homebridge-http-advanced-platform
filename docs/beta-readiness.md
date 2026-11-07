@@ -1,6 +1,6 @@
 # Historical Alpha.5 preparation for Beta
 
-> Historical Alpha.5 checkpoint. The test counts, deployment status and remaining gates below describe 2026-09-13 only. For stable 2.1.0, see the [stable release notes](release-notes.md); for the next release, see the [2.2.0 Beta notes](release-notes-2.2.0-beta.1.md) and [README](../README.md).
+> Historical Alpha.5 checkpoint. The test counts, deployment status and remaining gates below describe 2026-09-13 only. For current installation and release guidance, see the [stable release notes](release-notes.md) and [README](../README.md).
 
 Local checkpoint: 2026-09-13, `2.0.0-alpha.5`. Alpha.4 is the last verified field deployment. These changes are uncommitted and have not been deployed or published.
 
