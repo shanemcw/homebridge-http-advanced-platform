@@ -1,16 +1,18 @@
-# Homebridge HTTP Advanced Platform 2.2.0
+# Homebridge HTTP Advanced Platform 2.2.1
 
-Stable release, November 7, 2026. Preserve individual button commands while
-retaining target-value debounce for controls such as brightness sliders.
+Stable release, November 11, 2026. Add Node 26 support and remove the plugin
+compatibility warning on Node 26.13.1. Runtime behavior, dependencies and
+configuration are unchanged from 2.2.0. Compatibility CI now includes Node 26
+alongside Node 22 and 24, with both Homebridge 1 and 2.
 
-Select **latest** or **v2.2.0** in Homebridge Manage Version, or install
-`homebridge-http-advanced-platform@2.2.0` in the existing plugin location.
-Requires Node 22.13 or later in the 22.x line, or Node 24.x, and Homebridge 1.11.4
+Select **latest** or **v2.2.1** in Homebridge Manage Version, or install
+`homebridge-http-advanced-platform@2.2.1` in the existing plugin location.
+Requires Node 22.13 or later in the 22.x line, Node 24.x or Node 26.x, and Homebridge 1.11.4
 or later in the 1.x line, or Homebridge 2.4 or later in the 2.x line.
 Homebridge verification is tracked separately.
 
 Back up Homebridge before upgrading. Keep existing device IDs, platform names,
-service subtypes and bridge assignments. Follow the [migration guide](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.2.0/docs/migration.md)
+service subtypes and bridge assignments. Follow the [migration guide](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.2.1/docs/migration.md)
 when replacing the original accessory package.
 
 ## Individual commands
@@ -71,7 +73,7 @@ preserved. The feature works through both legacy and platform adapters.
 
 ## Validation and device reports
 
-Source and clean-install checks cover Node 22 and 24 with Homebridge 1 and 2.
+Source and clean-install checks cover Node 22, 24 and 26 with Homebridge 1 and 2.
 They exercise repeated writes, mixed targets and commands, deadlines, failure
 cancellation, shutdown, feedback and editor round-trips. Household field use
 covered ordinary switches and migrated platform devices. Command mode has
@@ -82,5 +84,5 @@ with the device and controller models, Node and Homebridge versions, a sanitized
 setter configuration, the sequence you sent and what the device actually did.
 Keep credentials, private URLs and request bodies out of the report.
 
-See the [design and validation plan](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.2.0/docs/development-2.2.0.md)
-and [changelog](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.2.0/CHANGELOG.md).
+See the [design and validation plan](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.2.1/docs/development-2.2.0.md)
+and [changelog](https://github.com/shanemcw/homebridge-http-advanced-platform/blob/v2.2.1/CHANGELOG.md).

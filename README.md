@@ -6,7 +6,7 @@ This is a platform conversion of [staromeste's homebridge-http-advanced-accessor
 
 **Use platform devices, retain existing accessory configurations, or migrate manually at your own pace.** Keep your `HttpAdvancedAccessory` entries, encoded command URLs, request bodies, hand-written mappings and other settings. The improvements apply to existing accessories without converting them to a platform or upgrading their web server.
 
-**Stable release: `2.2.0`.** Individual HTTP commands are available for setters that opt in. The package has automated command-mode coverage, and reports from physical devices are welcome. See the [release notes](docs/release-notes.md) and [compatibility details](docs/modernization.md#what-non-breaking-means-here) before upgrading.
+**Stable release: `2.2.1`.** Node 26 is now supported alongside Node 22 and 24. Individual HTTP commands are available for setters that opt in. The package has automated command-mode coverage, and reports from physical devices are welcome. See the [release notes](docs/release-notes.md) and [compatibility details](docs/modernization.md#what-non-breaking-means-here) before upgrading.
 
 [What's new](#what-this-platform-adds) · [Individual commands](#individual-http-commands) · [User guide](#user-guide) · [Configuration examples](docs/configuration-examples.md) · [Developer reference](docs/modernization.md)
 
@@ -30,7 +30,7 @@ This project builds on the original plugin's HTTP actions, JSON/XML mappings, po
 | [Custom accessory information](#keep-using-existing-accessories) | Set manufacturer, model and serial-number information without changing a platform device's identity. |
 | [Request headers and response checks](docs/modernization.md#actions-and-http) | Configure API-key or Bearer headers and opt into stricter HTTP, response-pattern and extraction checks so unexpected replies are less likely to become apparent device state. |
 | [Safer HTTP redirects](docs/modernization.md#actions-and-http) | Redirects to another origin discard configured headers and device credentials, including custom API-key headers. Configure a trusted final endpoint directly when it needs those credentials. |
-| [Current Homebridge support](#requirements) | Support Node 22/24 and Homebridge 1/2 through a maintained runtime and compatibility matrix, including canonical characteristic names and historical aliases. |
+| [Current Homebridge support](#requirements) | Support Node 22/24/26 and Homebridge 1/2 through a maintained runtime and compatibility matrix, including canonical characteristic names and historical aliases. |
 | [Useful diagnostics](#troubleshooting-and-rollback) | Inspect request timing, queue use, cache ages and recovery status without exposing URLs, credentials, request bodies or device values in the diagnostic snapshot. |
 
 **Addresses requests from the original project.** Several additions address longstanding open requests and issues in the parent repository, including [multiple services and battery information (#12)](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/12), [brightness conversion (#2)](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/2), [header authentication (#26)](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/26), [custom accessory information (PR #46)](https://github.com/staromeste/homebridge-http-advanced-accessory/pull/46) and [Homebridge 2 readiness (#58)](https://github.com/staromeste/homebridge-http-advanced-accessory/issues/58).
@@ -47,7 +47,7 @@ Set `writeMode: "command"` on an individual setter for legacy accessories or pla
 
 | Component | Supported versions |
 |---|---|
-| Node.js | 22.13 or later in the 22.x line, or 24.x |
+| Node.js | 22.13 or later in the 22.x line, 24.x or 26.x |
 | Homebridge | 1.11.4 or later in the 1.x line, or 2.4 or later in the 2.x line |
 
 Older environments need a runtime upgrade before installing this release. The original accessory plugin 1.3.0 remains the historical compatibility baseline. If you also upgrade Homebridge itself, check the [service compatibility list](docs/service-support.md) for historical services removed by newer HAP versions.
@@ -60,21 +60,21 @@ If the legacy accessories disappear from the new setup, [paste only the missing 
 
 Check the [npm version list](https://www.npmjs.com/package/homebridge-http-advanced-platform?activeTab=versions) and matching [GitHub release](https://github.com/shanemcw/homebridge-http-advanced-platform/releases) before installing. Choose the stable release; a local candidate archive alone does not establish public availability.
 
-In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select **latest** or **v2.2.0** in the version chooser. Existing Alpha and Beta testers can use **Manage Version** to select **v2.2.0**. Descriptive searches such as **HTTP Advanced**, **HTTP accessory**, **REST API** or **HTTP JSON** depend on npm indexing and ranking; searching the exact original package name still finds the original accessory package.
+In **Homebridge UI 5.29.0**, open **Plugins** and search for `homebridge-http-advanced-platform`. Choose its install icon, then select **latest** or **v2.2.1** in the version chooser. Existing Alpha and Beta testers can use **Manage Version** to select **v2.2.1**. Descriptive searches such as **HTTP Advanced**, **HTTP accessory**, **REST API** or **HTTP JSON** depend on npm indexing and ranking; searching the exact original package name still finds the original accessory package.
 
 For command-line installation, use `homebridge-http-advanced-platform@latest`, or pin the reviewed version as shown below. Use the same plugin location and account your Homebridge installation already uses; `/var/lib/homebridge` is an example prefix:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.2.0
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts homebridge-http-advanced-platform@2.2.1
 ```
 
 To install a reviewed archive directly:
 
 ```sh
-npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.2.0.tgz
+npm install --prefix /var/lib/homebridge --omit=dev --ignore-scripts /path/to/homebridge-http-advanced-platform-2.2.1.tgz
 ```
 
-**Release channels.** npm `latest` selects stable `2.2.0`. The historical `2.2.0-beta.1` remains on `beta`. Stable `2.0.0` and `2.1.0` remain available by exact version. The older Alpha and 2.1.0 Beta versions were retired on October 24, 2026.
+**Release channels.** npm `latest` selects stable `2.2.1`. The historical `2.2.0-beta.1` remains on `beta`. Stable `2.0.0`, `2.1.0` and `2.2.0` remain available by exact version. The older Alpha and 2.1.0 Beta versions were retired on October 24, 2026.
 
 Preserve Homebridge storage and bridge identity. Remove the old plugin package as part of the backed-up replacement before starting Homebridge with the new package; loading both would make their shared configuration aliases ambiguous. Check the migration guide before changing any package-qualified identifiers: changing a qualified legacy accessory identifier can change its HomeKit identity. Restart Homebridge and its UI, then verify devices, state updates, controls and existing automations. Installed UI and managed-child-bridge acceptance passed in an isolated Node 24/Homebridge 2 fixture with HAP disabled; paired Apple Home identity and live controls still need acceptance.
 
@@ -301,4 +301,4 @@ The [modernization and developer reference](docs/modernization.md) contains the 
 - Service support, optional characteristics, configuration editing and platform lifecycle.
 - Benchmark interpretation, development commands, test coverage and release policy.
 
-The [release notes](docs/release-notes.md) and [changelog](CHANGELOG.md) summarize 2.2.0 and its validation coverage. The project retains its existing [Apache-2.0 license](LICENSE) and historical authorship.
+The [release notes](docs/release-notes.md) and [changelog](CHANGELOG.md) summarize 2.2.1 and its validation coverage. The project retains its existing [Apache-2.0 license](LICENSE) and historical authorship.

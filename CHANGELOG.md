@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.1 - 2026-11-11
+
+- Declare Node 26 support so Homebridge accepts the plugin on Node 26.13.1.
+- Add Node 26 to compatibility CI alongside Node 22 and 24, with Homebridge 1
+  and 2. Existing runtime behavior, dependencies and configuration are unchanged.
+
 ## 2.2.0 - 2026-11-07
 
 Promote the runtime and configuration editors from Beta.1 to stable.
